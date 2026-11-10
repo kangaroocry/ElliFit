@@ -72,6 +72,7 @@ def test_independent_tmm_reference(angle, ambient, films, substrate):
 
 def test_phase_convention_and_wrap():
     model = Model().model_dump()
+    model['delta_convention'] = 'standard'
     d, p = simulate(model, [70])
     model['delta_convention'] = 'reversed'
     dr, pr = simulate(model, [70])
@@ -189,7 +190,7 @@ def test_two_transparent_thickness_periods():
 
 def test_substrate_nk_fit_rejects_undefined_corner():
     m = Model(layers=[]).model_dump()
-    req = FitRequest(model=m, measurements=rows(m, [70]), quality='quick', parameters=[dict(path='substrate.n', lower=1, upper=4), dict(path='substrate.k', lower=0, upper=2, scale='linear')])
+    req = FitRequest(model=m, measurements=rows(m, [70]), quality='quick', parameters=[dict(path='substrate.n', lower=1, upper=4), dict(path='substrate.k', lower=0, upper=2)])
     obj = Objective(req)
     assert obj.batch([[0, 0]])[0] == 1e100
     np.testing.assert_allclose(solve(req)['solutions'][0]['values'], [3.882, .019], atol=1e-5)
@@ -212,3 +213,18 @@ def test_single_angle_plot_with_thickness_as_second_parameter():
     assert result['xlabel'].endswith('d / nm')
     assert result['fixed_parameter_label'].endswith(' · n')
     assert result['points'][0]['x'] == 123.456
+
+
+def test_default_output_matches_opposite_phasor_reference():
+    # Independent bare-interface reference with N=n-ik / exp(+i*omega*t).
+    # This tests the output conversion, not the unavailable original Elli binary.
+    model = Model(layers=[]).model_dump()
+    phi = np.deg2rad(np.array([50., 60, 70, 80]))
+    index = model['substrate']['n'] - 1j * model['substrate']['k']
+    q = np.sqrt(index ** 2 - np.sin(phi) ** 2 + 0j)
+    rs = (np.cos(phi) - q) / (np.cos(phi) + q)
+    rp = (index ** 2 * np.cos(phi) - q) / (index ** 2 * np.cos(phi) + q)
+    rho = rp / rs
+    delta, psi = simulate(model, np.rad2deg(phi))
+    np.testing.assert_allclose(wrap(delta[0] - np.rad2deg(np.angle(rho))), 0, atol=1e-10)
+    np.testing.assert_allclose(psi[0], np.rad2deg(np.arctan(abs(rho))), atol=1e-12)

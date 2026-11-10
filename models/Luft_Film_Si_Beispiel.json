@@ -2,18 +2,18 @@
   "schema_version": 1,
   "name": "Luft / Film / Si · Beispiel",
   "wavelength_nm": 632.8,
-  "delta_convention": "standard",
+  "delta_convention": "reversed",
   "ambient": {
     "name": "Luft",
-    "n": 1.0,
-    "k": 0.0
+    "n": 1,
+    "k": 0
   },
   "layers": [
     {
       "name": "Film",
       "n": 1.46,
-      "k": 0.0,
-      "thickness_nm": 80.0
+      "k": 0,
+      "thickness_nm": 80
     }
   ],
   "substrate": {

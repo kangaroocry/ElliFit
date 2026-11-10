@@ -1,4 +1,4 @@
-# ElliFit 1.1
+# ElliFit 1.1.1
 
 Lokale Auswertung monochromatischer Ellipsometrie: Schichtmodelle definieren und Schichtdicke, Brechungsindex oder zwei Parameter gemeinsam global fitten. Die Browseroberfläche kommuniziert ausschließlich mit einem Python-Rechenkern auf demselben Rechner.
 
@@ -53,7 +53,7 @@ Die ursprünglichen Messdateien und das Handbuch werden nicht in diesem öffentl
 1. **Modell:** Einfallsmedium, endliche Filme von oben nach unten und Substrat einstellen. `N = n + ik`, `k ≥ 0`, Dicke in nm. Schichten lassen sich ergänzen, entfernen und umsortieren. Für ein blankes Substrat die endlichen Filme entfernen.
 2. **Messungen:** `.phi`, `.dat`, `.txt` oder einfache `.csv` laden; alternativ Winkel, Δ und Ψ manuell eingeben. Beide ursprünglichen Dateitypen werden gleichartig behandelt: drei numerische Spalten **Einfallswinkel, Delta, Psi in Grad**. Winkel werden gegen die Oberflächennormale gemessen. UTF-8, Windows-1252, Dezimalpunkt, Dezimalkomma und Kommentare hinter `>>` sind unterstützt.
 3. **Auswahl:** Häkchen bestimmen, welche Zeilen in den Fit eingehen. Das globale Häkchen wählt alle geladenen Zeilen, unabhängig vom Filter. „Gefilterte wählen“ ergänzt die aktuell gefilterten Zeilen; „Keine“ leert die Auswahl. Nach Quelle, Kommentar, Zeilennummer und Winkel filtern. `Umschalt`-Klick wählt einen zusammenhängenden Bereich der gefilterten Ansicht. Die Tabelle zeigt 50 Zeilen je Seite; die ganze Auswahl wird gerechnet.
-4. **Parameter:** Einen oder zwei Parameter wählen. Unterstützt sind d, n und k der Filme, n/k des Substrats und n des transparenten Einfallsmediums. Standard-Dickenbereich **0,1–1000 nm**; beide Grenzen editierbar. Alle anderen Modellwerte bleiben fest. Für k = 0 die lineare Skala verwenden; logarithmische Grenzen müssen positiv sein.
+4. **Parameter:** Einen oder zwei Parameter wählen. Unterstützt sind d, n und k der Filme, n/k des Substrats und n des transparenten Einfallsmediums. Vorgaben: **d = 0,1–1000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–4 linear**; alle Grenzen und Skalen editierbar. Alle anderen Modellwerte bleiben fest. Für k = 0 die lineare Skala verwenden; logarithmische Grenzen müssen positiv sein.
 5. **Fit:** Globale Suche starten. Mehrere ausgewählte Winkel führen automatisch zu einem Mehrwinkelfit. Bei Wiederholungen fragt die Oberfläche nach Mittelung oder Mehrfachgewichtung; dies ist auch dauerhaft einstellbar. Abbruch ist über „Abbrechen“ möglich.
 6. **Lösungen:** Die Liste ist nach Q aufsteigend sortiert. Eine Zeile oder einen Minimum-Punkt anklicken, um die zugehörige Modellkurve zu sehen. „Ins Modell übernehmen“ überträgt die Werte; anschließend speichern.
 
@@ -145,7 +145,21 @@ Eine lokale Jacobi-Matrix prüft schwache beziehungsweise korrelierte Sensitivit
 
 Fresnel-Amplituden werden rekursiv über alle Grenzflächen kombiniert. Das ist im unterstützten Schichtmodell dem Matrixformalismus physikalisch äquivalent, vermeidet bei dicken absorbierenden Filmen aber exponentiell wachsende Transfermatrixelemente.
 
-Konvention: `N = n + ik`, `k ≥ 0`, Zeitfaktor `exp(−iωt)`, `ρ = rₚ/rₛ = tan Ψ · exp(iΔ)`. Der Wurzelzweig erzeugt passive, abklingende Wellen. Für eine abweichende Gerätekonvention kann das Δ-Vorzeichen umgekehrt werden. Die Konvention sollte mit einer bekannten Referenzprobe geprüft werden. Ohne reflektiertes Feld sind Δ/Ψ undefiniert; solche Suchpunkte werden ausgeschlossen.
+Interne Rechenkonvention: `N = n + ik`, `k ≥ 0`, Zeitfaktor `exp(−iωt)`. Der Wurzelzweig erzeugt passive, abklingende Wellen. Ohne reflektiertes Feld sind Δ/Ψ undefiniert; solche Suchpunkte werden ausgeschlossen.
+
+### Δ-Ausgabe und Vergleich mit Original-Elli
+
+Das Handbuch definiert `ρ = rₚ/rₛ = tan Ψ · exp(iΔ)` (gedruckte Seite 57, Gleichung 2.11). Diese Formel allein genügt jedoch nicht, um das Vorzeichen der Ausgabe auf eine andere interne Phasorkonvention zu übertragen. Nach dem Nutzervergleich stimmt die Originalsoftware mit der Ausgabe **`Δ = (−arg(ρ_intern)) mod 360°`** überein. Deshalb ist **„Elli: 360° − arg(rₚ/rₛ)“** jetzt die Voreinstellung für neue Modelle, die synthetische Referenz und die mitgelieferten Modellbeispiele. Die Alternative gibt die rohe Phase des internen Rechenkerns aus.
+
+Die gespeicherten technischen Kennungen bleiben kompatibel: `reversed` bezeichnet die Elli-kompatible Ausgabe, `standard` die alternative rohe Phase. Eine ausdrücklich gespeicherte Konvention in alten Modell- oder Sitzungsdateien wird nicht überschrieben. Solche Dateien bei Bedarf in der Oberfläche einmal auf „Elli“ umstellen und erneut speichern. Alte Dateien ohne Konventionsfeld erhalten die neue Voreinstellung.
+
+Der Originalvergleich stammt aus dem praktischen Test des Nutzers. Die automatisierten Tests prüfen zusätzlich die Phasenumrechnung gegen eine unabhängig berechnete Grenzfläche mit entgegengesetzter komplexer Zeitkonvention; sie ersetzen keinen Vergleich mit der Originalsoftware über alle Schichtsysteme.
+
+### Suchskalen für n und k
+
+n wird standardmäßig linear von 1 bis 4 gesucht; bei Metallen können auch Werte unter 1 erforderlich sein. k wird standardmäßig linear von 0 bis 4 gesucht, damit transparente Filme (`k = 0`) enthalten sind. Manche Metalle benötigen höhere obere Grenzen. Für sehr schwache Absorption über mehrere Größenordnungen kann k optional logarithmisch mit strikt positiver Untergrenze, etwa 10⁻⁶, untersucht werden; `k = 0` muss dann separat geprüft werden. Eine logarithmische k-Achse kann null nicht enthalten.
+
+Explizite Skalen in gespeicherten Sitzungen bleiben erhalten. Die neuen Vorgaben gelten beim Auswählen eines Parameters und für API-Aufrufe ohne explizite Skala.
 
 Die Suche verbindet ein logarithmisches/lineares Raster mit zusätzlichen Stützstellen entlang der optischen Phase, angestrebt etwa 32 pro Interferenzperiode. Rasterminima werden lokal verfeinert: eindimensional durch beschränkte skalare Minimierung, zweidimensional mit mehreren Trust-Region-Least-Squares-Starts. Bei zwei Parametern ergänzt Differential Evolution mit festem Seed die globale Suche. Numerisch gleiche Kandidaten werden zusammengefasst.
 

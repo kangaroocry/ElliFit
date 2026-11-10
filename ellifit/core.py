@@ -37,7 +37,7 @@ class Model(Validated):
     schema_version: Literal[1] = 1
     name: str = Field(default='Luft / Film / Si · Beispiel', min_length=1, max_length=160)
     wavelength_nm: float = Field(default=632.8, gt=0, le=1e6)
-    delta_convention: Literal['standard', 'reversed'] = 'standard'
+    delta_convention: Literal['standard', 'reversed'] = 'reversed'
     ambient: Medium = Field(default_factory=lambda: Medium(name='Luft', n=1))
     layers: list[Layer] = Field(default_factory=lambda: [Layer(name='Film', n=1.46)], max_length=40)
     substrate: Medium = Field(default_factory=lambda: Medium(name='Si · Beispiel', n=3.882, k=0.019))
@@ -65,6 +65,13 @@ class Parameter(Validated):
     lower: float
     upper: float
     scale: Literal['log', 'linear'] = 'log'
+
+    @model_validator(mode='before')
+    @classmethod
+    def default_scale(cls, value):
+        if isinstance(value, dict) and 'scale' not in value:
+            return value | {'scale': 'log' if value.get('path', '').endswith('thickness_nm') else 'linear'}
+        return value
 
     @model_validator(mode='after')
     def bounds(self):
@@ -172,7 +179,8 @@ def reflection(model, angles, values=None, paths=()):
 def simulate(model, angles, values=None, paths=()):
     rp, rs = reflection(model, angles, values, paths)
     delta = np.rad2deg(np.angle(rp) - np.angle(rs))
-    if model.get('delta_convention') == 'reversed':
+    # Elli-compatible output sign; explicit choices in saved models are retained.
+    if model.get('delta_convention', 'reversed') == 'reversed':
         delta = -delta
     psi = np.rad2deg(np.arctan2(abs(rp), abs(rs)))
     invalid = abs(rp) + abs(rs) < 1e-15

@@ -38,3 +38,18 @@ Die 14 protokollierten Prüfpunkte stehen zusammengefasst in `Pruefdaten_Browser
 Ein tatsächlicher Windows-Lauf und eine Windows-7-Kompatibilität wurden nicht geprüft. Der Windows-Starter ist Quellcode, keine kompilierte EXE. Die ursprüngliche reale Probe kann ohne verifizierten Schichtaufbau und Materialwerte nicht physikalisch validiert ausgewertet werden. Numerische Referenzergebnisse sind keine experimentelle Genauigkeitsangabe.
 
 Eine endliche globale Suche garantiert nicht jedes Minimum. Die README erläutert Rasterbegrenzung, Periodenprüfung, Fehlermaße und physikalische Modellgrenzen.
+
+
+## Nachtrag zu ElliFit 1.1.1: Δ-Voreinstellung und Suchskalen
+
+Die Voreinstellung der Δ-Ausgabe wurde nach dem praktischen Vergleich des Nutzers mit Original-Elli auf `(−arg(ρ_intern)) mod 360°` umgestellt. Dieser Originalvergleich wurde vom Nutzer berichtet; eine automatische Gegenprüfung mit der historischen Software wurde hier nicht ausgeführt.
+
+Neue Modelle, die synthetische Referenz und die mitgelieferten Beispiele verwenden die Elli-kompatible Ausgabe. Explizite Konventionen in vorhandenen Dateien bleiben erhalten. Die alternative Rechenkern-Phase bleibt auswählbar.
+
+Neue Vorgaben: d = 0,1–1000 nm logarithmisch; n = 1–4 linear; k = 0–4 linear. Für API-Anfragen ohne explizite Skala wird diese jetzt anhand des Parameters gewählt. Explizite Suchskalen in Sitzungen werden beibehalten. Logarithmisches k benötigt eine positive Untergrenze und enthält k = 0 nicht.
+
+Erneut **26 numerische/API-Tests bestanden**, einschließlich einer unabhängigen Prüfung der neuen Ausgabe an einer analytischen Grenzfläche mit entgegengesetzter komplexer Phasorkonvention. Die vorhandene Prüfung beider expliziter Δ-Konventionen bleibt erhalten. JavaScript-Syntaxprüfung bestanden.
+
+Gezielter Chromium/Playwright-Check: Elli-Voreinstellung und Beschriftung; n = 1–4 linear; k = 0–4 linear; d logarithmisch; simultaner Referenzfit mit d = 118 nm und n = 1,46; Konturachsen log/linear; Erhalt einer explizit auf die Alternative gesetzten Modellkonvention. Keine JavaScript-Laufzeitfehler.
+
+Die oben dokumentierten umfassenden Browserprüfungen beziehen sich auf den ursprünglichen Stand 1.1; für 1.1.1 wurde gezielt der geänderte Funktionsumfang erneut im Browser geprüft.
