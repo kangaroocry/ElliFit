@@ -583,4 +583,5 @@ def comparison(request, values):
         display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=float(np.rad2deg(np.angle(np.mean(np.exp(1j * np.deg2rad(obs.ds[j]))))) % 360), psi=float(obs.pm[j]), source=f'Mittelwert aus {len(group)} Messungen')]
         for r in display:
             points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source']))
-    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_second_parameter=not multi and len(request.parameters) == 2)
+    fixed_label = parameter_label(m, request.parameters[1 - col].path) if not multi and len(request.parameters) == 2 else None
+    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label)

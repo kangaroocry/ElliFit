@@ -1,0 +1,109 @@
+[
+  {
+    "check": "One parameter, multiple angles",
+    "best": {
+      "rank": 1,
+      "values": [
+        118.00000005386732
+      ],
+      "q": 4.347218424385887e-14,
+      "sqrt_q": 2.0849984231135253e-07,
+      "rmse_deg": 4.91438841248944e-08,
+      "at_boundary": false,
+      "equivalent": true
+    }
+  },
+  {
+    "check": "Single angle, period and selectable aliases",
+    "count": 4,
+    "periods": [
+      {
+        "path": "layers.0.thickness_nm",
+        "period_nm": 283.15789438310946
+      }
+    ]
+  },
+  {
+    "check": "Simultaneous d/n fit and contour",
+    "best": {
+      "rank": 1,
+      "values": [
+        118.00000000000003,
+        1.46
+      ],
+      "q": 1.6155871338926322e-26,
+      "sqrt_q": 1.2710574864626038e-13,
+      "rmse_deg": 2.995911226518785e-14,
+      "at_boundary": false,
+      "equivalent": true
+    },
+    "counts": {
+      "selected": 9,
+      "effective": 9,
+      "angles": 9,
+      "grid": 57600,
+      "evaluations": 60168
+    }
+  },
+  {
+    "check": "3D surface",
+    "passed": true
+  },
+  {
+    "check": "Result exports",
+    "formats": [
+      "CSV solutions",
+      "CSV residuals",
+      "CSV landscape",
+      "JSON report"
+    ]
+  },
+  {
+    "check": "Measurement CSV roundtrip",
+    "count": 9
+  },
+  {
+    "check": "Session save/load",
+    "count": 9
+  },
+  {
+    "check": "Model directory, save and reload",
+    "passed": true
+  },
+  {
+    "check": "Original phi, duplicate average",
+    "counts": {
+      "selected": 10,
+      "effective": 9,
+      "angles": 9,
+      "grid": 436,
+      "evaluations": 742
+    }
+  },
+  {
+    "check": "Original phi, repeated weights",
+    "counts": {
+      "selected": 10,
+      "effective": 10,
+      "angles": 9,
+      "grid": 436,
+      "evaluations": 788
+    }
+  },
+  {
+    "check": "Original dat, selection and pagination",
+    "count": 16377
+  },
+  {
+    "check": "Cancel global search",
+    "passed": true
+  },
+  {
+    "check": "Responsive layout",
+    "width": 390
+  },
+  {
+    "check": "JavaScript errors",
+    "count": 0
+  }
+]
