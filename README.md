@@ -25,6 +25,19 @@ Wenn die Erstinstallation fehlschlägt, Fehlerausgabe prüfen und die Batchdatei
 
 Unter Linux/macOS: `sh start.sh`. Alternativ manuell eine virtuelle Umgebung erstellen, `pip install -r requirements.txt` und `python launch.py` ausführen.
 
+## Ohne Adminrechte mit vorhandenem WinPython
+
+Mit einem bereits lauffähigen WinPython 3.12 (64 Bit) ist keine weitere Python-Installation und kein System-PATH-Eintrag erforderlich.
+
+1. ElliFit in einen **beschreibbaren Benutzerordner** entpacken, z. B. unter Dokumente.
+2. **`Start_WinPython.bat`** doppelklicken. Der vorkonfigurierte WinPython-Ordner ist `C:\Programme_portable\WinPython\WPy64-31290`.
+3. Der Starter findet `python.exe` direkt darin, im Unterordner `python` oder in einem Unterordner `python-*` (z. B. `python-3.12.9.amd64`).
+4. Die Abhängigkeiten werden beim ersten Start in **`.venv-winpython` im ElliFit-Ordner** installiert. Die WinPython-Distribution selbst wird nicht verändert. Eine gegebenenfalls bereits bestehende `.venv` wird von diesem Starter nicht verwendet.
+
+Für einen anderen WinPython-Pfad die Einstellung am Anfang des Starters ändern oder vor dem Aufruf die Umgebungsvariable `ELLIFIT_WINPYTHON_ROOT` setzen. Startargumente wie `--port 8766` und `--models "C:\Pfad\Modelle"` werden weitergereicht. Der WinPython-Ordner muss beim späteren Start weiterhin vorhanden sein.
+
+Auch dieser Starter macht Python 3.12 nicht mit Windows 7 kompatibel. Ein tatsächlicher Windows-/WinPython-Lauf wurde in der Entwicklungsumgebung nicht geprüft.
+
 ## Referenz und reale Proben
 
 Beim Öffnen sind **synthetische Referenzdaten** geladen: tatsächliche Filmdicke **118 nm**, Film-n **1,46**, Luft / Film / Si-Beispiel. Die Modelldicke startet absichtlich bei 80 nm. Die globale Suche sollte 118 nm wiederfinden. Die Referenzdaten sind rauschfrei; extrem kleine numerische Fehler sind keine Aussage zur experimentellen Genauigkeit.
