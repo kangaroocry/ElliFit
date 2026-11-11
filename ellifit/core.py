@@ -166,7 +166,7 @@ def reflection(model, angles, values=None, paths=()):
     media = [model['ambient'], *model['layers'], model['substrate']]
     batch = len(values)
     indices = np.tile(np.array([m['n'] + 1j * m['k'] for m in media])[:, None], (1, batch))
-    thickness = np.tile(np.array([l['thickness_nm'] for l in model['layers']])[:, None], (1, batch))
+    thickness = np.tile(np.array([l['thickness_nm'] for l in model['layers']], dtype=float)[:, None], (1, batch))
     for col, path in enumerate(paths):
         parts = path.split('.')
         j = int(parts[1]) + 1 if parts[0] == 'layers' else 0 if parts[0] == 'ambient' else len(media) - 1
@@ -254,7 +254,8 @@ class Observations:
                 self.groups[-1].append(idx)
         self.angles = np.array([np.mean([rows[i]['angle'] for i in g]) for g in self.groups])
         self.duplicates = [dict(angle=float(a), count=len(g)) for a, g in zip(self.angles, self.groups) if len(g) > 1]
-        self.ds, self.ps, self.ext, self.pre, self.pre2 = [], [], [], [], []
+        self.ds, self.ps = [], []
+        self.centers, self.centered, self.deviations = [], [], []
         for a, group in zip(self.angles, self.groups):
             d = np.array([rows[i]['delta'] % 360 for i in group])
             p = np.array([rows[i]['psi'] for i in group])
@@ -267,10 +268,13 @@ class Observations:
                 d, p = np.array([np.rad2deg(np.angle(z)) % 360]), np.array([p.mean()])
             self.ds.append(d)
             self.ps.append(p)
-            ext = np.concatenate((np.sort(d) - 360, np.sort(d), np.sort(d) + 360))
-            self.ext.append(ext)
-            self.pre.append(np.r_[0, np.cumsum(ext)])
-            self.pre2.append(np.r_[0, np.cumsum(ext ** 2)])
+            center = float(np.rad2deg(np.angle(np.mean(np.exp(1j * np.deg2rad(d))))))
+            dev = wrap(d - center)
+            order = np.argsort(dev)
+            dev, dp = dev[order], (p - p.mean())[order]
+            self.centers.append(center)
+            self.deviations.append(dev)
+            self.centered.append(tuple(np.r_[0., np.cumsum(a)] for a in (dev, dev**2, dev*dp, dp)))
         self.counts = np.array([len(d) for d in self.ds])
         self.count = int(self.counts.sum())
         self.pm = np.array([p.mean() for p in self.ps])
@@ -279,22 +283,31 @@ class Observations:
         self.sm = np.array([v.mean(axis=0) for v in vectors])
         self.sv = np.array([np.sum((v - v.mean(axis=0)) ** 2) for v in vectors])
 
+    def angular_statistics(self, delta):
+        """Exact wrapped residual statistics about a numerically stable center."""
+        delta = np.atleast_2d(delta)
+        invalid = ~np.isfinite(delta)
+        prediction = wrap(np.where(invalid, 0, delta) - np.asarray(self.centers))
+        means, variance, cross = np.empty_like(prediction), np.empty_like(prediction), np.empty_like(prediction)
+        for j, count in enumerate(self.counts):
+            dev = self.deviations[j]
+            left = np.searchsorted(dev, prediction[:, j] - 180, side='right')
+            right = np.searchsorted(dev, prediction[:, j] + 180, side='right')
+            s, s2, sp, pp = self.centered[j]
+            total = s[-1] + 360 * (left - (count - right))
+            total2 = s2[-1] + 720 * (s[left] - (s[-1] - s[right])) + 360**2 * (left + count - right)
+            means[:, j] = np.sqrt(count) * (prediction[:, j] - total / count)
+            variance[:, j] = np.maximum(total2 - total**2 / count, 0)
+            cross[:, j] = sp[-1] + 360 * (pp[left] - (pp[-1] - pp[right]))
+        means[invalid] = np.nan
+        return means, variance, cross
+
     def residuals(self, delta, psi, metric='angular', sigmas=(1, 1)):
         delta, psi = np.atleast_2d(delta), np.atleast_2d(psi)
         if metric == 'stokes':
             r = ((stokes(delta, psi) - self.sm) * np.sqrt(self.counts)[None, :, None]).reshape(len(delta), -1)
             return np.c_[r, np.broadcast_to(np.sqrt(self.sv), (len(delta), len(self.sv)))]
-        invalid = ~np.isfinite(delta)
-        delta = np.where(invalid, 0, delta % 360)
-        means, variance = np.empty_like(delta), np.empty_like(delta)
-        for j, count in enumerate(self.counts):
-            start = np.searchsorted(self.ext[j], delta[:, j] - 180)
-            total = self.pre[j][start + count] - self.pre[j][start]
-            total2 = self.pre2[j][start + count] - self.pre2[j][start]
-            means[:, j] = total / count
-            variance[:, j] = np.maximum(total2 - total ** 2 / count, 0)
-        dm = np.sqrt(self.counts) * (delta - means)
-        dm[invalid] = np.nan
+        dm, variance, _ = self.angular_statistics(delta)
         return np.concatenate((dm / sigmas[0], np.sqrt(self.counts) * (psi - self.pm) / sigmas[1], np.sqrt(variance) / sigmas[0], np.broadcast_to(np.sqrt(self.pv) / sigmas[1], psi.shape)), axis=1)
 
     def sse(self, delta, psi, metric='angular', sigmas=(1, 1)):

@@ -77,13 +77,6 @@ class RepeatAnalysis:
             self.warnings.append('Messunsicherheiten nicht für alle Winkel bestimmbar: ungewichteter Fit. Fehlende Unsicherheiten werden nicht durch null oder pauschale Vorgaben ersetzt.')
         if self.complete and min(len(g) for g in self.groups) < 10:
             self.warnings.append('Wenige Wiederholungen: geschätzte Kovarianzen und statistische Intervalle sind unsicher; χ²-Angaben sind Näherungen.')
-        # Prefix sums retain the Delta/Psi cross term when a circular branch
-        # changes. Averages alone would otherwise lose the within-group SSE.
-        self.cross = []
-        for d, p in zip(self.raw.ds, self.raw.ps):
-            order = np.argsort(d)
-            ds, ps = d[order], p[order]
-            self.cross.append(np.r_[0., np.cumsum(np.r_[ds-360, ds, ds+360] * np.tile(ps, 3))])
 
     def public(self):
         return dict(groups=self.records, complete=self.complete, weighted=self.active,
@@ -94,24 +87,15 @@ class RepeatAnalysis:
         if not self.active:
             return self.display.residuals(delta, psi, self.metric)
         delta, psi = np.atleast_2d(delta), np.atleast_2d(psi)
+        dm, variances, crosses = self.raw.angular_statistics(delta)
         out = []
         for j, count in enumerate(self.raw.counts):
-            d = delta[:, j] % 360
-            invalid = ~np.isfinite(d)
-            d = np.where(invalid, 0, d)
-            start = np.searchsorted(self.raw.ext[j], d - 180)
-            total = self.raw.pre[j][start + count] - self.raw.pre[j][start]
-            total2 = self.raw.pre2[j][start + count] - self.raw.pre2[j][start]
-            mean_d = total / count
             mean_p = self.raw.pm[j]
-            cross = self.cross[j][start + count] - self.cross[j][start] - total * mean_p
-            var_d = np.maximum(total2 - total**2 / count, 0)
             W = self.precisions[j]
-            means = np.column_stack((d - mean_d, psi[:, j] - mean_p))
-            means[invalid] = np.nan
+            means = np.column_stack((dm[:, j], np.sqrt(count) * (psi[:, j] - mean_p)))
             root = np.linalg.cholesky(W)
-            out.append(np.sqrt(count) * means @ root)
-            spread = np.maximum(W[0, 0] * var_d + 2 * W[0, 1] * cross + W[1, 1] * self.raw.pv[j], 0)
+            out.append(means @ root)
+            spread = np.maximum(W[0, 0] * variances[:, j] + 2 * W[0, 1] * crosses[:, j] + W[1, 1] * self.raw.pv[j], 0)
             out.append(np.sqrt(spread)[:, None])
         return np.concatenate(out, axis=1)
 
@@ -224,7 +208,7 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     if bootstrap and analysis.complete and min(analysis.raw.counts) >= 6:
         from .core import stokes as _stokes
         rng = np.random.default_rng(1337)
-        samples = []
+        samples, boundary_count = [], 0
         center_z = obj.encode(values)[0]
         lower, upper = np.maximum(0, center_z-.12), np.minimum(1, center_z+.12)
         # A thickness period must not be crossed by a bootstrap local fit.
@@ -261,10 +245,15 @@ def parameter_uncertainty(obj, values, bootstrap=0):
             fit = least_squares(residual, np.clip(center_z, lower+1e-12, upper-1e-12), bounds=(lower, upper), max_nfev=160)
             if fit.success and np.isfinite(fit.fun).all():
                 samples.append(obj.decode(fit.x)[0])
+                boundary_count += int(np.any(np.minimum(fit.x-lower, upper-fit.x) <= 1e-5*(upper-lower)))
         if len(samples) >= max(20, int(.8*bootstrap)):
-            result['bootstrap95'] = np.percentile(samples, [2.5, 97.5], axis=0).T.tolist()
             result['bootstrap_samples'] = len(samples)
-            result['bootstrap_note'] = 'Bedingter paarweiser Bootstrap mit festen geschätzten Gewichten; ausgewählte Lösungsfamilie. Keine globale Eindeutigkeitsaussage.'
+            result['bootstrap_boundary_hits'] = boundary_count
+            if boundary_count:
+                result['bootstrap_note'] = f'Kein Bootstrapintervall: {boundary_count} von {len(samples)} lokalen Fits erreichen eine Grenze. Ein Intervall wäre dadurch beschnitten.'
+            else:
+                result['bootstrap95'] = np.percentile(samples, [2.5, 97.5], axis=0).T.tolist()
+                result['bootstrap_note'] = 'Bedingter paarweiser Bootstrap mit festen geschätzten Gewichten; ausgewählte Lösungsfamilie. Keine globale Eindeutigkeitsaussage.'
     return result
 
 

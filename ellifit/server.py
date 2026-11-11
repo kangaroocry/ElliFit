@@ -13,7 +13,8 @@ import plotly
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Literal
 
 from . import __version__
 from .core import Cancelled, FitRequest, Model, Observations, Row, comparison, parse_data, simulate, solve
@@ -137,9 +138,10 @@ def change_folder(body: Folder):
 
 
 class Material(Medium):
-    schema_version: int = 1
-    wavelength_nm: float | None = None
-    notes: str = ''
+    schema_version: Literal[1] = 1
+    name: str = Field(min_length=1,max_length=160)
+    wavelength_nm: float | None = Field(default=None,gt=0,le=1e6)
+    notes: str = Field(default='',max_length=10000)
 
 
 class SaveMaterial(BaseModel):

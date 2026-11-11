@@ -23,3 +23,18 @@ def test_import_and_origin_restriction():
     data = client.post('/api/import', files={'file': ('a.dat', b'Header\n70 359.9 20.1 >> a\n')})
     assert data.status_code == 200 and data.json()['count'] == 1
     assert client.post('/api/models', json={'model': Model().model_dump()}, headers={'origin': 'https://unrelated.example'}).status_code == 403
+
+
+def test_material_library_roundtrip_and_validation(tmp_path,monkeypatch):
+    monkeypatch.setattr(server,'MATERIAL_DIR',tmp_path)
+    client=TestClient(server.app)
+    material=dict(schema_version=1,name='Testglas',n=1.456,k=0,wavelength_nm=632.8,uncertainty_n=.001,notes='Referenz')
+    saved=client.post('/api/materials',json={'material':material})
+    assert saved.status_code==200
+    filename=saved.json()['filename']
+    loaded=client.get('/api/materials/'+filename).json()
+    assert loaded['n']==1.456 and loaded['uncertainty_n']==.001
+    assert client.get('/api/materials').json()['materials'][0]['name']=='Testglas'
+    assert client.post('/api/materials',json={'material':material}).status_code==409
+    assert client.post('/api/materials',json={'material':material,'filename':'../bad.json'}).status_code==400
+    assert client.post('/api/validate-material',json=material|{'wavelength_nm':-1}).status_code==422

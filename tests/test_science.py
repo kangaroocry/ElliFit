@@ -185,7 +185,8 @@ def test_two_transparent_thickness_periods():
     assert result['periodicity']['kind'] == 'lattice'
     expected = [632.8 / (2 * np.sqrt(n ** 2 - np.sin(np.deg2rad(70)) ** 2)) for n in [1.46, 2]]
     np.testing.assert_allclose([p['period_nm'] for p in result['periodicity']['periods']], expected)
-    assert result['periodicity']['equivalent_count'] >= 8
+    assert result['periodicity']['alias_count'] >= 8
+    assert result['solutions'][0]['alias_count'] >= 8
 
 
 def test_substrate_nk_fit_rejects_undefined_corner():
@@ -198,6 +199,7 @@ def test_substrate_nk_fit_rejects_undefined_corner():
 
 def test_duplicate_decision_and_cancellation():
     req = request([dict(path='layers.0.thickness_nm', lower=.1, upper=1000)], angles=(70, 70))
+    req.duplicate_policy = 'ask'
     with pytest.raises(ValueError, match='Wiederholungen'):
         solve(req)
     req.duplicate_policy = 'repeat'
@@ -210,8 +212,8 @@ def test_duplicate_decision_and_cancellation():
 def test_single_angle_plot_with_thickness_as_second_parameter():
     req = request([dict(path='layers.0.n', lower=1, upper=4), dict(path='layers.0.thickness_nm', lower=.1, upper=1000)], angles=(70,))
     result = comparison(req, [1.67, 123.456])
-    assert result['xlabel'].endswith('d / nm')
-    assert result['fixed_parameter_label'].endswith(' · n')
+    assert result['xlabel'].startswith('Schichtdicke') and result['xlabel'].endswith('(nm)')
+    assert result['fixed_parameter_label'].startswith('Brechungsindex')
     assert result['points'][0]['x'] == 123.456
 
 
