@@ -1,109 +1,70 @@
 [
   {
-    "check": "One parameter, multiple angles",
-    "best": {
-      "rank": 1,
-      "values": [
-        118.00000005386732
-      ],
-      "q": 4.347218424385887e-14,
-      "sqrt_q": 2.0849984231135253e-07,
-      "rmse_deg": 4.91438841248944e-08,
-      "at_boundary": false,
-      "equivalent": true
-    }
-  },
-  {
-    "check": "Single angle, period and selectable aliases",
-    "count": 4,
-    "periods": [
-      {
-        "path": "layers.0.thickness_nm",
-        "period_nm": 283.15789438310946
-      }
-    ]
-  },
-  {
-    "check": "Simultaneous d/n fit and contour",
-    "best": {
-      "rank": 1,
-      "values": [
-        118.00000000000003,
-        1.46
-      ],
-      "q": 1.6155871338926322e-26,
-      "sqrt_q": 1.2710574864626038e-13,
-      "rmse_deg": 2.995911226518785e-14,
-      "at_boundary": false,
-      "equivalent": true
-    },
-    "counts": {
-      "selected": 9,
-      "effective": 9,
-      "angles": 9,
-      "grid": 57600,
-      "evaluations": 60168
-    }
-  },
-  {
-    "check": "3D surface",
+    "check": "Vorgaben, Dezimalkomma, ausklappbare Optik, getrennte Suchskalen",
     "passed": true
   },
   {
-    "check": "Result exports",
-    "formats": [
-      "CSV solutions",
-      "CSV residuals",
-      "CSV landscape",
-      "JSON report"
-    ]
-  },
-  {
-    "check": "Measurement CSV roundtrip",
-    "count": 9
-  },
-  {
-    "check": "Session save/load",
-    "count": 9
-  },
-  {
-    "check": "Model directory, save and reload",
+    "check": "Pfeiltasten n/d, vierstellige Anzeige ohne Präzisionsverlust, Schichten verschieben/löschen/rückgängig",
     "passed": true
   },
   {
-    "check": "Original phi, duplicate average",
-    "counts": {
-      "selected": 10,
-      "effective": 9,
-      "angles": 9,
-      "grid": 436,
-      "evaluations": 742
-    }
+    "check": "Einparameter-Mehrwinkelfit, unabhängige Log-Schalter, Rot/Blau, Ergebnistabelle ohne Q",
+    "d": 118.00000005386732,
+    "families": 4
   },
   {
-    "check": "Original phi, repeated weights",
-    "counts": {
-      "selected": 10,
-      "effective": 10,
-      "angles": 9,
-      "grid": 436,
-      "evaluations": 788
-    }
+    "check": "Periodenfamilie als ein Eintrag, sortierte Aliase, Nummern/Farben und Auswahl",
+    "aliases": 4,
+    "period_nm": 283.15789438310946
   },
   {
-    "check": "Original dat, selection and pagination",
+    "check": "Simultaner d/n-Fit, feste Güte-Konturskala, log-log-Anzeige trotz linearem n-Raster, 3D",
+    "values": [
+      118.00000000000003,
+      1.46
+    ]
+  },
+  {
+    "check": "Vier Ergebnisexporte, Messdaten-CSV-Rundlauf und Sitzung öffnen/speichern",
+    "passed": true
+  },
+  {
+    "check": "Modellpersistenz, Materialbibliothek speichern/importieren/anwenden, Dicke erhalten und Rückgängig",
+    "passed": true
+  },
+  {
+    "check": "Wiederholungen: Gruppen/Teilauswahl, GLS, identischer Mittelwertfit, getrennte Unsicherheiten und Bootstrap",
+    "d": 118.00194284626285,
+    "u_stat": 0.0009242505516479868,
+    "u_cal": 0.018861510696647543
+  },
+  {
+    "check": "k einschließlich null, Hybridachse und statistischer Nullvergleich",
+    "passed": true
+  },
+  {
+    "check": "Explizite alternative Delta-Konvention alter Modelle bleibt erhalten",
+    "passed": true
+  },
+  {
+    "check": "Privater phi-Import, automatische Winkelgruppen und beide Rückfragewege",
+    "count": 10,
+    "angles": 9
+  },
+  {
+    "check": "Privater dat-Import, 16 377 Zeilen, Seitennavigation, Filter und globales Auswahlhäkchen",
     "count": 16377
   },
   {
-    "check": "Cancel global search",
+    "check": "Abbruch einer globalen Zweiparametersuche",
     "passed": true
   },
   {
-    "check": "Responsive layout",
+    "check": "Schmale Darstellung ohne horizontalen Seitenüberlauf",
     "width": 390
   },
   {
-    "check": "JavaScript errors",
+    "check": "JavaScript-Laufzeitfehler",
     "count": 0
   }
 ]

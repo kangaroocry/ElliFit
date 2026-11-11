@@ -10,10 +10,13 @@ def main():
     parser = argparse.ArgumentParser(description='ElliFit · lokale Ellipsometrie')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--models', type=Path)
+    parser.add_argument('--materials', type=Path)
     parser.add_argument('--no-browser', action='store_true')
     args = parser.parse_args()
     if args.models:
         os.environ['ELLIFIT_MODELS'] = str(args.models.expanduser().resolve())
+    if args.materials:
+        os.environ['ELLIFIT_MATERIALS'] = str(args.materials.expanduser().resolve())
     try:
         with socket.socket() as probe:
             probe.bind(('127.0.0.1', args.port))

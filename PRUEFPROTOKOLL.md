@@ -1,55 +1,58 @@
-# Prüfprotokoll – ElliFit 1.1
+# Prüfprotokoll – ElliFit 1.2.0
 
-Stand: 10. November 2026. Neu erzeugter und erneut geprüfter Quellstand.
+Stand: 11. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Numerik und API
+## Automatisierte Rechen- und API-Tests
 
-**25 Tests bestanden** unter Linux mit Python 3.12; Ausführung mit `ELLIFIT_EXAMPLES_DIR` auf den lokalen Original-Messdateien. Ohne die nicht veröffentlichten Originaldateien wird der betreffende Test übersprungen.
+**42 Tests bestanden**, einschließlich des privaten Importtests mit den ursprünglichen Dateien:
 
-Geprüft wurden analytische Substratinversion, Nullschichtdicke, der Grenzfall dicker Absorber, Mehrschichtamplituden gegen die unabhängige Bibliothek `tmm` in drei Fällen (transparent, absorbierend, evaneszent), Δ-Konvention und 0°/360°-Übergang, undefinierte Reflexion, vollständige Wiederholungsgewichtung, Kreismittelung, CSV/Dezimalkomma, Originaldateien, globale d- und d/n-Fits, Stokes-n-Fits, Randminima, eine und zwei unabhängige Dickenperioden, Absorption und flache Zielfunktionen, Substrat-n/k, Abbruch, Rückfrage bei Wiederholungen, Einwinkelplot mit Dicke als zweitem Parameter, Modellpersistenz, Import und Origin-Prüfung.
+```sh
+ELLIFIT_EXAMPLES_DIR=/Pfad/zu/privaten/Beispielen python -m pytest -q
+```
 
-Zwei Hinweise aus den Testbibliotheken betreffen zukünftige Änderungen von pytest und Starlettes Testclient; keine Anwendungstests sind fehlgeschlagen.
+Ohne diese privaten Dateien wird genau dieser Importtest übersprungen. Die Dateien werden nicht veröffentlicht. Der Testumfang umfasst:
 
-## Browser
+- Analytische Substratinversion, Nullschichtdicke, dicke Absorber, undefinierte Reflexion und Mehrschichtamplituden gegen die unabhängige Bibliothek `tmm`, einschließlich absorbierender und evaneszenter Fälle.
+- Beide Δ-Konventionen, unabhängige Prüfung der Elli-kompatiblen Phasenausgabe, 0°/360°-Übergang, CSV/Dezimalkomma und die ursprünglichen `.phi`-/`.dat`-Formate.
+- Globale d-, d/n- und Substrat-n/k-Fits, Stokes-n-Fit, Randminima, flache Landschaften, Abbruch, Rückfrage bei Wiederholungen und Einwinkelvergleich mit Dicke als zweitem Parameter.
+- Eine und zwei transparente Dickenperioden; analytische Aliase als eine Familie in aufsteigender Reihenfolge. Absorption ergibt keinen falschen exakten Periodennachweis.
+- Gruppierte korrelierte Winkelresiduen gegen die Summe jedes einzelnen Residuenpaares, einschließlich zyklischer Zweigwechsel. Gleichheit von gewichtetem Rohwert- und Mittelwertfit.
+- Fehlende beziehungsweise identische Wiederholungen, singuläre Kovarianz und Drifthinweise. Sehr kleine Streuung wird gegen direkte Residuen geprüft, um numerischen Auslöschungseffekten vorzubeugen.
+- Getrennte statistische/Kalibrierbeiträge und quadratische Kombination. Fortgepflanzte GLS-Kovarianz gegen eine unabhängig differenzierte Fisher-Matrix.
+- Paarweiser lokaler Bootstrap; an künstlichen Grenzen beschnittene Intervalle werden nicht als Präzisionsangabe ausgegeben.
+- Exaktes k = 0 plus logarithmischer positiver Bereich, Wiederfinden von k = 10⁻⁵ und Profil-Obergrenze bei mit null verträglichen Daten. Eine physikalische k-Nullgrenze verdeckt keine weitere künstliche Suchgrenze.
+- Feste G-Skala unverändert beim Vervielfachen derselben Werte. Modell-/Materialpersistenz, Validierung, Dateinamenprüfung, Origin-Prüfung und Normalisierung alter Sitzungen bei Erhalt expliziter Konventionen.
 
-Automatisierte Bedienprüfung mit Playwright und echtem Chromium unter Linux:
+JavaScript-Syntaxprüfung mit `node --check ellifit/static/app.js` bestanden. Zwei Warnungen stammen aus AnyIOs pytest-Anbindung und Starlettes Testclient bezüglich künftiger Schnittstellen; kein Anwendungstest ist fehlgeschlagen.
+
+## Browserprüfung
+
+Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 15 protokollierte Prüfpunkte in [Pruefdaten_Browser.json](Pruefdaten_Browser.json):
 
 | Prüfung | Ergebnis |
 |---|---|
-| Ein Parameter, mehrere Winkel | Referenzdicke 118 nm wiedergefunden |
-| Ein Winkel | Vier vergleichbare Dickenlösungen, Periode 283,157894 nm |
-| Auswahl eines anderen Minimums | Modellvergleich folgt der ausgewählten Lösung |
-| Zwei Parameter, mehrere Winkel | d = 118 nm und n = 1,46 wiedergefunden |
-| Kontur und 3D | Umschalten erfolgreich |
-| Ergebnisexport | Drei CSV-Arten und JSON-Bericht tatsächlich heruntergeladen |
-| Messdaten-CSV | Exportiert und mit gleicher Anzahl erneut importiert |
-| Sitzung | Speichern und Öffnen samt Auswahl |
-| Modellordner | Ordnerwechsel, Speicherung und erneutes Laden |
-| Original-.phi | 10 Zeilen; mit Mittelung 9, mit Mehrfachgewichtung 10 effektive Messungen |
-| Original-.dat | 16.377 Messungen; Auswahl und Seitennavigation |
-| Abbruch | Größere globale Suche über Oberfläche abgebrochen |
-| Schmale Darstellung | 390 px ohne horizontalen Seitenüberlauf |
+| Voreinstellungen und Zahlenformat | 632,8 nm, Elli-Δ, d log, n linear, k log plus null; Optik zunächst eingeklappt |
+| Eingaben und Schichtbearbeitung | Pfeiltasten n/d, vierstellige Anzeige ohne Rundung unveränderter Modellwerte, Verschieben/Löschen/Rückgängig erfolgreich |
+| Einparameter-Mehrwinkelfit | Synthetische Referenz d = 118 nm wiedergefunden; Achsen unabhängig vom Suchraster schaltbar; Δ rot, Ψ blau; keine Q-Spalte |
+| Einwinkel-Periodenfamilie | Vier Dickenaliase mit T ≈ 283,1579 nm zusammengefasst; sortierte Aliaswahl aktualisiert den Vergleich; Markerfarben/-nummern konsistent |
+| Simultaner d/n-Fit | d = 118 nm, n = 1,46 wiedergefunden; feste G-Konturskala und 3D-Umschaltung erfolgreich |
+| Exporte und Sitzung | Vier Ergebnisformate tatsächlich heruntergeladen; Messdaten-CSV mit gleicher Anzahl erneut importiert; Sitzung gespeichert/geöffnet |
+| Modelle und Materialien | Modell gespeichert/geladen; Material gespeichert, als JSON exportiert/importiert, angewendet und rückgängig gemacht; Dicke erhalten |
+| Wiederholungsmessungen | 96 synthetische Messungen, Winkelgruppen mit Teilauswahl; GLS und Mittelwertfit identisch; statistischer Beitrag, Kalibrierung und Bootstrap angezeigt |
+| k einschließlich null | Nullpunkt der Fehlerlandschaft vorhanden, erklärte Hybridachse und statistischer Nullvergleich dargestellt |
+| Alte Konvention | Explizite alternative Δ-Konvention bleibt erhalten |
+| Privater `.phi`-Import | 10 Zeilen, 9 Winkel; Rückfrage für Mittelwert- und Rohwertfit durchlaufen |
+| Privater `.dat`-Import | 16 377 Zeilen, Seitennavigation, Filter und globales Häkchen erfolgreich |
+| Abbruch | Globale Zweiparametersuche über die Oberfläche abgebrochen |
+| Schmale Ansicht | 390 px ohne horizontalen Seitenüberlauf |
 | JavaScript-Laufzeitfehler | Keine |
 
-Die 14 protokollierten Prüfpunkte stehen zusammengefasst in `Pruefdaten_Browser.json`. Dort sind nur synthetische Referenzergebnisse und Importanzahlen enthalten; keine ursprünglichen Messwertlisten.
+Die JSON-Prüfdaten enthalten ausschließlich synthetische Ergebnisse und Importanzahlen; keine privaten Messwertlisten. Browserprüfung bezeichnet die tatsächliche Ausführung und Bedienung der lokal gestarteten Anwendung im Browser, nicht einen Upload der Messdaten an einen Webdienst.
 
-## Grenzen
+## Umgebung und Aussagegrenzen
 
-Ein tatsächlicher Windows-Lauf und eine Windows-7-Kompatibilität wurden nicht geprüft. Der Windows-Starter ist Quellcode, keine kompilierte EXE. Die ursprüngliche reale Probe kann ohne verifizierten Schichtaufbau und Materialwerte nicht physikalisch validiert ausgewertet werden. Numerische Referenzergebnisse sind keine experimentelle Genauigkeitsangabe.
+Geprüft mit Python 3.12.14, NumPy 2.3.5, SciPy 1.17.0, FastAPI 0.141.1, Pydantic 2.13.4, Uvicorn 0.52.1, Plotly 7.1.0, pytest 9.2.0, tmm 0.2.0 und Playwright 1.62.0. Die Anforderungen erlauben kompatible Versionsbereiche.
 
-Eine endliche globale Suche garantiert nicht jedes Minimum. Die README erläutert Rasterbegrenzung, Periodenprüfung, Fehlermaße und physikalische Modellgrenzen.
+Ein tatsächlicher Windows-/WinPython-Lauf wurde nicht durchgeführt. Die Batchdateien und der voreingestellte WinPython-Pfad bleiben im Paket; die Batchdateien verwenden Windows-Zeilenenden. Windows 7 ist nicht unterstützt. Das Paket enthält Quellcode, keine kompilierte EXE.
 
-
-## Nachtrag zu ElliFit 1.1.1: Δ-Voreinstellung und Suchskalen
-
-Die Voreinstellung der Δ-Ausgabe wurde nach dem praktischen Vergleich des Nutzers mit Original-Elli auf `(−arg(ρ_intern)) mod 360°` umgestellt. Dieser Originalvergleich wurde vom Nutzer berichtet; eine automatische Gegenprüfung mit der historischen Software wurde hier nicht ausgeführt.
-
-Neue Modelle, die synthetische Referenz und die mitgelieferten Beispiele verwenden die Elli-kompatible Ausgabe. Explizite Konventionen in vorhandenen Dateien bleiben erhalten. Die alternative Rechenkern-Phase bleibt auswählbar.
-
-Neue Vorgaben: d = 0,1–1000 nm logarithmisch; n = 1–4 linear; k = 0–4 linear. Für API-Anfragen ohne explizite Skala wird diese jetzt anhand des Parameters gewählt. Explizite Suchskalen in Sitzungen werden beibehalten. Logarithmisches k benötigt eine positive Untergrenze und enthält k = 0 nicht.
-
-Erneut **26 numerische/API-Tests bestanden**, einschließlich einer unabhängigen Prüfung der neuen Ausgabe an einer analytischen Grenzfläche mit entgegengesetzter komplexer Phasorkonvention. Die vorhandene Prüfung beider expliziter Δ-Konventionen bleibt erhalten. JavaScript-Syntaxprüfung bestanden.
-
-Gezielter Chromium/Playwright-Check: Elli-Voreinstellung und Beschriftung; n = 1–4 linear; k = 0–4 linear; d logarithmisch; simultaner Referenzfit mit d = 118 nm und n = 1,46; Konturachsen log/linear; Erhalt einer explizit auf die Alternative gesetzten Modellkonvention. Keine JavaScript-Laufzeitfehler.
-
-Die oben dokumentierten umfassenden Browserprüfungen beziehen sich auf den ursprünglichen Stand 1.1; für 1.1.1 wurde gezielt der geänderte Funktionsumfang erneut im Browser geprüft.
+Numerische Referenzen sind keine experimentelle Genauigkeitsangabe. Die reale Probe kann ohne verifiziertes Schichtsystem und Materialwerte nicht physikalisch validiert werden. Lokale Kovarianzen, bedingte Bootstrapintervalle und asymptotische k-Profile ersetzen weder die Kontrolle systematischer Fehler noch die Prüfung globaler Mehrdeutigkeit. Eine endliche globale Suche kann Minima übersehen; Details stehen in der [README](README.md).

@@ -112,8 +112,12 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     for s in solutions:s['equivalent']=s['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     for alias in all_aliases:alias['equivalent']=alias['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     if best['at_boundary']:
-        physical_zero=any(p.path.endswith('.k') and p.lower==0 and best['values'][i]<p.positive_min*1e-3 for i,p in enumerate(request.parameters))
-        warnings.append('Der beste Fit liegt bei k = 0, der physikalischen Nullgrenze. Kein negatives k erforderlich.' if physical_zero else 'Das global kleinste Minimum liegt an einer Suchgrenze. Bitte den Suchbereich vergrößern.')
+        best_z=obj.encode(best['values'])[0]
+        physical_zero=[p.path.endswith('.k') and p.lower==0 and best['values'][i]<p.positive_min*1e-3 for i,p in enumerate(request.parameters)]
+        if any(physical_zero):
+            warnings.append('Der beste Fit liegt bei k = 0, der physikalischen Nullgrenze. Kein negatives k erforderlich.')
+        if any((z<1e-6 or z>1-1e-6) and not zero for z,zero in zip(best_z,physical_zero)):
+            warnings.append('Das global kleinste Minimum liegt an einer Suchgrenze. Bitte den Suchbereich vergrößern.')
     if best['uncertainty']['weak']:
         warnings.append(best['uncertainty']['note'])
     if best.get('reduced_chi2') is not None and best['reduced_chi2']>3:

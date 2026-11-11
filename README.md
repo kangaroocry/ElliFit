@@ -1,185 +1,165 @@
-# ElliFit 1.1.1
+# ElliFit 1.2
 
-Lokale Auswertung monochromatischer Ellipsometrie: Schichtmodelle definieren und Schichtdicke, Brechungsindex oder zwei Parameter gemeinsam global fitten. Die Browseroberfläche kommuniziert ausschließlich mit einem Python-Rechenkern auf demselben Rechner.
+Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-## Download und Windows-Start
+**[ElliFit 1.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
-**[Programm als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.1.zip)**
+## Start unter Windows und mit WinPython
 
-1. Das ZIP **vollständig entpacken**, z. B. in `Dokumente\ElliFit`. Nicht direkt im ZIP starten.
-2. **Python 3.11 oder neuer, 64 Bit** von <https://www.python.org/downloads/> installieren. Den Python Launcher beziehungsweise „Add Python to PATH“ aktivieren.
-3. **`Start_Windows.bat` doppelklicken.** Beim ersten Start werden Python-Pakete aus dem Internet in den Unterordner `.venv` installiert.
-4. Der Browser öffnet `http://127.0.0.1:8765`. Das Konsolenfenster offen lassen; zum Beenden dort `Strg+C` drücken oder das Fenster schließen.
+Das ZIP **vollständig in einen beschreibbaren Ordner entpacken**, etwa unter Dokumente. Eine vorhandene ältere Version zunächst behalten; eigene Modell-, Material- und Sitzungsdateien können übernommen werden.
 
-Nach der Erstinstallation benötigt die Anwendung keine Internetverbindung. Plotly wird als Python-Paket installiert; seine JavaScript-Datei wird lokal ausgeliefert, nicht von einem CDN geladen. Messdaten und Modelle werden nicht an GitHub oder andere Dienste gesendet.
+**Mit vorhandenem WinPython:** `Start_WinPython.bat` doppelklicken. Voreingestellt ist der vom Nutzer genannte Pfad `C:\Programme_portable\WinPython\WPy64-31290`. Der Starter findet `python.exe` direkt dort, in `python` oder in einem Unterordner `python-*`. Er erstellt die private Umgebung `.venv-winpython` im ElliFit-Ordner. WinPython und der System-PATH werden dabei nicht verändert; eine zusätzliche Python-Installation und Adminrechte sind dafür nicht erforderlich. Der ElliFit-Ordner muss beschreibbar sein und der Rechner die Ausführung erlauben.
 
-Das Paket enthält **Quellcode mit Startdatei, keine kompilierte EXE**. Der erste Start benötigt Internet und eine passende Python-Installation. Standardmäßig ist keine systemweite Paketinstallation nötig; die virtuelle Umgebung liegt im Programmordner. Ob die Python-Installation ohne Admin-Rechte möglich ist, hängt vom Rechner ab.
+Für andere Installationen den Pfad am Anfang der Batchdatei oder `ELLIFIT_WINPYTHON_ROOT` anpassen. WinPython muss auch bei späteren Starts vorhanden sein. Eine gegebenenfalls bestehende `.venv` wird von diesem Starter nicht verwendet.
 
-**Windows 7 ist mit diesem Stand nicht unterstützt.** Dafür wäre eine eigene Zusammenstellung älterer, kompatibler Python-, Bibliotheks- und Browserversionen mit tatsächlicher Prüfung auf Windows 7 nötig. Die Tests dieser Version liefen unter Linux; ein echter Windows-Lauf wurde hier nicht ausgeführt.
+**Mit normal installiertem Python 3.11 oder neuer, 64 Bit:** `Start_Windows.bat` doppelklicken. Der Starter verwendet den Python Launcher beziehungsweise `python` und erstellt `.venv` im Programmordner.
 
-Wenn die Erstinstallation fehlschlägt, Fehlerausgabe prüfen und die Batchdatei erneut starten. Bei einem belegten Port:
+Beim ersten Start benötigen beide Starter Internet für die Python-Pakete. Danach öffnet sich der Browser mit `http://127.0.0.1:8765`. Das Konsolenfenster offen lassen; mit `Strg+C` beenden. Bei Fehlern die Ausgabe im Konsolenfenster beachten. Eine beschädigte private Umgebung kann umbenannt und vom Starter neu erstellt werden.
+
+Nach der Erstinstallation läuft ElliFit offline. Plotly-JavaScript wird lokal ausgeliefert; es gibt keinen CDN-Zugriff. Messdaten werden nicht an GitHub oder andere Dienste gesendet. Die Anwendung besteht aus **Python und JavaScript mit Startdateien, nicht aus einer kompilierten EXE**.
+
+**Windows 7 wird nicht unterstützt.** Das vorhandene WinPython 3.12 setzt eine neuere Windows-Version voraus. Die Version wurde unter Linux numerisch und im Chromium-Browser geprüft; ein tatsächlicher Windows-/WinPython-Lauf wurde hier nicht durchgeführt.
+
+Bei belegtem Port beispielsweise:
 
 ```bat
-.venv\Scripts\python.exe launch.py --port 8766
+Start_WinPython.bat --port 8766
 ```
 
-Unter Linux/macOS: `sh start.sh`. Alternativ manuell eine virtuelle Umgebung erstellen, `pip install -r requirements.txt` und `python launch.py` ausführen.
+Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
 
-## Ohne Adminrechte mit vorhandenem WinPython
+## Erste Auswertung
 
-Mit einem bereits lauffähigen WinPython 3.12 (64 Bit) ist keine weitere Python-Installation und kein System-PATH-Eintrag erforderlich.
+1. **Schichtmodell prüfen.** Einfallsmedium, Filme von oben nach unten und halbunendliches Substrat einstellen. Mitgelieferte Materialwerte sind Beispiele. Wellenlänge und Δ-Konvention befinden sich im ausklappbaren Bereich „Optische Einstellungen und Dateien“. Voreinstellung: **632,8 nm** und Elli-kompatibles Δ.
+2. **Messdaten laden.** `.phi`, `.dat`, `.txt` oder einfache `.csv` enthalten drei numerische Spalten: Einfallswinkel, Δ, Ψ in Grad. Winkel werden gegen die Oberflächennormale gemessen. UTF-8/Windows-1252, Dezimalkomma/Dezimalpunkt und Kommentare hinter `>>` werden unterstützt. Alternativ Einzelwerte eingeben.
+3. **Zeilen auswählen.** Das globale Häkchen wählt alle geladenen Zeilen unabhängig von Filter und Seite. „Gefilterte wählen“ ergänzt die aktuelle Ansicht. Gruppen können nach Winkel oder Quelle gebildet, ein-/ausgeklappt und gemeinsam ausgewählt werden. Bei wiederholten Winkeln gruppiert die Automatik sichtbar nach Winkel. Ein teilweise ausgewähltes Gruppenhäkchen zeigt einen Zwischenzustand. `Umschalt`-Klick wählt einen Bereich der gefilterten Zeilen.
+4. **Einen oder zwei Parameter wählen.** Voreinstellungen: **d = 0,1–1 000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–10 mit logarithmischen positiven Stützstellen plus exakt null**. Grenzen und Suchraster sind editierbar; bei n unter 1 oder k über 10 gegebenenfalls erweitern. Alle anderen Modellwerte bleiben fest.
+5. **Global suchen.** Mehrere ausgewählte Winkel ergeben automatisch einen Mehrwinkelfit. Wiederholungen werden standardmäßig gemeinsam gefittet. Mittelung und eine Rückfrage lassen sich unter „Fitverfahren und Unsicherheiten“ wählen. Ein laufender Fit kann abgebrochen werden.
+6. **Lösungsfamilien vergleichen.** Zeile, nummerierten Punkt im Fehlerplot oder eine Wiederholung innerhalb einer Periodenfamilie anklicken. Der Modellvergleich folgt der Auswahl. „Ins Modell übernehmen“ überträgt die Werte; anschließend das Modell speichern.
 
-1. ElliFit in einen **beschreibbaren Benutzerordner** entpacken, z. B. unter Dokumente.
-2. **`Start_WinPython.bat`** doppelklicken. Der vorkonfigurierte WinPython-Ordner ist `C:\Programme_portable\WinPython\WPy64-31290`.
-3. Der Starter findet `python.exe` direkt darin, im Unterordner `python` oder in einem Unterordner `python-*` (z. B. `python-3.12.9.amd64`).
-4. Die Abhängigkeiten werden beim ersten Start in **`.venv-winpython` im ElliFit-Ordner** installiert. Die WinPython-Distribution selbst wird nicht verändert. Eine gegebenenfalls bereits bestehende `.venv` wird von diesem Starter nicht verwendet.
+**Nur Messungen derselben unveränderten Probe gemeinsam fitten.** Gleiche Winkel belegen keine gleiche Probe. Die ursprüngliche `.dat`-Sammlung enthält unterschiedliche Probenkommentare und ist deshalb nicht automatisch eine gemeinsame Wiederholungsserie.
 
-Für einen anderen WinPython-Pfad die Einstellung am Anfang des Starters ändern oder vor dem Aufruf die Umgebungsvariable `ELLIFIT_WINPYTHON_ROOT` setzen. Startargumente wie `--port 8766` und `--models "C:\Pfad\Modelle"` werden weitergereicht. Der WinPython-Ordner muss beim späteren Start weiterhin vorhanden sein.
+Die mitgelieferte **synthetische Referenz** hat d = 118 nm und n = 1,46. Das Modell startet bei d = 80 nm; die globale Suche sollte 118 nm wiederfinden. Die Referenz ist rauschfrei und liefert keine experimentelle Unsicherheitsangabe. Für die ursprüngliche reale `.phi`-Probe ist nur die Wellenlänge bestätigt; ohne verifizierten Schichtaufbau und feste Materialwerte wird kein physikalisch validiertes Probenergebnis behauptet. Private Originaldateien und Handbuch sind nicht im öffentlichen Repository enthalten.
 
-Auch dieser Starter macht Python 3.12 nicht mit Windows 7 kompatibel. Ein tatsächlicher Windows-/WinPython-Lauf wurde in der Entwicklungsumgebung nicht geprüft.
+## Modelle, Materialien und Rückgängig
 
-## Referenz und reale Proben
+Modelle werden als UTF-8-JSON im Modellordner gespeichert und aus einer Liste geladen. Standardordner: `models`. Einzelne Dateien können geöffnet und heruntergeladen werden. Elli-`.cfg` wird nicht direkt importiert; ein solches Dateiformat liegt nicht vor.
 
-Beim Öffnen sind **synthetische Referenzdaten** geladen: tatsächliche Filmdicke **118 nm**, Film-n **1,46**, Luft / Film / Si-Beispiel. Die Modelldicke startet absichtlich bei 80 nm. Die globale Suche sollte 118 nm wiederfinden. Die Referenzdaten sind rauschfrei; extrem kleine numerische Fehler sind keine Aussage zur experimentellen Genauigkeit.
+Die separate **Materialbibliothek** speichert Name, n, k, optionale Wellenlänge, Notizen und optionale Standardunsicherheiten u(n)/u(k) im Ordner `materials`. Materialien lassen sich aus einem Medium übernehmen, bearbeiten, als JSON importieren/exportieren und auf Luft, Film oder Substrat anwenden. Die Schichtdicke bleibt erhalten. Bei abweichender Wellenlänge erscheint eine Rückfrage; eine Dispersionsumrechnung findet nicht statt. Die Beispieldateien sind entsprechend gekennzeichnet. Ein absorbierendes Einfallsmedium wird nicht zugelassen.
 
-Die Wellenlänge ist auf **632,8 nm voreingestellt und editierbar**. n und k gelten jeweils bei der eingestellten Wellenlänge; eine automatische Dispersionskorrektur ist nicht enthalten.
+Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen wieder her, einschließlich gelöschter/verschobener Schichten und angewendeter Materialien. Wiederherstellen ist ebenfalls möglich. Gespeicherte Dateien und Messdatenlöschungen werden dadurch nicht zurückgenommen. Die Historie umfasst bis zu 80 Schritte und gilt für die aktuelle Sitzung. `Strg+Z` außerhalb eines Texteingabefeldes wirkt ebenfalls auf diese Historie.
 
-**Die mitgelieferten Materialwerte sind Beispiele.** Für die ursprüngliche reale Messdatei ist nur die Wellenlänge bestätigt. Ein verifizierter Schichtaufbau und passende feste n/k-Werte wurden nicht angegeben. Es wird daher kein physikalisch validiertes Ergebnis für diese Probe behauptet.
+Eingabefelder zeigen in der Regel **vier signifikante Stellen**, Ergebnisse werden intern mit voller Gleitkommapräzision berechnet. Unveränderte, gerundet angezeigte Felder runden das Modell nicht. Ein Tooltip zeigt mehr Stellen. Pfeiltasten ändern n typischerweise um 0,001 und d um 0,1 nm; bei großen Werten beziehungsweise sehr kleinem k passt sich der Schritt an. Die Oberfläche verwendet Dezimalkomma und Leerzeichen zur Tausendertrennung. JSON-Dateien verwenden das standardisierte Zahlenformat mit Punkt.
 
-Die ursprünglichen Messdateien und das Handbuch werden nicht in diesem öffentlichen Repository verteilt. Ihre Formate und der Import wurden lokal geprüft. Eigene Dateien über „Dateien laden“ importieren.
+## Diagramme und feste Fitgüte
 
-## Bedienung
+Anzeigeachsen und Suchraster sind **unabhängig**. Die Logarithmus-Häkchen ändern die Darstellung; sie lösen keinen neuen Fit aus. Die Fehlerachsen sind anfangs logarithmisch. Der Winkelvergleich startet mit linearer Winkelachse; auch dort ist eine logarithmische x-Achse wählbar.
 
-1. **Modell:** Einfallsmedium, endliche Filme von oben nach unten und Substrat einstellen. `N = n + ik`, `k ≥ 0`, Dicke in nm. Schichten lassen sich ergänzen, entfernen und umsortieren. Für ein blankes Substrat die endlichen Filme entfernen.
-2. **Messungen:** `.phi`, `.dat`, `.txt` oder einfache `.csv` laden; alternativ Winkel, Δ und Ψ manuell eingeben. Beide ursprünglichen Dateitypen werden gleichartig behandelt: drei numerische Spalten **Einfallswinkel, Delta, Psi in Grad**. Winkel werden gegen die Oberflächennormale gemessen. UTF-8, Windows-1252, Dezimalpunkt, Dezimalkomma und Kommentare hinter `>>` sind unterstützt.
-3. **Auswahl:** Häkchen bestimmen, welche Zeilen in den Fit eingehen. Das globale Häkchen wählt alle geladenen Zeilen, unabhängig vom Filter. „Gefilterte wählen“ ergänzt die aktuell gefilterten Zeilen; „Keine“ leert die Auswahl. Nach Quelle, Kommentar, Zeilennummer und Winkel filtern. `Umschalt`-Klick wählt einen zusammenhängenden Bereich der gefilterten Ansicht. Die Tabelle zeigt 50 Zeilen je Seite; die ganze Auswahl wird gerechnet.
-4. **Parameter:** Einen oder zwei Parameter wählen. Unterstützt sind d, n und k der Filme, n/k des Substrats und n des transparenten Einfallsmediums. Vorgaben: **d = 0,1–1000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–4 linear**; alle Grenzen und Skalen editierbar. Alle anderen Modellwerte bleiben fest. Für k = 0 die lineare Skala verwenden; logarithmische Grenzen müssen positiv sein.
-5. **Fit:** Globale Suche starten. Mehrere ausgewählte Winkel führen automatisch zu einem Mehrwinkelfit. Bei Wiederholungen fragt die Oberfläche nach Mittelung oder Mehrfachgewichtung; dies ist auch dauerhaft einstellbar. Abbruch ist über „Abbrechen“ möglich.
-6. **Lösungen:** Die Liste ist nach Q aufsteigend sortiert. Eine Zeile oder einen Minimum-Punkt anklicken, um die zugehörige Modellkurve zu sehen. „Ins Modell übernehmen“ überträgt die Werte; anschließend speichern.
-
-**Nur Messungen derselben unveränderten Probe gemeinsam fitten.** Gleiche Winkel allein bedeuten nicht gleiche Probe. Insbesondere die ursprüngliche `.dat`-Sammlung enthält unterschiedliche Probenkommentare; sie ist nicht automatisch eine gemeinsame Wiederholungsserie.
-
-## Modelle und Sitzungen speichern
-
-- **Modellordner:** Standardmäßig `models` neben `launch.py`. Unter „Modellordner“ einen anderen Pfad eingeben oder mit `python launch.py --models "C:\Pfad\Modelle"` starten. Die Oberfläche merkt den Ordner im Browser. Die Dateien werden als UTF-8-JSON gespeichert und aus einer Liste geladen. Zusätzlich stehen JSON-Download und Öffnen einer einzelnen Modelldatei zur Verfügung.
-- **Sitzung:** Enthält Modell, Messwerte, Auswahl und Suchkonfiguration. Beim erneuten Öffnen die Fits neu berechnen. Ergebnisse werden über den separaten Fitbericht exportiert.
-- **Elli-`.cfg`:** Kein direkter Import; ein entsprechendes Dateiformat wurde nicht bereitgestellt. Der neue Modelldateityp ist JSON mit `schema_version: 1`.
-
-Beim Umstellen der Eingaben bleiben vorhandene Ergebnisse als Vergleich sichtbar und werden als veraltet gekennzeichnet. Ein neuer Fit aktualisiert die Darstellung.
-
-## Diagramme und Export
-
-**Ein Parameter:** Q gegen den Parameter, bei logarithmischer Parameterskala als log-log-Plot. Lokale Verfeinerungen zeigen die Tiefe der Minima zusätzlich zum globalen Raster. Numerische Nullwerte werden im Log-Plot bei 10⁻²⁰ dargestellt; in der Ergebnisliste bleiben die tatsächlichen Q-Werte erhalten.
-
-**Zwei Parameter:** Konturplot mit den beiden Fitparametern auf x/y und **log₁₀ Q als Farbe**. Mit zwei logarithmischen Parameterachsen ergibt dies die gewünschte log-log-log-Darstellung. Optional ist eine drehbare 3D-Fläche verfügbar. Gefundene Minima werden als Wertepaare markiert.
-
-**Mehrwinkelfit:** Experimentelle Punkte und theoretische Kurven gegen den Einfallswinkel. Δ ist immer **rot** auf der linken Achse, Ψ immer **blau** auf der rechten Achse.
-
-**Einwinkelfit:** Theorie gegen den freien Parameter; experimentelle Punkte liegen am gefitteten x-Wert. Bei zwei freien Parametern wird eine Dicke als Kurvenparameter bevorzugt, sonst der erste Parameter. Der andere Parameter bleibt auf dem Wert der gewählten Lösung fixiert und wird in der Beschriftung genannt. Δ-Linien werden an 0°/360° unterbrochen.
-
-Mit Ziehen zoomen, mit Doppelklick zurücksetzen. Die Kamera in der Plot-Werkzeugleiste exportiert SVG. Bei sehr vielen Wiederholungen wird nur die Punktdarstellung auf etwa 3.500 Punkte ausgedünnt, nicht die Rechnung.
-
-Verfügbare Exporte:
-
-- Messwerte als CSV; erneut importierbar.
-- Ergebnisliste als CSV: Parameter, Q, √Q, Winkel-RMS, Vergleichbarkeit, Randstatus und gegebenenfalls χ²red.
-- Residuen der angezeigten Lösung als CSV. Bei vorheriger Mittelung enthält dieser Export zur Kontrolle **alle ursprünglichen Zeilen**; die Zielfunktion bezieht sich dagegen auf die Winkelmittelwerte. Diese Mittelwerte stehen im Fitbericht unter `comparison.points`.
-- Fehlerlandschaft als CSV.
-- Vollständiger Fitbericht als JSON mit Modell, Parametern, Einstellungen, Kandidaten, Perioden, Oberfläche und Vergleichsdaten. Die zusätzlich angezeigte Lösung steht unter `displayed_solution` / `displayed_comparison`.
-
-CSV-Dateien verwenden Semikolon, Dezimalkomma und UTF-8-BOM für deutsche Tabellenkalkulationen.
-
-## Zielfunktion, Unsicherheiten und Wiederholungen
-
-Standard:
+Bei einem freien Parameter zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. Die feste Farbskala verwendet:
 
 ```text
-rΔ = wrap(Δtheo − Δexp) in [−180°, 180°)
-rΨ = Ψtheo − Ψexp
-Q = Σ(rΔ² + rΨ²)
-Winkel-RMS = sqrt[Σ(rΔ² + rΨ²) / (2N)]
+RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
+G = −log10(RMS / 1°)
 ```
 
-Der Winkel-RMS in Grad ist über unterschiedliche Punktzahlen besser vergleichbar als √Q. Ein gewöhnliches R² ist wegen zyklischem Δ und der möglichen Mehrdeutigkeit kein geeigneter Standardwert.
+| RMS | G | Farbe |
+|---|---:|---|
+| 1° | 0 | Rot |
+| 0,1° | 1 | Gelb |
+| 0,01° | 2 | Grün |
 
-Optional kann mit den eingegebenen globalen Standardunsicherheiten gewichtet werden:
+Die Farbskala ist bei jedem Datensatz gleich und wird in Tabelle, Kontur und nummerierten Minimum-Punkten verwendet. Die Tabelle ist dezent hinterlegt; Punkte haben kräftigere Farben und eine helle Umrandung. Bei 3D ist auch die Höhe G. Werte außerhalb des Farbintervalls −1 bis 3 erhalten die jeweilige Endfarbe. Numerisch sehr kleine RMS werden für G bei 0,000001° begrenzt; angezeigt wird dann G ≥ 6. Im logarithmischen 1D-Plot werden Nullwerte nur zur Darstellung bei 10⁻⁹° begrenzt.
+
+**G beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Es ist unabhängig vom bloßen Vervielfachen der gleichen Messwerte und benutzt keine datensatzabhängige Normierung. Es ist jedoch nicht unabhängig von der gewählten Probe, Messgeometrie oder tatsächlichen Gerätestreuung. Ein guter G-Wert allein bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
+
+Die Ergebnisliste wird nach der **gewählten Zielfunktion** sortiert. Bei Kovarianzgewichtung oder Stokes-Abstand muss diese Reihenfolge nicht identisch mit der Reihenfolge des ungewichteten Winkel-RMS und damit der Farbe sein. Die absolute Fehlerquadratsumme Q ist aus der Ergebnisliste entfernt; im vollständigen JSON-Bericht bleibt sie für Diagnosezwecke erhalten.
+
+**k = 0 auf einer logarithmischen Anzeige:** Null hat keinen Logarithmus. Bei einer k-Achse einschließlich null verwendet ElliFit deshalb `log10(1 + k/k0)` mit dem eingestellten kleinsten positiven Rasterwert k0. Nahe null ist diese Achse linear, darüber näherungsweise logarithmisch. Die Beschriftung zeigt die tatsächlichen k-Werte einschließlich null. Das ist in der Bildunterschrift erklärt. Das Suchraster enthält null separat und positive logarithmische Stützstellen; lokale Verfeinerung darf auch zwischen null und k0 liegen. k0 ist keine willkürliche Nachweisgrenze und ersetzt nicht kleine Werte durch null.
+
+Im **Mehrwinkelvergleich** stehen Theorie und Messungen gegen den Winkel. Im **Einwinkelvergleich** stehen sie gegen den freien Parameter; Messpunkte liegen am Wert der ausgewählten Lösung. Bei zwei freien Parametern wird eine Dicke als Kurvenparameter bevorzugt, der andere Parameter bleibt auf dem gewählten Lösungswert fixiert und wird benannt. **Δ ist immer rot links, Ψ immer blau rechts.** Δ-Linien werden am 0°/360°-Sprung unterbrochen. Sehr große Messlisten werden nur bei der Punktdarstellung ausgedünnt; die Rechnung berücksichtigt alle ausgewählten Zeilen.
+
+## Periodische Lösungen und Bereichsgrenzen
+
+Für eine transparente variable Filmdicke bei einem Winkel gilt bei propagierender Welle:
 
 ```text
-Q = Σ[(rΔ / σΔ)² + (rΨ / σΨ)²]
-χ²red = Q / (2N − p), sofern 2N > p
+T = λ / [2 Re(sqrt(N_Film² − n_Einfallsmedium² sin²φ))]
 ```
 
-`p` ist die Zahl freier Parameter. Bei vorheriger Mittelung sind σΔ/σΨ als Unsicherheiten der **Mittelwerte** zu verstehen; es wird keine automatische Division durch √m vorgenommen. Die Startwerte 0,05° sind Beispiele, keine aus den Dateien ermittelten Gerätespezifikationen. χ² setzt passende Unsicherheiten und unabhängige Fehler voraus.
+Analytisch nachgewiesene Wiederholungen werden als **eine hervorgehobene Lösungsfamilie** dargestellt: Periode, Anzahl und nach Dicke geordnete Wiederholungen. Die ersten Werte sind direkt anklickbar, weitere ausklappbar. Bei zwei transparenten variablen Dicken sind zwei Perioden möglich. Bei gleichzeitig freiem n gilt die Dickenperiode nur beim jeweiligen festen n-Wert. Ähnliche Güte allein führt nicht zur Zusammenfassung. Bei Absorption, evaneszenter Ausbreitung oder mehreren unterschiedlichen Winkeln wird keine exakte allgemeine Dickenperiode behauptet.
 
-Alternativ:
+Nicht globale Randminima werden aus der Ergebnisliste entfernt. Liegt das beste Minimum an einer künstlichen Suchgrenze, erscheint der Hinweis, den Bereich zu vergrößern. Die physikalische Grenze k = 0 wird ausdrücklich unterschieden. Eine praktisch flache Zielfunktion beziehungsweise eine rangdefiziente Sensitivität wird als fehlende Bestimmbarkeit gemeldet.
+
+Eine Familie kann viele Aliase enthalten. Bis zu 200 werden einzeln dargestellt; die analytische Gesamtzahl bleibt angegeben. Lokale Unsicherheiten gehören immer zur jeweiligen Familie beziehungsweise ausgewählten Wiederholung. Über periodische Aliase werden weder Parameter noch Unsicherheiten gemittelt.
+
+## Messunsicherheiten aus Wiederholungen
+
+Es gibt **keine pauschalen Eingabefelder für σΔ oder σΨ**. Bei wiederholten Winkeln schätzt ElliFit die gemeinsame 2×2-Kovarianz aus den Δ/Ψ-Paaren. Δ wird dafür lokal um das Kreismittel entrollt, damit 359,99° und 0,01° benachbart bleiben. Angezeigt werden Streuung der Einzelwerte s, Unsicherheit des Mittelwerts ū = s/√m und Δ/Ψ-Korrelation.
+
+Mindestens drei geeignete, unterschiedliche Wiederholungen mit nicht singulärer Kovarianz sind technisch erforderlich. Drei Werte sind noch keine belastbare statistische Charakterisierung; bei wenigen Wiederholungen erscheint ein Hinweis. Exakt kopierte Werte, fehlende Streuung, zu große zyklische Streuung, singuläre Kovarianz und Hinweise auf Drift werden nicht als verschwindende Unsicherheit interpretiert. Einfache Lag-1-Korrelationen der geladenen Reihenfolge dienen als **Hinweis**, nicht als Nachweis von Drift oder Unabhängigkeit. Eine tatsächliche Zeitreihenanalyse ersetzt das nicht.
+
+Nur wenn **alle ausgewählten Winkel** geeignete Kovarianzen haben, wird der Winkel-Fit automatisch mit ihnen gewichtet:
+
+```text
+r = [wrap(Δtheo − Δexp), Ψtheo − Ψexp]
+Q = Σ rᵀ Σ_Winkel⁻¹ r
+χ²red = Q / (2N_Rohwerte − p), sofern genügend Freiheitsgrade vorliegen
+```
+
+Die Kreuzkorrelation und die Streuung innerhalb der Wiederholungen bleiben erhalten. Bei dieser vollständigen Gewichtung liefern **gemeinsamer Fit aller Einzelwerte und Fit der Mittelwerte mit korrekt fortgepflanzter Kovarianz dieselbe Lösung**. Rechenzeit wird durch exakte gruppierte Summenstatistiken gespart. Die lokalen Mittelwerte werden im Vergleichsplot gezeigt; Rohwerte bleiben im Bericht/Residuenexport verfügbar.
+
+Fehlen passende Kovarianzen, wird der gesamte Fit ungewichtet durchgeführt und darauf hingewiesen. Dabei sind die Optionen verschieden: „Gemeinsamer Fit“ berücksichtigt alle Einzelwerte; ein Winkel mit mehr Wiederholungen erhält entsprechend mehr Gewicht. „Winkelmittelwerte“ gibt jedem Winkel ein Wertepaar und gleiches Gewicht. Die Rohdaten und ihre Streuung bleiben für die Statistik erhalten, aber ohne geeignete Kovarianzen wird keine statistische Gleichwertigkeit dieser beiden Schätzverfahren behauptet. Winkel innerhalb der einstellbaren Toleranz (Vorgabe 0,001°) werden am gemeinsamen mittleren Einfallswinkel modelliert.
+
+Alternativ kann der **Stokes-Abstand** minimiert werden:
 
 ```text
 s(Δ, Ψ) = [cos(2Ψ), sin(2Ψ) cos(Δ), sin(2Ψ) sin(Δ)]
 Q = Σ ||s_theo − s_exp||²
 ```
 
-Der Stokes-Abstand vermeidet künstliche Δ-Empfindlichkeit an Ψ = 0°/90°. Die Winkel-σ-Gewichtung ist dafür deaktiviert. Die Ergebnisliste bleibt nach der gewählten Zielfunktion sortiert; Winkel-RMS wird zusätzlich angezeigt.
+Das vermeidet künstliche Δ-Empfindlichkeit nahe Ψ = 0°/90°. Die automatische Winkel-Kovarianzgewichtung ist dabei ausgeschaltet. Bei vollständigen Wiederholungen kann deren Kovarianz trotzdem zum Parameterunsicherheitsbeitrag fortgepflanzt werden. Winkel-RMS und G bleiben als zusätzliche absolute Winkeldiagnose sichtbar.
 
-Wiederholungen innerhalb der einstellbaren Winkeltoleranz (Start: 0,001°) werden am gemeinsamen mittleren Einfallswinkel modelliert:
+## Parameterunsicherheiten, Kalibrierung und schwaches k
 
-- **Mitteln:** Δ als komplexes Kreismittel, Ψ arithmetisch; jeder Winkel liefert ein Wertepaar. Nicht eindeutiges Δ-Kreismitteln wird abgelehnt, große Streuung wird gemeldet.
-- **Mehrfachgewichten:** Die Fehlerquadratsumme aller ursprünglichen Werte einschließlich der Streuung bleibt erhalten. Ausreichende gruppierte Summenstatistiken beschleunigen die Suche, ohne Wiederholungen auf gleich gewichtete Mittelwerte zu reduzieren.
+Der Fit überträgt die Messstreuung auf die Parameter. Die lokale Jacobi-Matrix und die tatsächlichen Fitgewichte ergeben eine Kovarianzfortpflanzung; bei ungewichteten Schätzern wird eine Sandwich-Kovarianz verwendet. Bei Rangdefekt oder sehr starker Parameterkorrelation werden keine scheinbar präzisen lokalen Fehlerbalken ausgegeben. Ein Δ/Ψ-Paar liefert nur zwei unabhängige Größen: Ein exakter Zweiparameterfit bei einem Winkel bestätigt keine Eindeutigkeit.
 
-## Periodizität und Eindeutigkeit
+Angezeigt werden **u statistisch**, **u Kalibrierung** und, soweit beide Beiträge bestimmbar sind, **u kombiniert**. Es gibt **keinen zusätzlichen pauschalen „Fitfehler“**, der die bereits fortgepflanzte Messunsicherheit nochmals addiert. Große Restfehler führen zu einem Hinweis auf Modell, Drift oder Kalibrierung; die Unsicherheiten werden nicht automatisch passend aufgebläht.
 
-Bei einem Winkel und einer transparenten, propagierenden variablen Filmdicke gilt:
+Optionale Kalibrierangaben stehen ausklappbar weiter unten: gemeinsame Standardunsicherheit des Winkels und der Wellenlänge; Unsicherheiten fester n/k-Werte werden über Materialien hinterlegt. Verschiedene Kalibrierquellen gelten hier als unabhängig; ihre Beiträge werden quadratisch kombiniert. Für einen bereits frei gefitteten n-/k-Parameter wird dessen hinterlegte Materialunsicherheit nicht zusätzlich gezählt. Korrelationen zwischen Kalibrierquellen werden noch nicht modelliert. Leere Felder bedeuten unbekannt, nicht nachgewiesen null. Die Kalibrierfortpflanzung ist lokal und bedingt auf die ausgewählte Lösungsfamilie.
 
-```text
-T = λ / [2 Re(sqrt(N_Film² − n_Einfallsmedium² sin²φ))]
-```
+Ab mindestens sechs geeigneten Wiederholungen je Winkel kann zusätzlich ein **paarweiser Bootstrap innerhalb der Winkelgruppen** für die beste Familie laufen (60 oder 120 Wiederholungen). Die aus den Originalmessungen geschätzten Gewichte bleiben dabei fest: ein bedingter Bootstrap. Er liefert ein näherungsweises lokales 95-%-Perzentilintervall für den statistischen Beitrag; Kalibrierung ist darin nicht enthalten. Werden lokale Grenzen erreicht, wird ein dadurch beschnittenes Bootstrapintervall unterdrückt und erklärt. Bei kleineren Stichproben bleibt es bei der lokalen Kovarianzfortpflanzung. Mehrere globale Lösungsfamilien können nicht durch ein einziges solches Intervall beschrieben werden.
 
-Analytische Wiederholungen innerhalb der Suchgrenzen werden nachgerechnet. Die ersten vergleichbaren Lösungen erscheinen zusätzlich nach Dicke sortiert. Wenn n gleichzeitig frei ist, gilt die Periode nur beim jeweiligen festen zweiten Parameter. Zwei variable transparente Dicken können zwei unabhängige Perioden besitzen. Bei Absorption oder evaneszenter Ausbreitung wird keine exakte Dickenperiode behauptet. Praktisch flache Fehlerfunktionen werden als fehlende Bestimmbarkeit behandelt.
+Bei einem freien k wird **k = 0 ausdrücklich nachgerechnet**, bei zwei Parametern mit erneuter Anpassung des anderen Parameters. Ohne geeignete Messunsicherheiten wird nur die daraus entstehende Δ/Ψ-Änderung angezeigt. Es gibt keine pauschale Aussage, dass etwa k = 10⁻⁵ stets vernachlässigbar wäre: Der Einfluss hängt unter anderem von Dicke, Geometrie und Messstreuung ab.
 
-Mehrere Winkel haben im Allgemeinen unterschiedliche Perioden. Ähnlich gute Minima allein sind kein Periodennachweis.
+Mit vollständiger Kovarianzgewichtung erfolgt ein näherungsweiser **einseitiger 95-%-Profilvergleich** mit Δχ² = 2,7055. Ist null vereinbar, wird eine Obergrenze nur für einen zusammenhängenden erkannten Profilbereich angegeben. Dies ist ein asymptotischer Vergleich mit geschätzten Kovarianzen, **keine exakte Aussage bei kleinen Stichproben oder falschem Modell**. Das endliche Profilraster kann weitere schmale Bereiche übersehen. Eine normale symmetrische lokale Unsicherheit an k = 0 ist entsprechend vorsichtig zu interpretieren; der Profilvergleich ist dort aussagekräftiger.
 
-Die einstellbare **Fit-Toleranz** markiert im ungewichteten Winkelmodus Lösungen mit `RMS ≤ RMS_best + Toleranz`. Bei gewichteten Winkeln ist die Q-Toleranz `2N · Toleranz² / min(σΔ,σΨ)²`, bei Stokes `N · (2 · Toleranz_in_Radiant)²`. Das ist ein transparentes Qualitätskriterium, **kein Konfidenzintervall und kein Beweis identischer Modellkurven**.
+## Speichern und Exportieren
 
-Eine lokale Jacobi-Matrix prüft schwache beziehungsweise korrelierte Sensitivitäten. Diese Prüfung ersetzt keine vollständige Unsicherheitsanalyse. Ein Δ/Ψ-Paar liefert nur zwei unabhängige Messgrößen; ein exakter Zweiparameter-Fit bestätigt daher weder Eindeutigkeit noch Modellrichtigkeit.
+- **Sitzung:** Modell, Messwerte, Auswahl, Suchkonfiguration und Ansichtsoptionen als JSON. Nach dem Öffnen Fits neu berechnen. Alte explizite Δ-Konventionen und Suchskalen bleiben erhalten; frühere pauschale σ-Vorgaben werden nicht als gemessene Unsicherheiten übernommen.
+- **Messdaten-CSV:** Alle geladenen Zeilen; erneut importierbar.
+- **Lösungsfamilien-CSV:** Parameter, G, RMS, Perioden/Aliase, Randstatus und gegebenenfalls χ²red; keine absolute Q-Spalte.
+- **Residuen-CSV:** Alle ursprünglichen ausgewählten Einzelwerte der angezeigten Lösung, auch bei einem Mittelwertfit.
+- **Fehlerlandschaft-CSV:** Parameter, Winkel-RMS und G.
+- **Fitbericht-JSON:** Vollständige Daten einschließlich Modell, Einstellungen, Familien, Oberfläche, Unsicherheiten und aktuell angezeigter Lösung. Q bleibt für Diagnosezwecke enthalten.
 
-## Mathematik und globale Suche
+CSV verwendet Semikolon, Dezimalkomma und UTF-8-BOM. Die Kamera in der Plot-Werkzeugleiste exportiert SVG. Geänderte Eingaben markieren alte Ergebnisse sichtbar als veraltet.
 
-Fresnel-Amplituden werden rekursiv über alle Grenzflächen kombiniert. Das ist im unterstützten Schichtmodell dem Matrixformalismus physikalisch äquivalent, vermeidet bei dicken absorbierenden Filmen aber exponentiell wachsende Transfermatrixelemente.
+## Optik, Suche und Δ-Konvention
 
-Interne Rechenkonvention: `N = n + ik`, `k ≥ 0`, Zeitfaktor `exp(−iωt)`. Der Wurzelzweig erzeugt passive, abklingende Wellen. Ohne reflektiertes Feld sind Δ/Ψ undefiniert; solche Suchpunkte werden ausgeschlossen.
+Fresnel-Amplituden werden rekursiv über die Grenzflächen kombiniert. Das ist für die unterstützten Schichten dem Matrixformalismus äquivalent, vermeidet aber exponentiell wachsende Transfermatrixelemente bei dicken Absorbern. Interne Konvention: `N = n + ik`, k ≥ 0, Zeitfaktor `exp(−iωt)` und passive abklingende Wurzelzweige. Ohne reflektiertes Feld sind Δ/Ψ undefiniert; solche Punkte werden ausgeschlossen.
 
-### Δ-Ausgabe und Vergleich mit Original-Elli
+Das Handbuch definiert `ρ = rₚ/rₛ = tan Ψ · exp(iΔ)` (gedruckte Seite 57, Gleichung 2.11). Nach dem praktischen Vergleich des Nutzers stimmt Original-Elli mit **`Δ = (−arg(ρ_intern)) mod 360°`** überein. Deshalb ist „Elli: 360° − arg()“ voreingestellt. Die Alternative gibt die rohe interne Phase aus. Die technische Kennung `reversed` bezeichnet Elli, `standard` die alternative interne Phase. Gespeicherte ausdrückliche Entscheidungen werden nicht überschrieben. Der Originalvergleich wurde vom Nutzer berichtet; automatische Tests gegen eine historische Elli-Installation wurden nicht ausgeführt.
 
-Das Handbuch definiert `ρ = rₚ/rₛ = tan Ψ · exp(iΔ)` (gedruckte Seite 57, Gleichung 2.11). Diese Formel allein genügt jedoch nicht, um das Vorzeichen der Ausgabe auf eine andere interne Phasorkonvention zu übertragen. Nach dem Nutzervergleich stimmt die Originalsoftware mit der Ausgabe **`Δ = (−arg(ρ_intern)) mod 360°`** überein. Deshalb ist **„Elli: 360° − arg(rₚ/rₛ)“** jetzt die Voreinstellung für neue Modelle, die synthetische Referenz und die mitgelieferten Modellbeispiele. Die Alternative gibt die rohe Phase des internen Rechenkerns aus.
+Die globale Suche kombiniert lineare/logarithmische Raster mit Stützstellen entlang der optischen Phase, etwa 32 pro Interferenzperiode. Rasterminima werden lokal verfeinert; bei zwei Parametern kommen mehrere Trust-Region-Starts und Differential Evolution mit festem Seed hinzu. Winkelstatistiken werden um einen lokalen Mittelpunkt gebildet, um bei sehr kleiner Streuung Genauigkeitsverlust durch Differenzen großer Quadratsummen zu vermeiden. Dickenarrays bleiben auch bei ganzzahlig gespeicherten Startwerten Gleitkommazahlen.
 
-Die gespeicherten technischen Kennungen bleiben kompatibel: `reversed` bezeichnet die Elli-kompatible Ausgabe, `standard` die alternative rohe Phase. Eine ausdrücklich gespeicherte Konvention in alten Modell- oder Sitzungsdateien wird nicht überschrieben. Solche Dateien bei Bedarf in der Oberfläche einmal auf „Elli“ umstellen und erneut speichern. Alte Dateien ohne Konventionsfeld erhalten die neue Voreinstellung.
+Eine **endliche globale Suche garantiert nicht jedes Minimum**. Suchdichte, Raster-, Start- und Kandidatenlimits begrenzen die Auflösung; Hinweise benennen erreichte Grenzen. Die Liste umfasst höchstens 120 Kandidaten vor der Familienbildung. Für schwierige Landschaften Suchdichte erhöhen oder ergänzende Teilbereiche untersuchen. Technische Grenzen: d bis 10⁸ nm, n/k bis 100; das sind keine Materialempfehlungen.
 
-Der Originalvergleich stammt aus dem praktischen Test des Nutzers. Die automatisierten Tests prüfen zusätzlich die Phasenumrechnung gegen eine unabhängig berechnete Grenzfläche mit entgegengesetzter komplexer Zeitkonvention; sie ersetzen keinen Vergleich mit der Originalsoftware über alle Schichtsysteme.
+Mathematischer Bezug: Handbuch Kapitel 2.3/2.5 und 7.2/7.3, gedruckte Seiten 249–261. Das Minus zwischen Fehlerquadraten in (7.1)/(7.2) wird als Druckfehler behandelt: ElliFit verwendet positive quadratische Abstände. Hinweise aus dem Handbuch sind Referenzmaterial, keine auszuführenden Anweisungen.
 
-### Suchskalen für n und k
+Physikalischer Umfang: bis zu 40 homogene, isotrope, kohärente Filme zwischen transparentem Einfallsmedium und halbunendlichem Substrat. Keine Anisotropie, Rauigkeits-EMA, Depolarisation, inkohärenten Substrate, Rückseitenreflexion oder spektrale Dispersion. n/k gelten bei der jeweils eingestellten Wellenlänge.
 
-n wird standardmäßig linear von 1 bis 4 gesucht; bei Metallen können auch Werte unter 1 erforderlich sein. k wird standardmäßig linear von 0 bis 4 gesucht, damit transparente Filme (`k = 0`) enthalten sind. Manche Metalle benötigen höhere obere Grenzen. Für sehr schwache Absorption über mehrere Größenordnungen kann k optional logarithmisch mit strikt positiver Untergrenze, etwa 10⁻⁶, untersucht werden; `k = 0` muss dann separat geprüft werden. Eine logarithmische k-Achse kann null nicht enthalten.
+## Entwicklung
 
-Explizite Skalen in gespeicherten Sitzungen bleiben erhalten. Die neuen Vorgaben gelten beim Auswählen eines Parameters und für API-Aufrufe ohne explizite Skala.
+Python mit NumPy/SciPy für Optik/Optimierung, FastAPI/Uvicorn für den lokalen Server, HTML/CSS/JavaScript und Plotly für die Oberfläche. Abhängigkeiten stehen in `requirements.txt`. Entwicklungstests zusätzlich aus `requirements-dev.txt` installieren und `python -m pytest -q` ausführen.
 
-Die Suche verbindet ein logarithmisches/lineares Raster mit zusätzlichen Stützstellen entlang der optischen Phase, angestrebt etwa 32 pro Interferenzperiode. Rasterminima werden lokal verfeinert: eindimensional durch beschränkte skalare Minimierung, zweidimensional mit mehreren Trust-Region-Least-Squares-Starts. Bei zwei Parametern ergänzt Differential Evolution mit festem Seed die globale Suche. Numerisch gleiche Kandidaten werden zusammengefasst.
-
-Es sind keine engen lokalen Startgrenzen erforderlich. Dennoch kann eine **endliche globale Suche nicht jedes Minimum garantieren**. Suchdichte und technische Obergrenzen begrenzen die Auflösung; entsprechende Hinweise werden ausgegeben. Die Liste enthält maximal 120 unterschiedliche Minima. Periodenfamilien und lokale Startzahlen sind ebenfalls begrenzt. Größere Suchdichte oder ergänzende Teilbereichssuchen helfen bei stark oszillierenden Landschaften. Technische Grenzen: d bis 10⁸ nm, n/k bis 100; das sind keine Materialempfehlungen.
-
-Bezug zum ursprünglichen Handbuch: Kapitel 2.3/2.5 und 7.2/7.3, gedruckte Seiten 249–261. Das Minus zwischen den Fehlerquadraten in (7.1)/(7.2) wird als Druckfehler behandelt: ElliFit verwendet die positive Summe der quadrierten Residuen.
-
-## Physikalische Grenzen
-
-Bis zu 40 homogene, isotrope, kohärente Filme zwischen einem transparenten Einfallsmedium und einem halbunendlichen Substrat. Absorbierende Filme/Substrate sind erlaubt. Keine Anisotropie, Rauigkeits-EMA, Depolarisation, inkohärenten Substrate, Rückseitenreflexion oder spektralen Dispersionsmodelle. Ein ungeeignetes Modell kann trotz kleiner Fehler falsche physikalische Parameter liefern.
-
-## Entwicklung und Prüfungen
-
-```sh
-python -m venv .venv
-# Windows: .venv\Scripts\python.exe verwenden
-.venv/bin/python -m pip install -r requirements-dev.txt
-.venv/bin/python -m pytest -q
-```
-
-`ellifit/core.py` enthält Optik, Datenimport, gruppierte Residuen und globale Suche; `ellifit/server.py` den lokalen Server und Dateizugriff; `ellifit/static` die Oberfläche. Die Tests vergleichen Mehrschichtamplituden auch mit der unabhängigen Bibliothek `tmm`.
-
-Für den optionalen lokalen Test der ursprünglichen Dateien: `ELLIFIT_EXAMPLES_DIR` auf einen Ordner mit `.phi` und `.dat` setzen. Ohne diese privaten Dateien wird genau dieser Test übersprungen. Prüfdetails stehen in [PRUEFPROTOKOLL.md](PRUEFPROTOKOLL.md).
+`ellifit/core.py` enthält Optik, Import und Suche, `statistics.py` die Kovarianzfortpflanzung und Wiederholungsanalyse, `results.py` Familien und Profile, `server.py` die lokale API, `static` die Oberfläche. Unabhängige Mehrschichtvergleiche verwenden `tmm`. Für den privaten Importtest `ELLIFIT_EXAMPLES_DIR` auf einen Ordner mit den ursprünglichen `.phi`-/`.dat`-Dateien setzen; andernfalls wird dieser Test übersprungen. Aktuelle Resultate und Browserprüfung stehen im [Prüfprotokoll](PRUEFPROTOKOLL.md).

@@ -324,7 +324,8 @@ def validate_session(body: dict):
             Parameter.model_validate(p)
     if rows:
         FitRequest(model=model, measurements=rows, parameters=[p for p in pars if p.get('path')], **body.get('settings', {}))
-    return body
+    return body | dict(model=model.model_dump(), measurements=[r.model_dump() for r in rows],
+        parameters=[Parameter.model_validate(p).model_dump() if p.get('path') else p for p in pars])
 
 
 app.mount('/static', StaticFiles(directory=STATIC), name='static')

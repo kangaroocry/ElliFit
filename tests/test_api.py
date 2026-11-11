@@ -38,3 +38,19 @@ def test_material_library_roundtrip_and_validation(tmp_path,monkeypatch):
     assert client.post('/api/materials',json={'material':material}).status_code==409
     assert client.post('/api/materials',json={'material':material,'filename':'../bad.json'}).status_code==400
     assert client.post('/api/validate-material',json=material|{'wavelength_nm':-1}).status_code==422
+
+
+def test_session_normalizes_legacy_defaults_and_preserves_explicit_convention():
+    client=TestClient(server.app)
+    model=Model().model_dump();model.pop('delta_convention')
+    session=dict(type='ellifit-session',version=1,model=model,
+        measurements=[dict(id='a',angle=70,delta=100,psi=30)],selected=['a'],
+        parameters=[dict(path='layers.0.n',lower=1,upper=4),dict(path='')])
+    response=client.post('/api/validate-session',json=session)
+    assert response.status_code==200
+    normalized=response.json()
+    assert normalized['model']['delta_convention']=='reversed'
+    assert normalized['parameters'][0]['scale']=='linear'
+    assert normalized['measurements'][0]['source']=='Manuell'
+    session['model']['delta_convention']='standard'
+    assert client.post('/api/validate-session',json=session).json()['model']['delta_convention']=='standard'

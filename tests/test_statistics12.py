@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from scipy.linalg import block_diag
 
-from ellifit.core import Model, FitRequest, Objective, Parameter, simulate, solve, wrap
+from ellifit.core import Model, FitRequest, Objective, Observations, Parameter, simulate, solve, wrap
 from ellifit.statistics import RepeatAnalysis, parameter_uncertainty, quality_score
 
 
@@ -149,3 +149,31 @@ def test_fixed_goodness_is_independent_of_number_of_identical_repeats():
     b=RepeatAnalysis([r|{'id':str(i)} for i,r in enumerate(rows*20)],automatic=False)
     da,pa=np.array([[100.01]]),np.array([[30.005]])
     np.testing.assert_allclose(quality_score(a.raw_rms(da,pa)),quality_score(b.raw_rms(da,pa)),atol=1e-7)
+
+
+def test_tiny_repeat_scatter_retains_precision_of_direct_residuals():
+    rng=np.random.default_rng(472)
+    rows=[dict(id=str(i),angle=70,delta=330+rng.normal(0,1e-6),psi=30+rng.normal(0,1e-6)) for i in range(40)]
+    obs=Observations(rows)
+    expected=sum(float(wrap(330-r['delta']))**2+(30-r['psi'])**2 for r in rows)
+    np.testing.assert_allclose(obs.sse([[330]],[[30]])[0],expected,rtol=1e-6,atol=1e-21)
+
+
+def test_physical_zero_does_not_hide_another_artificial_boundary():
+    model=Model().model_dump();model['layers'][0]['thickness_nm']=150
+    angles=[60,65,70,75];d,p=simulate(model,angles)
+    rows=[dict(id=str(i),angle=a,delta=float(dd),psi=float(pp)) for i,(a,dd,pp) in enumerate(zip(angles,d[0],p[0]))]
+    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=80,upper=120),dict(path='layers.0.k',lower=0,upper=.1)],quality='quick',bootstrap_samples=0)
+    result=solve(req)
+    assert result['solutions'][0]['at_boundary']
+    assert result['solutions'][0]['values'][1]<1e-10
+    assert any('Suchbereich vergrößern' in w for w in result['warnings'])
+
+
+def test_bootstrap_intervals_at_artificial_bounds_are_not_reported_as_precision():
+    model,rows=repeated_data(m=24)
+    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=117.99999,upper=118.00001)],bootstrap_samples=60)
+    result=parameter_uncertainty(Objective(req),[118],bootstrap=60)
+    assert result['bootstrap_boundary_hits']>0
+    assert result['bootstrap95'] is None
+    assert 'beschnitten' in result['bootstrap_note']
