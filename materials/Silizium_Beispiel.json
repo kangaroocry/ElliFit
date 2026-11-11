@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Silizium Beispiel",
+  "n": 3.882,
+  "k": 0.019,
+  "wavelength_nm": 632.8,
+  "notes": "Editierbarer Beispielwert; keine zertifizierten Materialdaten."
+}

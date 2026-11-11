@@ -27,6 +27,8 @@ class Medium(Validated):
     name: str = Field(default='Medium', max_length=160)
     n: float = Field(default=1.5, gt=0, le=100)
     k: float = Field(default=0, ge=0, le=100)
+    uncertainty_n: float | None = Field(default=None, ge=0, le=100)
+    uncertainty_k: float | None = Field(default=None, ge=0, le=100)
 
 
 class Layer(Medium):
@@ -65,12 +67,13 @@ class Parameter(Validated):
     lower: float
     upper: float
     scale: Literal['log', 'linear'] = 'log'
+    positive_min: float = Field(default=1e-8, gt=0, le=100)
 
     @model_validator(mode='before')
     @classmethod
     def default_scale(cls, value):
         if isinstance(value, dict) and 'scale' not in value:
-            return value | {'scale': 'log' if value.get('path', '').endswith('thickness_nm') else 'linear'}
+            return value | {'scale': 'linear' if value.get('path', '').endswith('.n') else 'log'}
         return value
 
     @model_validator(mode='after')
@@ -80,16 +83,23 @@ class Parameter(Validated):
         cap = 1e8 if self.path.endswith('thickness_nm') else 100
         if not 0 <= self.lower < self.upper <= cap:
             raise ValueError('Ungültige Suchgrenzen.')
-        if self.lower == 0 and (self.scale == 'log' or self.path.endswith('.n')):
+        if self.lower == 0 and (self.path.endswith('.n') or (self.scale == 'log' and not self.path.endswith('.k'))):
             raise ValueError('Logarithmische Grenzen und n müssen positiv sein.')
+        if self.scale == 'log' and self.lower == 0 and self.positive_min >= self.upper:
+            raise ValueError('Der kleinste positive k-Wert muss unter der Obergrenze liegen.')
         return self
+
+
+class Calibration(Validated):
+    angle_deg: float | None = Field(default=None, ge=0, le=10)
+    wavelength_nm: float | None = Field(default=None, ge=0, le=10000)
 
 
 class FitRequest(Validated):
     model: Model
     measurements: list[Row] = Field(min_length=1, max_length=200000)
     parameters: list[Parameter] = Field(min_length=1, max_length=2)
-    duplicate_policy: Literal['ask', 'average', 'repeat'] = 'ask'
+    duplicate_policy: Literal['ask', 'average', 'repeat'] = 'repeat'
     angle_tolerance: float = Field(default=0.001, gt=0, le=0.1)
     metric: Literal['angular', 'stokes'] = 'angular'
     use_uncertainties: bool = False
@@ -97,6 +107,9 @@ class FitRequest(Validated):
     sigma_psi: float = Field(default=0.05, gt=0, le=90)
     equivalence_deg: float = Field(default=0.01, ge=0, le=10)
     quality: Literal['quick', 'balanced', 'thorough'] = 'balanced'
+    uncertainty_mode: Literal['auto', 'none'] = 'auto'
+    bootstrap_samples: Literal[0, 60, 120] = 60
+    calibration: Calibration = Field(default_factory=Calibration)
 
     @model_validator(mode='after')
     def paths(self):
@@ -128,7 +141,9 @@ def put(model, path, value):
 def parameter_label(model, path):
     parts = path.split('.')
     medium = model['layers'][int(parts[1])] if parts[0] == 'layers' else model[parts[0]]
-    return medium['name'] + ' · ' + ('d / nm' if parts[-1] == 'thickness_nm' else parts[-1])
+    quantity = {'thickness_nm': 'Schichtdicke', 'n': 'Brechungsindex', 'k': 'Extinktionskoeffizient'}[parts[-1]]
+    position = f' {int(parts[1])+1}' if parts[0] == 'layers' else (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
+    return quantity + ' „' + medium['name'] + '“' + position + (' (nm)' if parts[-1] == 'thickness_nm' else '')
 
 
 def wrap(value):
@@ -295,25 +310,32 @@ class Objective:
         self.req = request
         self.model = request.model.model_dump()
         self.rows = [r.model_dump() for r in request.measurements]
-        self.obs = Observations(self.rows, request.duplicate_policy, request.angle_tolerance)
+        from .statistics import RepeatAnalysis
+        self.analysis = RepeatAnalysis(self.rows, request.duplicate_policy, request.angle_tolerance, request.metric, request.uncertainty_mode == 'auto')
+        self.obs = self.analysis.display
         self.paths = [p.path for p in request.parameters]
-        self.a = np.array([math.log10(p.lower) if p.scale == 'log' else p.lower for p in request.parameters])
-        self.b = np.array([math.log10(p.upper) if p.scale == 'log' else p.upper for p in request.parameters])
-        self.sigmas = (request.sigma_delta, request.sigma_psi) if request.use_uncertainties else (1, 1)
+        self.hybrid = [p.scale == 'log' and p.lower == 0 and p.path.endswith('.k') for p in request.parameters]
+        self.a = np.array([0 if h else math.log10(p.lower) if p.scale == 'log' else p.lower for p,h in zip(request.parameters,self.hybrid)])
+        self.b = np.array([math.log1p(p.upper / p.positive_min) if h else math.log10(p.upper) if p.scale == 'log' else p.upper for p,h in zip(request.parameters,self.hybrid)])
+        self.sigmas = (1, 1)  # Legacy fixed sigma fields are accepted only for session migration.
         self.cancel = cancel or threading.Event()
         self.calls = 0
 
     def decode(self, z):
         v = self.a + np.atleast_2d(z) * (self.b - self.a)
         for i, p in enumerate(self.req.parameters):
-            if p.scale == 'log':
+            if self.hybrid[i]:
+                v[:, i] = p.positive_min * np.expm1(v[:, i])
+            elif p.scale == 'log':
                 v[:, i] = 10 ** v[:, i]
         return v
 
     def encode(self, values):
         v = np.atleast_2d(values).copy().astype(float)
         for i, p in enumerate(self.req.parameters):
-            if p.scale == 'log':
+            if self.hybrid[i]:
+                v[:, i] = np.log1p(v[:, i] / p.positive_min)
+            elif p.scale == 'log':
                 v[:, i] = np.log10(v[:, i])
         return (v - self.a) / (self.b - self.a)
 
@@ -325,7 +347,8 @@ class Objective:
 
     def batch(self, z):
         d, p = self.prediction(z)
-        q = self.obs.sse(d, p, self.req.metric, self.sigmas)
+        q = self.analysis.sse(d, p)
+        self.last_rms = self.analysis.raw_rms(d, p)
         return np.nan_to_num(q, nan=1e100, posinf=1e100, neginf=1e100)
 
     def scalar(self, z):
@@ -333,13 +356,16 @@ class Objective:
 
     def residual(self, z):
         d, p = self.prediction(z)
-        return np.nan_to_num(self.obs.residuals(d, p, self.req.metric, self.sigmas)[0], nan=1e40, posinf=1e40, neginf=-1e40)
+        return np.nan_to_num(self.analysis.residuals(d, p)[0], nan=1e40, posinf=1e40, neginf=-1e40)
 
 
 def phase_grid(obj, col, base, cap):
     par = obj.req.parameters[col]
     extra = np.array([])
     needed = 0
+    if par.path.endswith('.k'):
+        floor = max(par.positive_min, par.lower) if par.lower == 0 else par.lower
+        extra = np.r_[0 if par.lower == 0 else par.lower, np.geomspace(floor, par.upper, base)]
     if par.path.startswith('layers.'):
         idx = int(par.path.split('.')[1])
         layer = obj.model['layers'][idx]
@@ -366,10 +392,12 @@ def phase_grid(obj, col, base, cap):
         values[:, col] = np.clip(extra, par.lower, par.upper)
         # Other initial parameter values may be outside bounds; only this
         # encoded column is used to augment the grid.
-        zextra = ((np.log10(values[:, col]) if par.scale == 'log' else values[:, col]) - obj.a[col]) / (obj.b[col] - obj.a[col])
+        encoded = np.log1p(values[:, col] / par.positive_min) if obj.hybrid[col] else np.log10(values[:, col]) if par.scale == 'log' else values[:, col]
+        zextra = (encoded - obj.a[col]) / (obj.b[col] - obj.a[col])
     else:
         zextra = []
-    grid = np.unique(np.clip(np.r_[np.linspace(0, 1, base), zextra], 0, 1))
+    baseline = np.r_[0, np.linspace(math.log(2) / (obj.b[col]-obj.a[col]), 1, base-1)] if obj.hybrid[col] else np.linspace(0,1,base)
+    grid = np.unique(np.clip(np.r_[baseline, zextra], 0, 1))
     limited = len(grid) > cap or needed > cap
     if len(grid) > cap:
         grid = grid[np.rint(np.linspace(0, len(grid) - 1, cap)).astype(int)]
@@ -398,8 +426,32 @@ def period(model, path, angle):
     if not path.endswith('thickness_nm'):
         return None
     l = model['layers'][int(path.split('.')[1])]
+    if l['k'] != 0:
+        return None
     q = complex(longitudinal(l['n'] + 1j * l['k'], model['ambient']['n'] * math.sin(math.radians(angle))))
     return model['wavelength_nm'] / (2 * q.real) if abs(q.imag) < 1e-10 and q.real > 1e-10 else None
+
+
+def fixed_value_minimum(obj, col, value, grids):
+    """Profile one parameter, globally sampling the remaining 1D coordinate."""
+    initial = [np.clip(get(obj.model,p.path),p.lower,p.upper) for p in obj.req.parameters]
+    initial[col] = value
+    base = obj.encode(initial)[0]
+    if len(obj.paths) == 1:
+        return base, obj.scalar(base)
+    other = 1-col
+    grid = grids[other]
+    points = np.tile(base,(len(grid),1));points[:,other]=grid
+    scores=obj.batch(points)
+    idx=np.flatnonzero((scores<=np.r_[np.inf,scores[:-1]]) & (scores<=np.r_[scores[1:],np.inf]))
+    options=[(points[int(np.argmin(scores))],float(scores.min()))]
+    for j in idx[np.argsort(scores[idx])[:8]]:
+        def f(z):
+            candidate=base.copy();candidate[other]=z
+            return obj.scalar(candidate)
+        opt=minimize_scalar(f,bounds=(grid[max(0,j-1)],grid[min(len(grid)-1,j+1)]),method='bounded',options={'xatol':1e-12})
+        z=base.copy();z[other]=opt.x;options.append((z,float(opt.fun)))
+    return min(options,key=lambda x:x[1])
 
 
 def solve(request, progress=lambda p, m: None, cancel=None):
@@ -412,7 +464,9 @@ def solve(request, progress=lambda p, m: None, cancel=None):
     base = ([321, 641, 1281] if ndim == 1 else [80, 140, 220])[level]
     cap = ([2400, 7000, 18000] if ndim == 1 else [240, 512, 800])[level]
     grids, limited = [], False
-    warnings = obj.obs.warnings.copy()
+    warnings = obj.obs.warnings.copy() + obj.analysis.warnings.copy()
+    if request.use_uncertainties:
+        warnings.append('Alte feste σ-Eingaben werden nicht mehr als Messunsicherheiten verwendet. Neue Auswertung aus Wiederholungen.')
     for col in range(ndim):
         g, cut = phase_grid(obj, col, base, cap)
         grids.append(g)
@@ -421,10 +475,12 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         warnings.append('Rasterauflösung begrenzt: schmale Minima können fehlen. Suchdichte erhöhen oder Teilbereiche zusätzlich prüfen.')
     points = grids[0][:, None] if ndim == 1 else np.column_stack([m.ravel() for m in np.meshgrid(*grids, indexing='ij')])
     scores = np.empty(len(points))
+    rms_grid = np.empty(len(points))
     chunk = max(8, min(4096, 180000 // len(obj.obs.angles)))
     for start in range(0, len(points), chunk):
         stop = min(start + chunk, len(points))
         scores[start:stop] = obj.batch(points[start:stop])
+        rms_grid[start:stop] = obj.last_rms
         progress(3 + 44 * stop / len(points), f'Globales Raster: {stop} / {len(points)}')
     valid = scores[scores < 1e90]
     if not len(valid):
@@ -471,6 +527,12 @@ def solve(request, progress=lambda p, m: None, cancel=None):
             if not opt.success:
                 warnings.append('Eine lokale Verfeinerung erreichte das Iterationslimit.')
             progress(60 + 25 * (k + 1) / len(starts), f'Lokale Verfeinerung: {k + 1} / {len(starts)}')
+    zero_candidates = {}
+    for col, par in enumerate(request.parameters):
+        if par.path.endswith('.k') and par.lower == 0:
+            candidate = fixed_value_minimum(obj, col, 0, grids)
+            zero_candidates[col] = candidate
+            candidates.append(candidate)
     candidates = unique_candidates(candidates)
     if not candidates:
         raise ValueError('Keine endliche Lösung gefunden.')
@@ -506,61 +568,9 @@ def solve(request, progress=lambda p, m: None, cancel=None):
             periodicity['message'] = 'Dickenperiode(n): ' + ', '.join(f'{p["period_nm"]:.7g} nm' for p in periodicity['periods']) + ('. Bei festem zweiten Parameter; die Periode kann zwischen Wertepaaren variieren.' if periodicity['kind'] == 'conditional' else '. Analytische Wiederholungen wurden nachgerechnet.')
     elif len(obj.obs.angles) > 1:
         periodicity['message'] = 'Mehrere Winkel haben im Allgemeinen unterschiedliche Dickenperioden. Ähnlich gute Minima allein beweisen keine Periodizität.'
-    if flat:
-        candidates = candidates[:1]
-    solutions = []
-    for rank, (z, q) in enumerate(candidates, 1):
-        d, p = obj.prediction(z)
-        rms = math.sqrt(float(obj.obs.sse(d, p)[0]) / (2 * obj.obs.count))
-        row = dict(rank=rank, values=obj.decode(z)[0].tolist(), q=q, sqrt_q=math.sqrt(max(q, 0)), rmse_deg=rms, at_boundary=bool(np.any(z < 1e-5) or np.any(z > 1 - 1e-5)))
-        if request.use_uncertainties:
-            dof = 2 * obj.obs.count - ndim
-            row['reduced_chi2'] = q / dof if dof > 0 else None
-        solutions.append(row)
-    best = solutions[0]
-    for s in solutions:
-        if request.metric == 'angular' and not request.use_uncertainties:
-            s['equivalent'] = s['rmse_deg'] <= best['rmse_deg'] + request.equivalence_deg + 1e-9
-        else:
-            tolerance = obj.obs.count * (2 * np.deg2rad(request.equivalence_deg)) ** 2 if request.metric == 'stokes' else 2 * obj.obs.count * request.equivalence_deg ** 2 / min(obj.sigmas) ** 2
-            s['equivalent'] = s['q'] <= best['q'] + tolerance + 1e-10
-    equal = [s for s in solutions if s['equivalent']]
-    periodicity['equivalent_count'] = len(equal)
-    periodicity['first_solutions'] = sorted(equal, key=lambda s: tuple(s['values'][i] for i in dcols))[:12] if dcols else equal[:12]
-    z = candidates[0][0]
-    columns = []
-    for i in range(ndim):
-        za, zb = z.copy(), z.copy()
-        za[i], zb[i] = max(0, z[i] - 2e-6), min(1, z[i] + 2e-6)
-        columns.append((obj.residual(zb) - obj.residual(za)) / (zb[i] - za[i]))
-    jac = np.column_stack(columns)
-    singular = np.linalg.svd(jac, compute_uv=False)
-    condition = float(singular[0] / singular[-1]) if singular[-1] > 1e-12 else None
-    correlation = None
-    if ndim == 2 and np.prod(np.linalg.norm(jac, axis=0)) > 1e-20:
-        correlation = float(-np.dot(jac[:, 0], jac[:, 1]) / np.prod(np.linalg.norm(jac, axis=0)))
-    if condition is None or condition > 1e6 or (correlation is not None and abs(correlation) > 0.9999):
-        warnings.append('Schwache oder stark korrelierte Sensitivitäten: Parameter möglicherweise nicht unabhängig bestimmbar.')
-    if best['at_boundary']:
-        warnings.append('Der beste Fit liegt an einer Suchgrenze. Bereich gegebenenfalls erweitern.')
-    if ndim == 2 and len(obj.obs.angles) == 1:
-        warnings.append('Ein Δ/Ψ-Paar liefert zwei unabhängige Messgrößen. Ein exakter Zweiparameter-Fit beweist keine Eindeutigkeit.')
-    axes = []
-    for i, grid in enumerate(grids):
-        a = np.zeros((len(grid), ndim))
-        a[:, i] = grid
-        axes.append(obj.decode(a)[:, i].tolist())
-    plotted = dict(axes=axes, q=safe_list(surface if ndim == 1 else surface.T), scales=[p.scale for p in request.parameters])
-    if ndim == 1:
-        offsets = np.geomspace(2e-8, 0.004, 18)
-        details = np.unique(np.clip(np.concatenate([np.r_[z[0] - offsets, z[0], z[0] + offsets] for z, _ in candidates]), 0, 1))
-        x, q = np.r_[grids[0], details], np.r_[scores, obj.batch(details[:, None])]
-        order = np.argsort(x)
-        plotted['axes'] = [obj.decode(x[order, None])[:, 0].tolist()]
-        plotted['q'] = safe_list(q[order])
-    result = dict(model=obj.model, parameters=[p.model_dump() | dict(label=parameter_label(obj.model, p.path)) for p in request.parameters], settings=request.model_dump(exclude={'model', 'parameters', 'measurements'}), solutions=solutions, surface=plotted, periodicity=periodicity, sensitivity=dict(condition=condition, correlation=correlation), warnings=list(dict.fromkeys(warnings)), counts=dict(selected=len(obj.rows), effective=obj.obs.count, angles=len(obj.obs.angles), grid=len(points), evaluations=obj.calls), elapsed_seconds=time.perf_counter() - started, comparison=comparison(request, best['values']))
-    progress(100, 'Fit abgeschlossen')
-    return result
+    from .results import finalize
+    return finalize(request, obj, candidates, grids, points, scores, rms_grid,
+                    periodicity, warnings, flat, started, progress, zero_candidates)
 
 
 def comparison(request, values):
@@ -568,16 +578,18 @@ def comparison(request, values):
     for p, v in zip(request.parameters, values):
         put(m, p.path, v)
     rows = [r.model_dump() for r in request.measurements]
-    obs = Observations(rows, request.duplicate_policy, request.angle_tolerance)
+    from .statistics import RepeatAnalysis
+    analysis = RepeatAnalysis(rows, request.duplicate_policy, request.angle_tolerance, request.metric, request.uncertainty_mode == 'auto')
+    obs = analysis.display
     multi = len(obs.angles) > 1
     col = next((i for i, p in enumerate(request.parameters) if p.path.endswith('thickness_nm')), 0)
     if multi:
         x = np.unique(np.r_[np.linspace(obs.angles.min(), obs.angles.max(), 500), obs.angles])
         d, p = simulate(m, x)
-        xlabel, scale = 'Einfallswinkel φ / °', 'linear'
+        xlabel, scale = 'Einfallswinkel φ (°)', 'linear'
     else:
         par = request.parameters[col]
-        x = np.geomspace(par.lower, par.upper, 1000) if par.scale == 'log' else np.linspace(par.lower, par.upper, 1000)
+        x = np.r_[0, np.geomspace(par.positive_min,par.upper,999)] if par.scale == 'log' and par.lower == 0 else np.geomspace(par.lower, par.upper, 1000) if par.scale == 'log' else np.linspace(par.lower, par.upper, 1000)
         x = np.unique(np.r_[x, values[col]])
         d, p = simulate(m, obs.angles, x[:, None], [par.path])
         d, p = d.T, p.T
@@ -588,8 +600,8 @@ def comparison(request, values):
         for i in group:
             r = rows[i]
             residuals.append(r | dict(model_angle=float(obs.angles[j]), fit_delta=float(fd[0, j]), fit_psi=float(fp[0, j]), delta_residual=float(wrap(fd[0, j] - r['delta'])), psi_residual=float(fp[0, j] - r['psi'])))
-        display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=float(np.rad2deg(np.angle(np.mean(np.exp(1j * np.deg2rad(obs.ds[j]))))) % 360), psi=float(obs.pm[j]), source=f'Mittelwert aus {len(group)} Messungen')]
+        display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=analysis.records[j]['mean_delta'], psi=analysis.records[j]['mean_psi'], source=f'Mittelwert aus {len(group)} Messungen')]
         for r in display:
             points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source']))
     fixed_label = parameter_label(m, request.parameters[1 - col].path) if not multi and len(request.parameters) == 2 else None
-    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label)
+    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)

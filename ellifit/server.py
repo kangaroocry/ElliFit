@@ -17,10 +17,13 @@ from pydantic import BaseModel
 
 from . import __version__
 from .core import Cancelled, FitRequest, Model, Observations, Row, comparison, parse_data, simulate, solve
+from .core import Medium, Objective
+from .statistics import RepeatAnalysis, parameter_uncertainty
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = Path(__file__).parent / 'static'
 MODEL_DIR = Path(os.environ.get('ELLIFIT_MODELS', ROOT / 'models')).expanduser().resolve()
+MATERIAL_DIR = Path(os.environ.get('ELLIFIT_MATERIALS', ROOT / 'materials')).expanduser().resolve()
 POOL = ThreadPoolExecutor(max_workers=1)
 JOBS = {}
 LOCK = threading.Lock()
@@ -61,7 +64,7 @@ def plotly_js():
 
 @app.get('/api/info')
 def info():
-    return dict(version=__version__, model_dir=str(MODEL_DIR), default_model=Model().model_dump())
+    return dict(version=__version__, model_dir=str(MODEL_DIR), material_dir=str(MATERIAL_DIR), default_model=Model().model_dump())
 
 
 @app.post('/api/validate-model')
@@ -131,6 +134,81 @@ def change_folder(body: Folder):
         raise ValueError('Kein Modellordner.')
     MODEL_DIR = path
     return dict(model_dir=str(path))
+
+
+class Material(Medium):
+    schema_version: int = 1
+    wavelength_nm: float | None = None
+    notes: str = ''
+
+
+class SaveMaterial(BaseModel):
+    material: Material
+    filename: str | None = None
+    overwrite: bool = False
+
+
+def material_path(name):
+    if Path(name).name != name or not name.endswith('.json') or len(name)>180:
+        raise ValueError('Ungültiger Material-Dateiname.')
+    p=MATERIAL_DIR/name
+    if p.is_symlink() or p.resolve().parent!=MATERIAL_DIR:
+        raise ValueError('Ungültiger Materialpfad.')
+    return p
+
+
+@app.get('/api/materials')
+def materials():
+    MATERIAL_DIR.mkdir(parents=True,exist_ok=True)
+    entries,invalid=[],[]
+    for p in sorted(MATERIAL_DIR.glob('*.json')):
+        try:
+            material=Material.model_validate_json(p.read_text(encoding='utf-8'))
+            entries.append(dict(file=p.name,**material.model_dump()))
+        except (OSError,ValueError): invalid.append(p.name)
+    return dict(materials=entries,invalid=invalid,material_dir=str(MATERIAL_DIR))
+
+
+@app.get('/api/materials/{filename}')
+def load_material(filename:str):
+    p=material_path(filename)
+    if not p.exists():raise HTTPException(404,'Material nicht gefunden.')
+    return Material.model_validate_json(p.read_text(encoding='utf-8'))
+
+
+@app.post('/api/validate-material')
+def validate_material(material:Material):return material
+
+
+@app.post('/api/materials')
+def save_material(body:SaveMaterial):
+    filename=body.filename or (re.sub(r'[^\w-]+','_',body.material.name).strip('_')[:120] or 'Material')+'.json'
+    p=material_path(filename);MATERIAL_DIR.mkdir(parents=True,exist_ok=True)
+    if p.exists() and not body.overwrite:raise HTTPException(409,dict(filename=filename,message='Diese Materialdatei existiert bereits.'))
+    temp=p.with_suffix('.json.tmp');temp.write_text(body.material.model_dump_json(indent=2),encoding='utf-8');temp.replace(p)
+    return dict(filename=filename)
+
+
+@app.post('/api/material-folder')
+def change_material_folder(body:Folder):
+    global MATERIAL_DIR
+    path=Path(body.path).expanduser().resolve();path.mkdir(parents=True,exist_ok=True)
+    if not path.is_dir():raise ValueError('Kein Materialordner.')
+    MATERIAL_DIR=path
+    return dict(material_dir=str(path))
+
+
+class ObservationRequest(BaseModel):
+    measurements: list[Row]
+    angle_tolerance: float = .001
+    duplicate_policy: str = 'repeat'
+
+
+@app.post('/api/observations')
+def observation_statistics(body:ObservationRequest):
+    if not body.measurements:return dict(groups=[],complete=False,weighted=False,warnings=[])
+    if not 0<body.angle_tolerance<=.1 or len(body.measurements)>200000:raise ValueError('Ungültige Messdaten oder Winkeltoleranz.')
+    return RepeatAnalysis([r.model_dump() for r in body.measurements],body.duplicate_policy,body.angle_tolerance).public()
 
 
 @app.post('/api/import')
@@ -209,11 +287,22 @@ def result(key: str):
 
 
 @app.get('/api/jobs/{key}/comparison/{index}')
-def other_solution(key: str, index: int):
+def other_solution(key: str, index: int, alias: int | None = None):
     job = job_by_id(key)
     if job['status'] != 'completed' or not 0 <= index < len(job['result']['solutions']):
         raise HTTPException(404, 'Lösung nicht vorhanden.')
-    return comparison(job['request'], job['result']['solutions'][index]['values'])
+    solution=job['result']['solutions'][index]
+    if alias is None:alias=solution['representative_alias']
+    if not 0<=alias<len(solution['aliases']):raise HTTPException(404,'Periodische Wiederholung nicht vorhanden.')
+    values=solution['aliases'][alias]['values']
+    result=comparison(job['request'],values)
+    if alias==solution['representative_alias']:
+        result['uncertainty']=solution['uncertainty']
+    else:
+        if 'objective' not in job:job['objective']=Objective(job['request'])
+        result['uncertainty']=parameter_uncertainty(job['objective'],values)
+    result['selected_alias']=alias
+    return result
 
 
 @app.post('/api/validate-session')

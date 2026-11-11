@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Luft",
+  "n": 1,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Editierbarer Beispielwert; keine zertifizierten Materialdaten."
+}
