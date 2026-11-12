@@ -1,8 +1,16 @@
-# Prüfprotokoll – ElliFit 1.2.2
+# Prüfprotokoll – ElliFit 1.2.3
 
 Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Automatisierte Rechen- und API-Tests
+## Aktuelle Prüfung von 1.2.3
+
+Änderung auf die RMS-Farbdarstellung beschränkt; `core.py`, `statistics.py`, `results.py` und `server.py` sind gegenüber 1.2.2 unverändert. Die Versionsnummern wurden synchron auf 1.2.3 gesetzt, damit die neuen Dateien ohne altes Browser-Cache geladen werden.
+
+**6 API-Tests und die JavaScript-Syntaxprüfung bestanden.** Die aktuelle Palette wird zusätzlich in **7 gezielten Chromium-Prüfungen** kontrolliert: Ankerfarben und Grünverlauf, theoretisches oberes Skalenende, 1D-Hintergrund mit linearer/logarithmischer Achse, Tabellenfarben, Kontur, 3D sowie schmale Darstellung. Die Einträge in `Pruefdaten_Browser.json` tragen die jeweilige geprüfte Versionsnummer.
+
+Die folgenden umfangreichen Rechen-/Browserprüfungen dokumentieren den Stand **1.2.2**. Die dort protokollierte frühere Farbabstufung wurde in 1.2.3 durch die oben beschriebene Skala ersetzt.
+
+## Basisprüfung 1.2.2: Automatisierte Rechen- und API-Tests
 
 **44 Tests bestanden**, einschließlich des privaten Importtests mit den ursprünglichen Dateien:
 

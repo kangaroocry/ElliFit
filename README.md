@@ -1,8 +1,8 @@
-# ElliFit 1.2.2
+# ElliFit 1.2.3
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -67,17 +67,17 @@ RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
 
 | Winkel-RMS | Farbe |
 |---|---|
-| unter 0,01° | fest cyan |
-| 0,01° | sattes Grün Richtung Türkis |
-| 0,1° | helles, leicht gelbliches Grün |
+| unter 0,001° | fest Cyan |
+| 0,001° | kräftiges, sattes Grün |
+| 0,01° | mittlere Grünabstufung |
+| 0,1° | klares Grün für einen sehr guten Fit |
 | 1° | Gelb |
 | 10° | Rot |
-| 100° | Pink |
-| über 100° | fest Violett |
+| 142,3° (theoretisches Maximum) | Pink |
 
-Zwischen 0,01° und 100° wird die Farbe gleichmäßig über die Dekaden interpoliert. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse.
+Zwischen 0,001° und dem theoretischen Höchstwert von √[(180² + 90²)/2] ≈ 142,3° wird die Farbe über die Dekaden interpoliert. Von 0,1° bis 0,001° geht das Grün kontinuierlich in ein kräftigeres, satteres Grün über. Pink wird erst am Höchstwert erreicht; es gibt keinen violetten Abschnitt und kein gleichfarbiges Plateau ab 100°. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse.
 
-Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
+Farblegenden und 1D-Achsen reichen nach oben höchstens bis zum theoretischen RMS-Maximum. Legende, Hintergrund und Marker verwenden dieselbe Farbdefinition. Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
 
 **Der Winkel-RMS beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Er bleibt beim bloßen Vervielfachen derselben Messwerte gleich. Seine Bewertung hängt weiterhin von Probe, Messgeometrie und Gerätestreuung ab. Ein kleiner RMS bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
 

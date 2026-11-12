@@ -1,5 +1,5 @@
 'use strict';
-const UI_VERSION='1.2.2';
+const UI_VERSION='1.2.3';
 const $=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -112,15 +112,16 @@ async function selectSolution(index,alias=null){if(!state.result)return;alias??=
 
 
 // Colors describe physical angular RMS in degrees. Interpolate within decades.
-const RMS_ANCHORS=[[.01,'#18b99b'],[.1,'#afd975'],[1,'#f1cf57'],[10,'#e65b52'],[100,'#e96aab']];
-const RMS_CYAN='#24cbd3',RMS_VIOLET='#8960b4',RMS_LOG_MIN=-2.5,RMS_LOG_MAX=2.5;
+const RMS_MAX=Math.sqrt((180**2+90**2)/2);
+const RMS_ANCHORS=[[.001,'#159d4b'],[.1,'#70c66f'],[1,'#f1cf57'],[10,'#e65b52'],[RMS_MAX,'#e96aab']];
+const RMS_CYAN='#24cbd3',RMS_LOG_MIN=-3.5,RMS_LOG_MAX=Math.log10(RMS_MAX);
 const rmsLog=rms=>rms==null||!Number.isFinite(rms)?null:Math.log10(Math.max(rms,1e-12));
 const rgbFromHex=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 function rmsColor(rms,alpha=1){
  let rgb;
  if(rms==null||!Number.isFinite(rms))rgb=[140,155,145];
- else if(rms<.01)rgb=rgbFromHex(RMS_CYAN);
- else if(rms>100)rgb=rgbFromHex(RMS_VIOLET);
+ else if(rms<.001)rgb=rgbFromHex(RMS_CYAN);
+ else if(rms>=RMS_MAX)rgb=rgbFromHex(RMS_ANCHORS.at(-1)[1]);
  else{
   let a=RMS_ANCHORS[0],b=RMS_ANCHORS.at(-1);
   for(let i=1;i<RMS_ANCHORS.length;i++)if(rms<=RMS_ANCHORS[i][0]){a=RMS_ANCHORS[i-1];b=RMS_ANCHORS[i];break;}
@@ -131,17 +132,21 @@ function rmsColor(rms,alpha=1){
 }
 function rmsPlotColors(){
  const u=rms=>(Math.log10(rms)-RMS_LOG_MIN)/(RMS_LOG_MAX-RMS_LOG_MIN),epsilon=1e-9;
- return [[0,RMS_CYAN],[u(.01)-epsilon,RMS_CYAN],...RMS_ANCHORS.map(([r,c])=>[u(r),c]),[u(100)+epsilon,RMS_VIOLET],[1,RMS_VIOLET]];
+ return [[0,RMS_CYAN],[u(.001)-epsilon,RMS_CYAN],...RMS_ANCHORS.map(([r,c])=>[u(r),c])];
 }
-function rmsColorbar(){return {title:{text:'RMS (°)'},thickness:12,len:.86,tickvals:[-2.5,-2,-1,0,1,2,2.5],ticktext:['< 0,01','0,01','0,1','1','10','100','> 100']};}
+function rmsColorbar(){return {title:{text:'RMS (°)'},thickness:12,len:.86,tickvals:[RMS_LOG_MIN,-3,-2,-1,0,1,RMS_LOG_MAX],ticktext:['< 0,001','0,001','0,01','0,1','1','10',fmt(RMS_MAX)]};}
+function renderRmsLegend(){
+ const entries=[[0,'< 0,001°'],[.001,'0,001°'],[.01,'0,01°'],[.1,'0,1°'],[1,'1°'],[10,'10°'],[RMS_MAX,fmt(RMS_MAX)+'°']];
+ $('rmsLegend').innerHTML=entries.map(([r,label])=>`<span><i style="background:${rmsColor(r)}"></i>${esc(label)}</span>`).join('');
+}
 function rmsBackground(logarithmic){
  const rect=(lo,hi,color)=>({type:'rect',xref:'paper',x0:0,x1:1,yref:'y',y0:lo,y1:hi,fillcolor:color,line:{width:0},layer:'below'});
- const shapes=[rect(logarithmic?1e-15:0,.01,rmsColor(0,.17))],steps=96;
+ const shapes=[rect(logarithmic?1e-15:0,.001,rmsColor(0,.17))],steps=128,span=RMS_LOG_MAX+3;
  for(let i=0;i<steps;i++){
-  const lo=10**(-2+4*i/steps),hi=10**(-2+4*(i+1)/steps);
+  const lo=10**(-3+span*i/steps),hi=i===steps-1?RMS_MAX:10**(-3+span*(i+1)/steps);
   shapes.push(rect(lo,hi,rmsColor(Math.sqrt(lo*hi),.17)));
  }
- shapes.push(rect(100,10000,rmsColor(101,.17)));
+ shapes.push(rect(RMS_MAX,10000,rmsColor(RMS_MAX,.17)));
  return shapes;
 }
 const plotOptions={responsive:true,displaylogo:false,scrollZoom:true,modeBarButtonsToRemove:['lasso2d','select2d'],toImageButtonOptions:{format:'svg',filename:'ElliFit',width:1200,height:800}};
@@ -162,8 +167,8 @@ function errorPlot(){
  if(!two){
   const display=v=>v==null?null:state.view.logY?Math.max(v,1e-9):v,y=s.rms.map(display),ym=markers.map(m=>display(m.rms)),ay=axisSpec(y,'Winkel-RMS (°)',state.view.logY),finite=[...y,...ym].filter(v=>v!=null&&Number.isFinite(v)),lo=Math.min(...finite),hi=Math.max(...finite);
   l.xaxis=ax.axis;l.yaxis=ay.axis;
-  if(state.view.logY){const a=Math.log10(Math.max(lo,1e-9)),b=Math.log10(Math.max(hi,1e-8)),span=Math.max(b-a,1);l.yaxis.range=[a-.08*span,b+.1*span];}
-  else l.yaxis.range=[0,Math.max(hi*1.12,.01)];
+  if(state.view.logY){const a=Math.log10(Math.max(lo,1e-9)),b=Math.log10(Math.max(hi,1e-8)),span=Math.max(b-a,1);l.yaxis.range=[a-.08*span,Math.min(RMS_LOG_MAX,b+.1*span)];}
+  else l.yaxis.range=[0,Math.min(RMS_MAX,Math.max(hi*1.12,.01))];
   l.shapes=rmsBackground(state.view.logY);
   traces=[
    {x:ax.values,y,mode:'lines',line:{color:'#294b55',width:2},customdata:s.rms.map((v,i)=>`${fmt(s.axes[0][i],8)}<br>Winkel-RMS ${rmsText(v)}°`),hovertemplate:'%{customdata}<extra>Suchraster</extra>'},
@@ -175,7 +180,7 @@ function errorPlot(){
   note=[ax.note,ay.note].filter(Boolean).join(' ');
   if(surface){
    l.margin={l:0,r:0,t:0,b:0};
-   l.scene={xaxis:ax.axis,yaxis:ay.axis,zaxis:{type:'log',title:{text:'Winkel-RMS (°)'},tickvals:[1e-9,1e-6,.001,.01,.1,1,10,100],ticktext:['1e-9','1e-6','0,001','0,01','0,1','1','10','100']},camera:{eye:{x:1.7,y:1.5,z:1.2}}};
+   l.scene={xaxis:ax.axis,yaxis:ay.axis,zaxis:{type:'log',title:{text:'Winkel-RMS (°)'},tickvals:[1e-9,1e-6,.001,.01,.1,1,10,RMS_MAX],ticktext:['1e-9','1e-6','0,001','0,01','0,1','1','10',fmt(RMS_MAX)]},camera:{eye:{x:1.7,y:1.5,z:1.2}}};
    traces=[
     {type:'surface',x:ax.values,y:ay.values,z:s.rms.map(row=>row.map(v=>v==null?null:Math.max(v,1e-9))),surfacecolor:logRms,colorscale:rmsPlotColors(),cmin:RMS_LOG_MIN,cmax:RMS_LOG_MAX,colorbar:rmsColorbar(),customdata:hover,hovertemplate:'%{customdata}<extra>Raster</extra>'},
     {type:'scatter3d',x:markers.map(m=>ax.map(m.values[0])),y:markers.map(m=>ay.map(m.values[1])),z:markers.map(m=>Math.max(m.rms,1e-9)),mode:'markers+text',text:markers.map(m=>String(m.rank)),textposition:'top center',marker:{size:5,color,line:{color:'#fff',width:1}},customdata:custom,hovertemplate:'%{customdata[2]}<extra></extra>'}
@@ -183,7 +188,7 @@ function errorPlot(){
   }else{
    l.margin.r=90;l.xaxis=ax.axis;l.yaxis=ay.axis;
    traces=[
-    {type:'contour',x:ax.values,y:ay.values,z:logRms,colorscale:rmsPlotColors(),zmin:RMS_LOG_MIN,zmax:RMS_LOG_MAX,autocontour:false,contours:{start:RMS_LOG_MIN,end:RMS_LOG_MAX,size:.1,coloring:'heatmap',showlines:true},line:{width:.3,color:'#ffffff65'},colorbar:rmsColorbar(),customdata:hover,hovertemplate:'%{customdata}<extra>Raster</extra>'},
+    {type:'contour',x:ax.values,y:ay.values,z:logRms,colorscale:rmsPlotColors(),zmin:RMS_LOG_MIN,zmax:RMS_LOG_MAX,autocontour:false,contours:{start:RMS_LOG_MIN,end:RMS_LOG_MAX,size:(RMS_LOG_MAX-RMS_LOG_MIN)/60,coloring:'heatmap',showlines:true},line:{width:.3,color:'#ffffff65'},colorbar:rmsColorbar(),customdata:hover,hovertemplate:'%{customdata}<extra>Raster</extra>'},
     {type:'scatter',x:markers.map(m=>ax.map(m.values[0])),y:markers.map(m=>ay.map(m.values[1])),mode:'markers+text',text:markers.map(m=>String(m.rank)),textposition:'top center',textfont:{size:12,color:'#25424d'},marker:{size:markers.map(m=>m.family===state.active&&m.alias===state.activeAlias?13:9),color,line:{color:'#fff',width:2}},customdata:custom,hovertemplate:'%{customdata[2]}<extra></extra>'}
    ];
   }
@@ -207,6 +212,7 @@ function setMaterial(m,file=null){state.material=clone(m);state.materialFile=fil
 async function materialsDialog(){materialTargets();await refreshMaterials();if(!state.material)setMaterial({schema_version:1,name:'Neues Material',n:1.5,k:0,wavelength_nm:state.model.wavelength_nm,notes:'',uncertainty_n:null,uncertainty_k:null});$('materialDialog').showModal();}
 function numericStep(kind,value){const magnitude=Math.abs(value),precision=magnitude?10**(Math.floor(Math.log10(magnitude))-3):0;if(kind==='k'&&magnitude<.001)return magnitude?10**(Math.floor(Math.log10(magnitude))-2):1e-8;return Math.max(precision,(kind==='d'||kind==='wavelength')?.1:.001);}
 function bind(){
+ renderRmsLegend();
  document.addEventListener('keydown',e=>{const t=e.target;if(t.matches('input[data-num]')&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const value=parseNumber(t.value,true)??0;if(!Number.isFinite(value))return;let next=value+(e.key==='ArrowUp'?1:-1)*numericStep(t.dataset.num,value);if(t.dataset.num!=='angle')next=Math.max(t.dataset.num==='n'?1e-9:0,next);t.value=fmt(next,4);t.dispatchEvent(new Event('change',{bubbles:true}));}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!t.matches('input,textarea')){e.preventDefault();e.shiftKey?redo():undo();}});
  $('undo').onclick=undo;$('redo').onclick=redo;
  $('paramControls').addEventListener('change',e=>{const t=e.target;if(!t.dataset.prop)return;const i=Number(t.dataset.param),key=t.dataset.prop,value=['lower','upper','positive_min'].includes(key)?parseNumber(t.value):t.value;if(typeof value==='number'&&!Number.isFinite(value))return toast('Bitte eine gültige Zahl eingeben.');if(key==='path')setFitSelection(value,String(i));else{mutate(()=>state.parameters[i][key]=value);renderParameters();}});

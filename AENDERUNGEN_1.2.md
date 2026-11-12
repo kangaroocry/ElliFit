@@ -1,6 +1,14 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 12. November 2026. Quellstand 1.2.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 12. November 2026. Quellstand 1.2.3; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Neue RMS-Farbskala in 1.2.3
+
+- Oberes Skalenende ist das theoretische Maximum √[(180² + 90²)/2] ≈ **142,3°**, dort **Pink**. Der Bereich oberhalb von 100° wird weiter abgestuft; der violette Abschnitt entfällt.
+- **0,1° ist klares Grün**. Bis **0,001°** nimmt die Sättigung kontinuierlich zu; darunter bleibt die Farbe **Cyan**.
+- Gelb bei 1° und Rot bei 10° bleiben erhalten. Die Übergänge sind logarithmisch in den RMS-Werten abgestuft.
+- Gleiche Farben in Ergebnisliste, Markern, Kontur, 3D und im gedeckten 1D-Hintergrund. Die Legende wird aus derselben Farbdefinition erzeugt.
+- Die Cache-Korrektur aus 1.2.2 verhindert auch bei diesem Update die Wiederverwendung der älteren Palette.
 
 ## Korrektur in 1.2.2
 

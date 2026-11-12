@@ -1,90 +1,146 @@
 [
   {
     "check": "Vorgaben, Dezimalkomma, ausklappbare Optik, getrennte Suchskalen",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Pfeiltasten n/d, vierstellige Anzeige ohne Präzisionsverlust, Schichten verschieben/löschen/rückgängig",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Direktauswahl fix/X/Y, Achsentausch mit Suchgrenzen, leere Auswahl als Sitzung und Auswahl folgt verschobenen Schichten",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "RMS-Farben an allen Dekadengrenzen und konstante Endfarben cyan/violett",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "1D-Hintergrund folgt RMS-Farben auf logarithmischer und linearer Achse",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Einparameter-Mehrwinkelfit, unabhängige Log-Schalter, Rot/Blau, Ergebnistabelle ohne Zusatzkennzahl",
     "d": 118.00000005386732,
-    "families": 4
+    "families": 4,
+    "version": "1.2.2"
   },
   {
     "check": "Periodenfamilie als ein Eintrag, sortierte Aliase, Nummern/Farben und Auswahl",
     "aliases": 4,
-    "period_nm": 283.15789438310946
+    "period_nm": 283.15789438310946,
+    "version": "1.2.2"
   },
   {
     "check": "Simultaner d/n-Fit, feste Winkel-RMS-Konturskala, log-log-Anzeige trotz linearem n-Raster, 3D",
     "values": [
       118.00000000000003,
       1.46
-    ]
+    ],
+    "version": "1.2.2"
   },
   {
     "check": "Vier Ergebnisexporte, Messdaten-CSV-Rundlauf und Sitzung öffnen/speichern",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Modellpersistenz, Materialbibliothek speichern/importieren/anwenden, Dicke erhalten und Rückgängig",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Wiederholungen: Gruppen/Teilauswahl, GLS, identischer Mittelwertfit, getrennte Unsicherheiten und Bootstrap",
     "d": 118.00194284626285,
     "u_stat": 0.0009242505516479868,
-    "u_cal": 0.018861510696647543
+    "u_cal": 0.018861510696647543,
+    "version": "1.2.2"
   },
   {
     "check": "k einschließlich null, Hybridachse und statistischer Nullvergleich",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Explizite alternative Delta-Konvention alter Modelle bleibt erhalten",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Privater phi-Import, automatische Winkelgruppen und beide Rückfragewege",
     "count": 10,
-    "angles": 9
+    "angles": 9,
+    "version": "1.2.2"
   },
   {
     "check": "Privater dat-Import, 16 377 Zeilen, Seitennavigation, Filter und globales Auswahlhäkchen",
-    "count": 16377
+    "count": 16377,
+    "version": "1.2.2"
   },
   {
     "check": "Abbruch einer globalen Zweiparametersuche",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Schmale Darstellung ohne horizontalen Seitenüberlauf",
-    "width": 390
+    "width": 390,
+    "version": "1.2.2"
   },
   {
     "check": "JavaScript-Laufzeitfehler",
-    "count": 0
+    "count": 0,
+    "version": "1.2.2"
   },
   {
     "check": "Gefüllter Browser-Cache: alte Dateien reproduzieren graue Ergebnisse und fehlende Auswahl; Update lädt ohne Cache-Löschen die neuen Dateien",
-    "passed": true
+    "passed": true,
+    "version": "1.2.2"
   },
   {
     "check": "Unterschiedliche Versionen von Oberfläche und Rechenkern werden verständlich gemeldet; Fit bleibt deaktiviert",
+    "passed": true,
+    "version": "1.2.2"
+  },
+  {
+    "version": "1.2.3",
+    "check": "Neue Version, Direktauswahl und automatisch erzeugte RMS-Legende sichtbar",
+    "passed": true
+  },
+  {
+    "version": "1.2.3",
+    "check": "Cyan unter 0,001°, kontinuierliches Grün bis 0,1°, Gelb/Rot und Pink erst beim theoretischen Maximum",
+    "passed": true,
+    "rms_max": 142.30249470757707
+  },
+  {
+    "version": "1.2.3",
+    "check": "1D-Hintergrund und Ergebnisfarben konsistent; lineare und logarithmische y-Achse bis maximal 142,3°",
+    "passed": true
+  },
+  {
+    "version": "1.2.3",
+    "check": "Grünabstufungen von 0,1° bis 0,001° auch in den echten Ergebniszeilen",
+    "passed": true
+  },
+  {
+    "version": "1.2.3",
+    "check": "Konturskala bis 142,3° in Pink, ohne violetten Abschnitt und ohne Plateau ab 100°",
+    "passed": true
+  },
+  {
+    "version": "1.2.3",
+    "check": "3D-Fläche verwendet dieselben Farben und RMS-Minima",
+    "passed": true
+  },
+  {
+    "version": "1.2.3",
+    "check": "390-px-Darstellung ohne horizontalen Überlauf und ohne JavaScript-Laufzeitfehler",
     "passed": true
   }
 ]
