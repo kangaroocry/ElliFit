@@ -3,7 +3,7 @@ import numpy as np
 from scipy.linalg import block_diag
 
 from ellifit.core import Model, FitRequest, Objective, Observations, Parameter, simulate, solve, wrap
-from ellifit.statistics import RepeatAnalysis, parameter_uncertainty, quality_score
+from ellifit.statistics import RepeatAnalysis, parameter_uncertainty
 
 
 def repeated_data(model=None, angles=(60,64,68,72), m=20, seed=19, symmetric=False):
@@ -143,12 +143,12 @@ def test_k_zero_has_measured_profile_limit_instead_of_arbitrary_floor():
     assert zero['profile'] is not None
 
 
-def test_fixed_goodness_is_independent_of_number_of_identical_repeats():
+def test_angular_rms_is_independent_of_number_of_identical_repeats():
     rows=[dict(id='a',angle=70,delta=100,psi=30),dict(id='b',angle=70,delta=100.02,psi=30.01)]
     a=RepeatAnalysis(rows,automatic=False)
     b=RepeatAnalysis([r|{'id':str(i)} for i,r in enumerate(rows*20)],automatic=False)
     da,pa=np.array([[100.01]]),np.array([[30.005]])
-    np.testing.assert_allclose(quality_score(a.raw_rms(da,pa)),quality_score(b.raw_rms(da,pa)),atol=1e-7)
+    np.testing.assert_allclose(a.raw_rms(da,pa),b.raw_rms(da,pa),atol=1e-12)
 
 
 def test_tiny_repeat_scatter_retains_precision_of_direct_residuals():

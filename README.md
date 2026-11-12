@@ -1,8 +1,8 @@
-# ElliFit 1.2
+# ElliFit 1.2.1
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -33,7 +33,7 @@ Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pi
 1. **Schichtmodell prüfen.** Einfallsmedium, Filme von oben nach unten und halbunendliches Substrat einstellen. Mitgelieferte Materialwerte sind Beispiele. Wellenlänge und Δ-Konvention befinden sich im ausklappbaren Bereich „Optische Einstellungen und Dateien“. Voreinstellung: **632,8 nm** und Elli-kompatibles Δ.
 2. **Messdaten laden.** `.phi`, `.dat`, `.txt` oder einfache `.csv` enthalten drei numerische Spalten: Einfallswinkel, Δ, Ψ in Grad. Winkel werden gegen die Oberflächennormale gemessen. UTF-8/Windows-1252, Dezimalkomma/Dezimalpunkt und Kommentare hinter `>>` werden unterstützt. Alternativ Einzelwerte eingeben.
 3. **Zeilen auswählen.** Das globale Häkchen wählt alle geladenen Zeilen unabhängig von Filter und Seite. „Gefilterte wählen“ ergänzt die aktuelle Ansicht. Gruppen können nach Winkel oder Quelle gebildet, ein-/ausgeklappt und gemeinsam ausgewählt werden. Bei wiederholten Winkeln gruppiert die Automatik sichtbar nach Winkel. Ein teilweise ausgewähltes Gruppenhäkchen zeigt einen Zwischenzustand. `Umschalt`-Klick wählt einen Bereich der gefilterten Zeilen.
-4. **Einen oder zwei Parameter wählen.** Voreinstellungen: **d = 0,1–1 000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–10 mit logarithmischen positiven Stützstellen plus exakt null**. Grenzen und Suchraster sind editierbar; bei n unter 1 oder k über 10 gegebenenfalls erweitern. Alle anderen Modellwerte bleiben fest.
+4. **Einen oder zwei Parameter wählen.** Die kleinen Auswahlfelder unter d/n/k zeigen **fix**, **X** oder **Y**. Dort oder im Bereich „Globale Suche“ wählen; beide Ansichten bleiben synchron. X ist der erste, Y der zweite Fitparameter. Der einzige Parameter eines Einparameterfits ist X. Ohne ausgewählten Parameter wird noch kein Fit gestartet. Eine Auswahl folgt ihrer Schicht beim Verschieben; Löschen der Schicht entfernt auch ihre Auswahl.  Voreinstellungen: **d = 0,1–1 000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–10 mit logarithmischen positiven Stützstellen plus exakt null**. Grenzen und Suchraster sind editierbar; bei n unter 1 oder k über 10 gegebenenfalls erweitern. Alle anderen Modellwerte bleiben fest.
 5. **Global suchen.** Mehrere ausgewählte Winkel ergeben automatisch einen Mehrwinkelfit. Wiederholungen werden standardmäßig gemeinsam gefittet. Mittelung und eine Rückfrage lassen sich unter „Fitverfahren und Unsicherheiten“ wählen. Ein laufender Fit kann abgebrochen werden.
 6. **Lösungsfamilien vergleichen.** Zeile, nummerierten Punkt im Fehlerplot oder eine Wiederholung innerhalb einer Periodenfamilie anklicken. Der Modellvergleich folgt der Auswahl. „Ins Modell übernehmen“ überträgt die Werte; anschließend das Modell speichern.
 
@@ -51,28 +51,33 @@ Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen
 
 Eingabefelder zeigen in der Regel **vier signifikante Stellen**, Ergebnisse werden intern mit voller Gleitkommapräzision berechnet. Unveränderte, gerundet angezeigte Felder runden das Modell nicht. Ein Tooltip zeigt mehr Stellen. Pfeiltasten ändern n typischerweise um 0,001 und d um 0,1 nm; bei großen Werten beziehungsweise sehr kleinem k passt sich der Schritt an. Die Oberfläche verwendet Dezimalkomma und Leerzeichen zur Tausendertrennung. JSON-Dateien verwenden das standardisierte Zahlenformat mit Punkt.
 
-## Diagramme und feste Fitgüte
+## Diagramme und feste RMS-Farbstufen
 
 Anzeigeachsen und Suchraster sind **unabhängig**. Die Logarithmus-Häkchen ändern die Darstellung; sie lösen keinen neuen Fit aus. Die Fehlerachsen sind anfangs logarithmisch. Der Winkelvergleich startet mit linearer Winkelachse; auch dort ist eine logarithmische x-Achse wählbar.
 
-Bei einem freien Parameter zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. Die feste Farbskala verwendet:
+Bei einem freien Parameter zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. **Kleinere Werte sind besser; die besten Fits liegen in den Minima.**
 
 ```text
 RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
-G = −log10(RMS / 1°)
 ```
 
-| RMS | G | Farbe |
-|---|---:|---|
-| 1° | 0 | Rot |
-| 0,1° | 1 | Gelb |
-| 0,01° | 2 | Grün |
+| Winkel-RMS | Farbe |
+|---|---|
+| unter 0,01° | fest cyan |
+| 0,01° | sattes Grün Richtung Türkis |
+| 0,1° | helles, leicht gelbliches Grün |
+| 1° | Gelb |
+| 10° | Rot |
+| 100° | Pink |
+| über 100° | fest Violett |
 
-Die Farbskala ist bei jedem Datensatz gleich und wird in Tabelle, Kontur und nummerierten Minimum-Punkten verwendet. Die Tabelle ist dezent hinterlegt; Punkte haben kräftigere Farben und eine helle Umrandung. Bei 3D ist auch die Höhe G. Werte außerhalb des Farbintervalls −1 bis 3 erhalten die jeweilige Endfarbe. Numerisch sehr kleine RMS werden für G bei 0,000001° begrenzt; angezeigt wird dann G ≥ 6. Im logarithmischen 1D-Plot werden Nullwerte nur zur Darstellung bei 10⁻⁹° begrenzt.
+Zwischen 0,01° und 100° wird die Farbe gleichmäßig über die Dekaden interpoliert. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse.
 
-**G beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Es ist unabhängig vom bloßen Vervielfachen der gleichen Messwerte und benutzt keine datensatzabhängige Normierung. Es ist jedoch nicht unabhängig von der gewählten Probe, Messgeometrie oder tatsächlichen Gerätestreuung. Ein guter G-Wert allein bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
+Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
 
-Die Ergebnisliste wird nach der **gewählten Zielfunktion** sortiert. Bei Kovarianzgewichtung oder Stokes-Abstand muss diese Reihenfolge nicht identisch mit der Reihenfolge des ungewichteten Winkel-RMS und damit der Farbe sein. Die absolute Fehlerquadratsumme Q ist aus der Ergebnisliste entfernt; im vollständigen JSON-Bericht bleibt sie für Diagnosezwecke erhalten.
+**Der Winkel-RMS beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Er bleibt beim bloßen Vervielfachen derselben Messwerte gleich. Seine Bewertung hängt weiterhin von Probe, Messgeometrie und Gerätestreuung ab. Ein kleiner RMS bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
+
+Die Ergebnisliste wird nach der **gewählten Zielfunktion** sortiert. Bei Kovarianzgewichtung oder Stokes-Abstand muss diese Reihenfolge nicht der Reihenfolge des ungewichteten Winkel-RMS und damit der Farbe entsprechen. Die absolute Fehlerquadratsumme Q bleibt aus der Ergebnisliste entfernt; im vollständigen JSON-Bericht ist sie für Diagnosezwecke enthalten.
 
 **k = 0 auf einer logarithmischen Anzeige:** Null hat keinen Logarithmus. Bei einer k-Achse einschließlich null verwendet ElliFit deshalb `log10(1 + k/k0)` mit dem eingestellten kleinsten positiven Rasterwert k0. Nahe null ist diese Achse linear, darüber näherungsweise logarithmisch. Die Beschriftung zeigt die tatsächlichen k-Werte einschließlich null. Das ist in der Bildunterschrift erklärt. Das Suchraster enthält null separat und positive logarithmische Stützstellen; lokale Verfeinerung darf auch zwischen null und k0 liegen. k0 ist keine willkürliche Nachweisgrenze und ersetzt nicht kleine Werte durch null.
 
@@ -117,7 +122,7 @@ s(Δ, Ψ) = [cos(2Ψ), sin(2Ψ) cos(Δ), sin(2Ψ) sin(Δ)]
 Q = Σ ||s_theo − s_exp||²
 ```
 
-Das vermeidet künstliche Δ-Empfindlichkeit nahe Ψ = 0°/90°. Die automatische Winkel-Kovarianzgewichtung ist dabei ausgeschaltet. Bei vollständigen Wiederholungen kann deren Kovarianz trotzdem zum Parameterunsicherheitsbeitrag fortgepflanzt werden. Winkel-RMS und G bleiben als zusätzliche absolute Winkeldiagnose sichtbar.
+Das vermeidet künstliche Δ-Empfindlichkeit nahe Ψ = 0°/90°. Die automatische Winkel-Kovarianzgewichtung ist dabei ausgeschaltet. Bei vollständigen Wiederholungen kann deren Kovarianz trotzdem zum Parameterunsicherheitsbeitrag fortgepflanzt werden. Der Winkel-RMS bleibt als zusätzliche absolute Winkeldiagnose sichtbar.
 
 ## Parameterunsicherheiten, Kalibrierung und schwaches k
 
@@ -137,9 +142,9 @@ Mit vollständiger Kovarianzgewichtung erfolgt ein näherungsweiser **einseitige
 
 - **Sitzung:** Modell, Messwerte, Auswahl, Suchkonfiguration und Ansichtsoptionen als JSON. Nach dem Öffnen Fits neu berechnen. Alte explizite Δ-Konventionen und Suchskalen bleiben erhalten; frühere pauschale σ-Vorgaben werden nicht als gemessene Unsicherheiten übernommen.
 - **Messdaten-CSV:** Alle geladenen Zeilen; erneut importierbar.
-- **Lösungsfamilien-CSV:** Parameter, G, RMS, Perioden/Aliase, Randstatus und gegebenenfalls χ²red; keine absolute Q-Spalte.
+- **Lösungsfamilien-CSV:** Parameter, RMS, Perioden/Aliase, Randstatus und gegebenenfalls χ²red; keine absolute Q-Spalte.
 - **Residuen-CSV:** Alle ursprünglichen ausgewählten Einzelwerte der angezeigten Lösung, auch bei einem Mittelwertfit.
-- **Fehlerlandschaft-CSV:** Parameter, Winkel-RMS und G.
+- **Fehlerlandschaft-CSV:** Parameter und Winkel-RMS.
 - **Fitbericht-JSON:** Vollständige Daten einschließlich Modell, Einstellungen, Familien, Oberfläche, Unsicherheiten und aktuell angezeigter Lösung. Q bleibt für Diagnosezwecke enthalten.
 
 CSV verwendet Semikolon, Dezimalkomma und UTF-8-BOM. Die Kamera in der Plot-Werkzeugleiste exportiert SVG. Geänderte Eingaben markieren alte Ergebnisse sichtbar als veraltet.

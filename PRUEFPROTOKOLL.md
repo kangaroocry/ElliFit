@@ -1,6 +1,6 @@
-# Prüfprotokoll – ElliFit 1.2.0
+# Prüfprotokoll – ElliFit 1.2.1
 
-Stand: 11. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
 ## Automatisierte Rechen- und API-Tests
 
@@ -21,22 +21,25 @@ Ohne diese privaten Dateien wird genau dieser Importtest übersprungen. Die Date
 - Getrennte statistische/Kalibrierbeiträge und quadratische Kombination. Fortgepflanzte GLS-Kovarianz gegen eine unabhängig differenzierte Fisher-Matrix.
 - Paarweiser lokaler Bootstrap; an künstlichen Grenzen beschnittene Intervalle werden nicht als Präzisionsangabe ausgegeben.
 - Exaktes k = 0 plus logarithmischer positiver Bereich, Wiederfinden von k = 10⁻⁵ und Profil-Obergrenze bei mit null verträglichen Daten. Eine physikalische k-Nullgrenze verdeckt keine weitere künstliche Suchgrenze.
-- Feste G-Skala unverändert beim Vervielfachen derselben Werte. Modell-/Materialpersistenz, Validierung, Dateinamenprüfung, Origin-Prüfung und Normalisierung alter Sitzungen bei Erhalt expliziter Konventionen.
+- Unveränderter Winkel-RMS unverändert beim Vervielfachen derselben Werte. Modell-/Materialpersistenz, Validierung, Dateinamenprüfung, Origin-Prüfung und Normalisierung alter Sitzungen bei Erhalt expliziter Konventionen. Sitzungen ohne ausgewählte Parameter werden gespeichert; Fitaufrufe ohne Parameter bleiben ungültig.
 
 JavaScript-Syntaxprüfung mit `node --check ellifit/static/app.js` bestanden. Zwei Warnungen stammen aus AnyIOs pytest-Anbindung und Starlettes Testclient bezüglich künftiger Schnittstellen; kein Anwendungstest ist fehlgeschlagen.
 
 ## Browserprüfung
 
-Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 15 protokollierte Prüfpunkte in [Pruefdaten_Browser.json](Pruefdaten_Browser.json):
+Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 18 protokollierte Prüfpunkte in [Pruefdaten_Browser.json](Pruefdaten_Browser.json):
 
 | Prüfung | Ergebnis |
 |---|---|
 | Voreinstellungen und Zahlenformat | 632,8 nm, Elli-Δ, d log, n linear, k log plus null; Optik zunächst eingeklappt |
+| Direktauswahl der Fitparameter | fix/X/Y synchron zu den Suchparametern; Achsentausch erhält Grenzen, Schichtverschieben erhält Zuordnung; Rückgängig und Sitzung ohne Auswahl geprüft |
+| RMS-Farbstufen | Alle Ankerfarben bei 0,01°/0,1°/1°/10°/100° sowie feste Endfarben cyan und violett geprüft |
+| 1D-Hintergrund | 98 gedeckte Farbflächen unter der Kurve, auf logarithmischer und linearer y-Achse korrekt zugeordnet |
 | Eingaben und Schichtbearbeitung | Pfeiltasten n/d, vierstellige Anzeige ohne Rundung unveränderter Modellwerte, Verschieben/Löschen/Rückgängig erfolgreich |
-| Einparameter-Mehrwinkelfit | Synthetische Referenz d = 118 nm wiedergefunden; Achsen unabhängig vom Suchraster schaltbar; Δ rot, Ψ blau; keine Q-Spalte |
+| Einparameter-Mehrwinkelfit | Synthetische Referenz d = 118 nm wiedergefunden; Achsen unabhängig vom Suchraster schaltbar; Δ rot, Ψ blau; keine zusätzliche transformierte Kennzahl oder Q-Spalte |
 | Einwinkel-Periodenfamilie | Vier Dickenaliase mit T ≈ 283,1579 nm zusammengefasst; sortierte Aliaswahl aktualisiert den Vergleich; Markerfarben/-nummern konsistent |
-| Simultaner d/n-Fit | d = 118 nm, n = 1,46 wiedergefunden; feste G-Konturskala und 3D-Umschaltung erfolgreich |
-| Exporte und Sitzung | Vier Ergebnisformate tatsächlich heruntergeladen; Messdaten-CSV mit gleicher Anzahl erneut importiert; Sitzung gespeichert/geöffnet |
+| Simultaner d/n-Fit | d = 118 nm, n = 1,46 wiedergefunden; feste RMS-Konturskala und 3D-Umschaltung mit RMS-Tälern und logarithmischer z-Achse erfolgreich |
+| Exporte und Sitzung | Vier Ergebnisformate tatsächlich heruntergeladen; Messdaten-CSV mit gleicher Anzahl erneut importiert; Sitzung gespeichert/geöffnet; Zusatzkennzahl auch aus CSV und JSON entfernt |
 | Modelle und Materialien | Modell gespeichert/geladen; Material gespeichert, als JSON exportiert/importiert, angewendet und rückgängig gemacht; Dicke erhalten |
 | Wiederholungsmessungen | 96 synthetische Messungen, Winkelgruppen mit Teilauswahl; GLS und Mittelwertfit identisch; statistischer Beitrag, Kalibrierung und Bootstrap angezeigt |
 | k einschließlich null | Nullpunkt der Fehlerlandschaft vorhanden, erklärte Hybridachse und statistischer Nullvergleich dargestellt |

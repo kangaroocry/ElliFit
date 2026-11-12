@@ -322,7 +322,7 @@ def validate_session(body: dict):
     for p in pars:
         if p.get('path'):
             Parameter.model_validate(p)
-    if rows:
+    if rows and any(p.get('path') for p in pars):
         FitRequest(model=model, measurements=rows, parameters=[p for p in pars if p.get('path')], **body.get('settings', {}))
     return body | dict(model=model.model_dump(), measurements=[r.model_dump() for r in rows],
         parameters=[Parameter.model_validate(p).model_dump() if p.get('path') else p for p in pars])

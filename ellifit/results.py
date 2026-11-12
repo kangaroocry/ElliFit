@@ -1,4 +1,4 @@
-"""Result families, fixed goodness scale, profiles and uncertainty reporting."""
+"""Result families, angular RMS, profiles and uncertainty reporting."""
 from __future__ import annotations
 
 import copy
@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .core import comparison, fixed_value_minimum, parameter_label, put, safe_list, simulate, wrap
-from .statistics import group_periodic_candidates, parameter_uncertainty, quality_score
+from .statistics import group_periodic_candidates, parameter_uncertainty
 
 
 def boundary(z):
@@ -35,7 +35,7 @@ def alias_list(obj, group):
     encoded=obj.encode(values)
     scores=obj.batch(encoded)
     rms=obj.last_rms.copy()
-    return [dict(index=i,values=v.tolist(),q=float(q),rmse_deg=float(r),goodness=float(quality_score(r)),at_boundary=boundary(z)) for i,(v,q,r,z) in enumerate(zip(values,scores,rms,encoded))],total
+    return [dict(index=i,values=v.tolist(),q=float(q),rmse_deg=float(r),at_boundary=boundary(z)) for i,(v,q,r,z) in enumerate(zip(values,scores,rms,encoded))],total
 
 
 def k_profile(obj, col, values, best_q, grids, zero):
@@ -98,7 +98,7 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         preferred=next((a for a in aliases if not a['at_boundary']),aliases[0])
         periods=[dict(path=obj.paths[i],period_nm=float(t),label=parameter_label(obj.model,obj.paths[i])) for i,t in zip(group['dcols'],group['periods'])]
         row=dict(rank=rank,values=preferred['values'],q=group['q'],sqrt_q=math.sqrt(max(0,group['q'])),
-            rmse_deg=preferred['rmse_deg'],goodness=preferred['goodness'],at_boundary=preferred['at_boundary'],
+            rmse_deg=preferred['rmse_deg'],at_boundary=preferred['at_boundary'],
             aliases=aliases,alias_count=total,representative_alias=preferred['index'],periods=periods,
             periodic=bool(periods and total>1))
         row['uncertainty']=parameter_uncertainty(obj,row['values'],request.bootstrap_samples if rank==1 else 0)
@@ -136,7 +136,6 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     shape=tuple(len(g) for g in grids)
     surface=dict(axes=axes,q=safe_list(scores.reshape(shape) if len(shape)==1 else scores.reshape(shape).T),
         rms=safe_list(rms_grid.reshape(shape) if len(shape)==1 else rms_grid.reshape(shape).T),
-        goodness=safe_list(quality_score(rms_grid.reshape(shape) if len(shape)==1 else rms_grid.reshape(shape).T)),
         scales=[p.scale for p in request.parameters],zero_floors=[p.positive_min if p.path.endswith('.k') and p.lower==0 else None for p in request.parameters])
     if len(shape)==1:
         offsets=np.geomspace(2e-8,.004,18)
@@ -144,7 +143,7 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         detail=np.unique(np.clip(np.concatenate([np.r_[z-offsets,z,z+offsets] for z in centers]),0,1))
         dq=obj.batch(detail[:,None]);dr=obj.last_rms.copy()
         x=np.r_[grids[0],detail];q=np.r_[scores,dq];r=np.r_[rms_grid,dr];order=np.argsort(x)
-        surface.update(axes=[obj.decode(x[order,None])[:,0].tolist()],q=safe_list(q[order]),rms=safe_list(r[order]),goodness=safe_list(quality_score(r[order])))
+        surface.update(axes=[obj.decode(x[order,None])[:,0].tolist()],q=safe_list(q[order]),rms=safe_list(r[order]))
     equal=[a for a in all_aliases if a['equivalent']]
     periodicity['first_solutions']=sorted(equal,key=lambda a:tuple(a['values']))[:12]
     periodicity['equivalent_count']=sum(s['equivalent'] for s in solutions)
@@ -157,8 +156,8 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path)) for p in request.parameters],
         settings=request.model_dump(exclude={'model','parameters','measurements'}),solutions=solutions,surface=surface,
         periodicity=periodicity,measurement_uncertainty=obj.analysis.public(),zero_tests=zero_tests,
-        quality_definition=dict(formula='G = −log₁₀(RMS / 1°)',green_rms=.01,yellow_rms=.1,red_rms=1,display_cap=6,
-            note='Feste Skala der absoluten Winkelabweichung; kein R², kein Signifikanztest und kein Beweis physikalischer Plausibilität.'),
+        rms_definition=dict(formula='sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]',unit='degree',lower_is_better=True,
+            note='Absolute Winkelabweichung über alle ausgewählten Rohwerte; kein Signifikanztest oder Beweis physikalischer Plausibilität.'),
         warnings=list(dict.fromkeys(warnings)),discarded_boundary_minima=discarded,
         counts=dict(selected=len(obj.rows),effective=obj.obs.count,angles=len(obj.obs.angles),grid=len(points),evaluations=obj.calls,families=len(solutions),aliases=sum(s['alias_count'] for s in solutions)),
         elapsed_seconds=time.perf_counter()-started,comparison=comparison(request,best['values']))

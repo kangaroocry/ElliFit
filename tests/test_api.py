@@ -54,3 +54,6 @@ def test_session_normalizes_legacy_defaults_and_preserves_explicit_convention():
     assert normalized['measurements'][0]['source']=='Manuell'
     session['model']['delta_convention']='standard'
     assert client.post('/api/validate-session',json=session).json()['model']['delta_convention']=='standard'
+    session['parameters']=[dict(path=''),dict(path='')]
+    assert client.post('/api/validate-session',json=session).status_code==200
+    assert client.post('/api/fit',json=dict(model=model,measurements=session['measurements'],parameters=[])).status_code==422

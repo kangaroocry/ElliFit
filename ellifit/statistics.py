@@ -14,10 +14,6 @@ from scipy.optimize import least_squares
 from .core import Observations, parameter_label, put, simulate, stokes, wrap
 
 
-def quality_score(rms):
-    return -np.log10(np.maximum(np.asarray(rms, float), 1e-6))
-
-
 class RepeatAnalysis:
     def __init__(self, rows, policy='repeat', tolerance=.001, metric='angular', automatic=True):
         self.raw = Observations(rows, 'repeat', tolerance)

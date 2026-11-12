@@ -8,7 +8,19 @@
     "passed": true
   },
   {
-    "check": "Einparameter-Mehrwinkelfit, unabhängige Log-Schalter, Rot/Blau, Ergebnistabelle ohne Q",
+    "check": "Direktauswahl fix/X/Y, Achsentausch mit Suchgrenzen, leere Auswahl als Sitzung und Auswahl folgt verschobenen Schichten",
+    "passed": true
+  },
+  {
+    "check": "RMS-Farben an allen Dekadengrenzen und konstante Endfarben cyan/violett",
+    "passed": true
+  },
+  {
+    "check": "1D-Hintergrund folgt RMS-Farben auf logarithmischer und linearer Achse",
+    "passed": true
+  },
+  {
+    "check": "Einparameter-Mehrwinkelfit, unabhängige Log-Schalter, Rot/Blau, Ergebnistabelle ohne Zusatzkennzahl",
     "d": 118.00000005386732,
     "families": 4
   },
@@ -18,7 +30,7 @@
     "period_nm": 283.15789438310946
   },
   {
-    "check": "Simultaner d/n-Fit, feste Güte-Konturskala, log-log-Anzeige trotz linearem n-Raster, 3D",
+    "check": "Simultaner d/n-Fit, feste Winkel-RMS-Konturskala, log-log-Anzeige trotz linearem n-Raster, 3D",
     "values": [
       118.00000000000003,
       1.46

@@ -142,7 +142,7 @@ def parameter_label(model, path):
     parts = path.split('.')
     medium = model['layers'][int(parts[1])] if parts[0] == 'layers' else model[parts[0]]
     quantity = {'thickness_nm': 'Schichtdicke', 'n': 'Brechungsindex', 'k': 'Extinktionskoeffizient'}[parts[-1]]
-    position = f' {int(parts[1])+1}' if parts[0] == 'layers' else (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
+    position = f' (Schicht {int(parts[1])+1})' if parts[0] == 'layers' else (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
     return quantity + ' „' + medium['name'] + '“' + position + (' (nm)' if parts[-1] == 'thickness_nm' else '')
 
 

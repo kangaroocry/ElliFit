@@ -1,6 +1,15 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 11. November 2026. Quellstand 1.2.0; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 12. November 2026. Quellstand 1.2.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Ergänzungen in 1.2.1
+
+- Ausschließlich Winkel-RMS in Tabelle, Kontur, 3D, Hoverangaben und Exporten; kleinere Werte sind besser. Die zusätzliche transformierte Kennzahl wurde vollständig entfernt.
+- Neue feste RMS-Farbstufen: cyan unter 0,01°; Grün/Türkis bei 0,01°; helles gelbliches Grün bei 0,1°; Gelb bei 1°; Rot bei 10°; Pink bei 100°; Violett darüber. Zwischenwerte werden über Dekaden interpoliert.
+- 1D-Hintergrund entsprechend dem RMS eingefärbt, mit geringer Deckkraft und dunkler Kurve; funktioniert bei logarithmischer und linearer y-Achse.
+- Schichtpositionen in Klammern: z. B. **Schichtdicke „Film“ (Schicht 1) (nm)**.
+- Kompakte Auswahl **fix / X / Y** direkt unter den Modellfeldern. Farbe und Kennzeichnung zeigen den Status; die Auswahl bleibt mit den Suchparametern synchron. Achsentausch bewahrt die Suchgrenzen, Verschieben bewahrt die Zuordnung zur Schicht und Rückgängig stellt die Auswahl wieder her.
+- Sitzungen dürfen auch einen noch nicht zur Suche konfigurierten Zustand ohne ausgewählten Parameter speichern. Ein Fit benötigt weiterhin mindestens einen Parameter.
 
 ## Bedienoberfläche
 
@@ -11,10 +20,10 @@ Stand: 11. November 2026. Quellstand 1.2.0; ersetzt die Bedienoberfläche und er
 | Vier signifikante Stellen | Eingaben und Parameteranzeigen gerundet; Berechnung und unveränderte Modellwerte behalten volle Präzision. |
 | Perioden zusammenfassen | Ein hervorgehobener Eintrag pro analytisch nachgewiesener Periodenfamilie, mit Periode und sortierter anklickbarer Aliasliste. |
 | Fitgüte farblich zeigen | Feste Skala von grün über gelb zu rot; Tabelle dezent hinterlegt. |
-| Höherer Gütewert für bessere Fits | G = −log₁₀(RMS / 1°), ohne datensatzabhängige Normierung. Kein R² und kein Plausibilitätsbeweis. |
+| Fitgüte | Seit 1.2.1 ausschließlich Winkel-RMS in Grad: kleiner ist besser; feste Farbstufen ohne datensatzabhängige Normierung. |
 | Randminima ausblenden | Nur globales Randminimum bleibt; Hinweis zum Erweitern künstlicher Suchgrenzen. k = 0 wird physikalisch gesondert erklärt. |
 | Speicherbare Materialien | Eigene Bibliothek mit JSON-Dateien, Ordnerwahl, Import/Export und Anwendung auf ein Medium; Dicke bleibt erhalten. |
-| Gleiche Kontur-/Listenfarben | Einheitliche feste G-Skala in Tabelle, Kontur und 3D. |
+| Gleiche Kontur-/Listenfarben | Einheitliche feste RMS-Skala in Tabelle, Kontur und 3D. |
 | Farben und Nummern der Minima | Gesättigte Marker mit heller Umrandung und Familiennummer aus der Liste; Auswahl aktualisiert den Modellvergleich. |
 | Messdaten gruppieren | Automatisch bei wiederholten Winkeln, außerdem nach Winkel, Quelle oder ohne Gruppen; Gruppen auswählen/einklappen. |
 | Rückgängig | Modell und numerische Sucheinstellungen, einschließlich gelöschter/verschobener Schichten und Materialanwendung; Wiederherstellen ebenfalls möglich. |
@@ -23,13 +32,13 @@ Stand: 11. November 2026. Quellstand 1.2.0; ersetzt die Bedienoberfläche und er
 | Tabellenköpfe zentrieren | Überschriften mittig über denselben Eingabespalten. |
 | Schichtdiagramm beschriften | Rolle, Name, n, k und Dicke für jedes Medium; halbunendliche Medien mit d = ∞. |
 | Seltene Einstellungen ausklappen | Wellenlänge/Δ-Konvention, Fitdetails und optionale Kalibrierangaben separat ausklappbar. |
-| Beschreibende Achsentitel | Größenname, individueller Schichtname und Position, z. B. Schichtdicke „Film“ 1 (nm). |
+| Beschreibende Achsentitel | Größenname, individueller Schichtname und Position, z. B. Schichtdicke „Film“ (Schicht 1) (nm). |
 | Lesbarkeit verbessern | Größere Eingaben, Überschriften und Tabellenschriften; responsive Darstellung bis 390 px geprüft. |
 | Einheiten in Klammern | d (nm), Winkel-RMS (°) usw. |
 | Zahlenformat vereinheitlichen | Dezimalkomma und Leerzeichen als Tausendertrennung in der Oberfläche; Dezimalkomma in CSV. Standardkonformes JSON behält den Punkt. |
-| Absolute Fehlerquadratsumme entfernen | Aus Ergebnistabelle und Lösungs-CSV entfernt; RMS, G und gegebenenfalls χ²red bleiben. Q nur noch im vollständigen Diagnosebericht. |
+| Absolute Fehlerquadratsumme entfernen | Aus Ergebnistabelle und Lösungs-CSV entfernt; RMS und gegebenenfalls χ²red bleiben. Q nur noch im vollständigen Diagnosebericht. |
 
-Die 1D-Fehlerlandschaft zeigt den Winkel-RMS statt Q; die logarithmische Skalierung bleibt einstellbar. Die 2D-Kontur verwendet G als logarithmisches Fehlermaß mit umgekehrter Richtung: höher ist besser. Δ bleibt rot, Ψ blau.
+Die 1D-Fehlerlandschaft zeigt den Winkel-RMS statt Q; die logarithmische Skalierung bleibt einstellbar. Die 2D-Kontur verwendet logarithmisch abgestufte RMS-Farben; in 3D bilden beste Fits die Täler. Δ bleibt rot, Ψ blau.
 
 ## Zuvor besprochene Punkte
 
