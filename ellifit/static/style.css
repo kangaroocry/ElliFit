@@ -7,3 +7,11 @@
 .fit-field[data-fit-role="1"] input{border:2px solid #9173b3}.fit-field[data-fit-role="1"] select{background:#eee7f6;color:#72518f;border-color:#bea9d3;font-weight:700}
 .fit-role-help{font-size:12px;color:#718b7d;line-height:1.7;margin:9px 0 10px}.parameter{border-color:#397aab}.parameter.second{border-color:#9173b3}
 .rms-legend{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;margin:7px 0 11px;font-size:11px;color:#667d72}.rms-legend span{display:flex;align-items:center;gap:4px;white-space:nowrap}.rms-legend i{display:inline-block;width:13px;height:9px;border-radius:2px;border:1px solid #3454}
+
+.medium-name{display:flex;align-items:center;gap:5px;min-width:0;height:35px}.medium-name input{flex:1;min-width:0}.layer-number{font:600 12px var(--mono);color:#3a6d76;white-space:nowrap}
+.solution-parameter{white-space:normal;min-width:105px;max-width:230px;text-align:center!important;line-height:1.5}.quantity{display:block;font-weight:650}.solution-parameter small,.parameter-cell small{display:block;font:12px/1.5 "Segoe UI",sans-serif;color:#5e7f72;white-space:normal}.parameter-cell{min-width:110px;white-space:normal;text-align:left}
+.pagination{flex-wrap:wrap;gap:9px}.page-controls{display:flex;align-items:center;flex-wrap:wrap;gap:5px}.page-controls button{margin:0;padding:6px 8px}.page-jump{display:flex;align-items:center;gap:5px;margin:0;font-weight:400;font-size:12px}.page-jump input{width:58px;padding:6px;text-align:center;font:12px var(--mono)}#pageCount{white-space:nowrap;font-size:12px}
+.row-jump{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px}.row-jump label{font-size:12px;margin:0;white-space:nowrap}.row-jump input{width:94px;padding:7px;font:12px var(--mono)}.row-jump button{font-size:12px;padding:7px 9px}.row-jump #lastMeasurement{margin-left:auto}.jump-target{outline:2px solid #d6a739;outline-offset:-2px;scroll-margin-top:95px}.jump-target td{background:#ffeab533}
+@media(max-width:520px){.page-controls{gap:4px;width:100%}.page-controls button{padding:6px;font-size:11px}.page-jump input{width:47px}.row-jump{gap:5px}.row-jump input{width:74px}.row-jump button{font-size:11px;padding:7px}.layer-number{font-size:11px}.medium-name{gap:3px}.solution-parameter{min-width:95px}}
+
+.uncertainty-grid>div{min-width:0}#parameterUncertainty{overflow-x:auto}

@@ -1,8 +1,8 @@
-# ElliFit 1.2.3
+# ElliFit 1.2.4
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.4 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -36,7 +36,7 @@ Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pi
 
 1. **Schichtmodell prüfen.** Einfallsmedium, Filme von oben nach unten und halbunendliches Substrat einstellen. Mitgelieferte Materialwerte sind Beispiele. Wellenlänge und Δ-Konvention befinden sich im ausklappbaren Bereich „Optische Einstellungen und Dateien“. Voreinstellung: **632,8 nm** und Elli-kompatibles Δ.
 2. **Messdaten laden.** `.phi`, `.dat`, `.txt` oder einfache `.csv` enthalten drei numerische Spalten: Einfallswinkel, Δ, Ψ in Grad. Winkel werden gegen die Oberflächennormale gemessen. UTF-8/Windows-1252, Dezimalkomma/Dezimalpunkt und Kommentare hinter `>>` werden unterstützt. Alternativ Einzelwerte eingeben.
-3. **Zeilen auswählen.** Das globale Häkchen wählt alle geladenen Zeilen unabhängig von Filter und Seite. „Gefilterte wählen“ ergänzt die aktuelle Ansicht. Gruppen können nach Winkel oder Quelle gebildet, ein-/ausgeklappt und gemeinsam ausgewählt werden. Bei wiederholten Winkeln gruppiert die Automatik sichtbar nach Winkel. Ein teilweise ausgewähltes Gruppenhäkchen zeigt einen Zwischenzustand. `Umschalt`-Klick wählt einen Bereich der gefilterten Zeilen.
+3. **Zeilen auswählen.** Das globale Häkchen wählt alle geladenen Zeilen unabhängig von Filter und Seite. „Gefilterte wählen“ ergänzt die aktuelle Ansicht. Gruppen können nach Winkel oder Quelle gebildet, ein-/ausgeklappt und gemeinsam ausgewählt werden. Bei wiederholten Winkeln gruppiert die Automatik sichtbar nach Winkel. Ein teilweise ausgewähltes Gruppenhäkchen zeigt einen Zwischenzustand. `Umschalt`-Klick wählt einen Bereich der gefilterten Zeilen. **„Anfang“ und „Ende“** springen direkt zur ersten beziehungsweise letzten Seite. Mit der **Seiteneingabe** werden beliebige Seiten erreicht; **„Messung #“** springt zu einer Nummer aus der #-Spalte und hebt das Ziel hervor. **„Letzte Messung“** zeigt die letzte aktuell sichtbare Messung in ursprünglicher Dateireihenfolge, auch wenn Winkelgruppen anders sortiert sind. Zielgruppen werden bei Bedarf aufgeklappt. Filter und Fit-Auswahl bleiben erhalten; ein herausgefiltertes Ziel wird erklärt.
 4. **Einen oder zwei Parameter wählen.** Die kleinen Auswahlfelder unter d/n/k zeigen **fix**, **X** oder **Y**. Dort oder im Bereich „Globale Suche“ wählen; beide Ansichten bleiben synchron. X ist der erste, Y der zweite Fitparameter. Der einzige Parameter eines Einparameterfits ist X. Ohne ausgewählten Parameter wird noch kein Fit gestartet. Eine Auswahl folgt ihrer Schicht beim Verschieben; Löschen der Schicht entfernt auch ihre Auswahl.  Voreinstellungen: **d = 0,1–1 000 nm logarithmisch**, **n = 1–4 linear**, **k = 0–10 mit logarithmischen positiven Stützstellen plus exakt null**. Grenzen und Suchraster sind editierbar; bei n unter 1 oder k über 10 gegebenenfalls erweitern. Alle anderen Modellwerte bleiben fest.
 5. **Global suchen.** Mehrere ausgewählte Winkel ergeben automatisch einen Mehrwinkelfit. Wiederholungen werden standardmäßig gemeinsam gefittet. Mittelung und eine Rückfrage lassen sich unter „Fitverfahren und Unsicherheiten“ wählen. Ein laufender Fit kann abgebrochen werden.
 6. **Lösungsfamilien vergleichen.** Zeile, nummerierten Punkt im Fehlerplot oder eine Wiederholung innerhalb einer Periodenfamilie anklicken. Der Modellvergleich folgt der Auswahl. „Ins Modell übernehmen“ überträgt die Werte; anschließend das Modell speichern.
@@ -50,6 +50,8 @@ Die mitgelieferte **synthetische Referenz** hat d = 118 nm und n = 1,46. Das Mod
 Modelle werden als UTF-8-JSON im Modellordner gespeichert und aus einer Liste geladen. Standardordner: `models`. Einzelne Dateien können geöffnet und heruntergeladen werden. Elli-`.cfg` wird nicht direkt importiert; ein solches Dateiformat liegt nicht vor.
 
 Die separate **Materialbibliothek** speichert Name, n, k, optionale Wellenlänge, Notizen und optionale Standardunsicherheiten u(n)/u(k) im Ordner `materials`. Materialien lassen sich aus einem Medium übernehmen, bearbeiten, als JSON importieren/exportieren und auf Luft, Film oder Substrat anwenden. Die Schichtdicke bleibt erhalten. Bei abweichender Wellenlänge erscheint eine Rückfrage; eine Dispersionsumrechnung findet nicht statt. Die Beispieldateien sind entsprechend gekennzeichnet. Ein absorbierendes Einfallsmedium wird nicht zugelassen.
+
+**Schichtkennungen:** Endliche Filme werden vom Einfallsmedium zum Substrat als **[1] Name, [2] Name, …** angezeigt. Dieselbe Kennung steht im Schichtdiagramm, neben dem editierbaren Namen, in der Parameterauswahl, auf Achsen, im Ergebnistabellenkopf und in der Unsicherheitsanzeige. Einfallsmedium und Substrat bleiben über ihre Rollen benannt. Nummern werden bei einer Umordnung angepasst und sind kein Teil des gespeicherten Materialnamens. Tabellenköpfe zeigen beispielsweise **d (nm) · [2] Al2O3**, Achsen **Schichtdicke [2] Al2O3 (nm)**.
 
 Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen wieder her, einschließlich gelöschter/verschobener Schichten und angewendeter Materialien. Wiederherstellen ist ebenfalls möglich. Gespeicherte Dateien und Messdatenlöschungen werden dadurch nicht zurückgenommen. Die Historie umfasst bis zu 80 Schritte und gilt für die aktuelle Sitzung. `Strg+Z` außerhalb eines Texteingabefeldes wirkt ebenfalls auf diese Historie.
 
@@ -67,17 +69,16 @@ RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
 
 | Winkel-RMS | Farbe |
 |---|---|
-| unter 0,001° | fest Cyan |
-| 0,001° | kräftiges, sattes Grün |
+| bis einschließlich 0,001° | dieselbe kräftige Grünfarbe, ohne Farbsprung |
 | 0,01° | mittlere Grünabstufung |
 | 0,1° | klares Grün für einen sehr guten Fit |
 | 1° | Gelb |
 | 10° | Rot |
 | 142,3° (theoretisches Maximum) | Pink |
 
-Zwischen 0,001° und dem theoretischen Höchstwert von √[(180² + 90²)/2] ≈ 142,3° wird die Farbe über die Dekaden interpoliert. Von 0,1° bis 0,001° geht das Grün kontinuierlich in ein kräftigeres, satteres Grün über. Pink wird erst am Höchstwert erreicht; es gibt keinen violetten Abschnitt und kein gleichfarbiges Plateau ab 100°. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse.
+Zwischen 0,001° und dem theoretischen Höchstwert von √[(180² + 90²)/2] ≈ 142,3° wird die Farbe über die Dekaden interpoliert. Von 0,1° bis 0,001° geht das Grün kontinuierlich in ein kräftigeres, satteres Grün über. Pink wird erst am Höchstwert erreicht; es gibt keinen violetten Abschnitt und kein gleichfarbiges Plateau ab 100°. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse. Der Hintergrund wird nur im sichtbaren Diagrammbereich gezeichnet und folgt Zoom, Verschieben und Autoscale; seine Ausdehnung zählt nicht zu den Daten. **Autoscale richtet sich ausschließlich nach Kurve und Minimum-Punkten.**
 
-Farblegenden und 1D-Achsen reichen nach oben höchstens bis zum theoretischen RMS-Maximum. Legende, Hintergrund und Marker verwenden dieselbe Farbdefinition. Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
+Die Farblegende und die automatische 1D-Achsenskalierung reichen nach oben höchstens bis zum theoretischen RMS-Maximum. Legende, Hintergrund und Marker verwenden dieselbe Farbdefinition. Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
 
 **Der Winkel-RMS beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Er bleibt beim bloßen Vervielfachen derselben Messwerte gleich. Seine Bewertung hängt weiterhin von Probe, Messgeometrie und Gerätestreuung ab. Ein kleiner RMS bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
 

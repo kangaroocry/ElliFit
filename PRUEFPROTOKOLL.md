@@ -1,14 +1,22 @@
-# Prüfprotokoll – ElliFit 1.2.3
+# Prüfprotokoll – ElliFit 1.2.4
 
 Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.3
+## Aktuelle Prüfung von 1.2.4
 
-Änderung auf die RMS-Farbdarstellung beschränkt; `core.py`, `statistics.py`, `results.py` und `server.py` sind gegenüber 1.2.2 unverändert. Die Versionsnummern wurden synchron auf 1.2.3 gesetzt, damit die neuen Dateien ohne altes Browser-Cache geladen werden.
+**7 API-/Vergleichsplot-Tests und die JavaScript-Syntaxprüfung bestanden.** Die optischen Formeln und die Suche sind unverändert; ergänzt wurden Anzeigenamen und eindeutige Medium-Kennungen in den Ergebnisparametern.
 
-**6 API-Tests und die JavaScript-Syntaxprüfung bestanden.** Die aktuelle Palette wird zusätzlich in **7 gezielten Chromium-Prüfungen** kontrolliert: Ankerfarben und Grünverlauf, theoretisches oberes Skalenende, 1D-Hintergrund mit linearer/logarithmischer Achse, Tabellenfarben, Kontur, 3D sowie schmale Darstellung. Die Einträge in `Pruefdaten_Browser.json` tragen die jeweilige geprüfte Versionsnummer.
+**7 gezielte Chromium-Prüfungen bestanden:**
 
-Die folgenden umfangreichen Rechen-/Browserprüfungen dokumentieren den Stand **1.2.2**. Die dort protokollierte frühere Farbabstufung wurde in 1.2.3 durch die oben beschriebene Skala ersetzt.
+- Fehler in 1.2.3 über den tatsächlichen Autoscale-Knopf nachgestellt: Hintergrund dehnte die logarithmische y-Achse auf 10⁻¹⁵ bis 10⁴ aus. In 1.2.4 richtet sich Autoscale nach den dargestellten Daten; reine Ansichtsflächen beeinflussen die Achsen nicht. Der physikalische RMS-Höchstwert begrenzt die obere Achse bei Bedarf, während kleine Datenbereiche klein bleiben.
+- Hintergrund bei Zoom, Doppelklick und Autoscale mit logarithmischer sowie linearer Achse geprüft.
+- Durchgehend identisches kräftiges Grün von null bis 0,001°, ohne Cyan-Stufe, in Legende, Ergebnissen und Markern.
+- Zwei synthetische Filme: [1] SiO2 und [2] Al2O3. Nummern in Aufbau, Eingaben, Auswahl, Materialziel, Achsen, Ergebniskopf, Unsicherheiten und CSV geprüft; Modell-JSON bewahrt die ursprünglichen Namen ohne Nummernprefix. Umordnen und Rückgängig geprüft; gemeinsamer Fit findet d = 118 nm und n = 1,76 wieder.
+- Ursprüngliche private `.dat`-Datei mit 16 377 Zeilen: Anfang/Ende, direkte Seite 200, Messung 8 123 und letzte Messung geprüft. Auswahl wird durch Navigation nicht geändert.
+- Gruppierte und zugeklappte Messungen werden beim Sprung geöffnet; ausgefilterte Ziele werden verständlich gemeldet und Filter bleiben erhalten.
+- Schmale Darstellung mit 390 px ohne horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler.
+
+Die folgenden umfangreichen Rechen-/Browserprüfungen dokumentieren den Stand **1.2.2**. Zwischenstände und aktuelle Prüfungen sind in `Pruefdaten_Browser.json` durch Versionsnummern getrennt. Die Farbabstufung aus 1.2.2/1.2.3 wurde in 1.2.4 wie oben beschrieben angepasst.
 
 ## Basisprüfung 1.2.2: Automatisierte Rechen- und API-Tests
 

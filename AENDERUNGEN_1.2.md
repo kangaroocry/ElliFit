@@ -1,6 +1,14 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 12. November 2026. Quellstand 1.2.3; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 12. November 2026. Quellstand 1.2.4; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Bedienung und Autoscale in 1.2.4
+
+- **Autoscale korrigiert:** Der farbige 1D-Hintergrund liegt ausschließlich in Ansichtskoordinaten. Er folgt Zoom, Verschieben und automatischer Skalierung, ohne selbst die Achsengrenzen zu beeinflussen.
+- **Kein Cyan-Sprung:** Bei und unter 0,001° bleibt dieselbe kräftige Grünfarbe erhalten. Alle anderen Farbanker bleiben wie in 1.2.3.
+- **Direkte Navigation:** Anfang/Ende der angezeigten Messliste, Seiteneingabe, Sprung zu einer Messungsnummer sowie „Letzte Messung“ in Dateireihenfolge. Ziele werden hervorgehoben, Gruppen bei Bedarf aufgeklappt; Filter und Auswahl bleiben erhalten.
+- **Einheitliche Schichtnamen:** `[1] SiO2`, `[2] Al2O3` usw. in Aufbau, Eingaben, Parameterauswahl, Achsen, Tabellen und Exporten. Die Nummer ist eine Anzeige der Position und kein Teil des gespeicherten Namens.
+- **Ergebniskopf:** Jeder Parameter nennt sowohl Größe/Einheit als auch Film, beispielsweise `d (nm) · [2] Al2O3`.
 
 ## Neue RMS-Farbskala in 1.2.3
 
@@ -48,7 +56,7 @@ Stand: 12. November 2026. Quellstand 1.2.3; ersetzt die Bedienoberfläche und er
 | Tabellenköpfe zentrieren | Überschriften mittig über denselben Eingabespalten. |
 | Schichtdiagramm beschriften | Rolle, Name, n, k und Dicke für jedes Medium; halbunendliche Medien mit d = ∞. |
 | Seltene Einstellungen ausklappen | Wellenlänge/Δ-Konvention, Fitdetails und optionale Kalibrierangaben separat ausklappbar. |
-| Beschreibende Achsentitel | Größenname, individueller Schichtname und Position, z. B. Schichtdicke „Film“ (Schicht 1) (nm). |
+| Beschreibende Achsentitel | Größenname und nummerierter Schichtname, z. B. Schichtdicke [1] Film (nm). |
 | Lesbarkeit verbessern | Größere Eingaben, Überschriften und Tabellenschriften; responsive Darstellung bis 390 px geprüft. |
 | Einheiten in Klammern | d (nm), Winkel-RMS (°) usw. |
 | Zahlenformat vereinheitlichen | Dezimalkomma und Leerzeichen als Tausendertrennung in der Oberfläche; Dezimalkomma in CSV. Standardkonformes JSON behält den Punkt. |

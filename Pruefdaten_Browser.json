@@ -142,5 +142,55 @@
     "version": "1.2.3",
     "check": "390-px-Darstellung ohne horizontalen Überlauf und ohne JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.2.4",
+    "check": "Autoscale über echten Werkzeugleistenknopf: vorheriger Fehler nachgestellt, Datenbereich statt Farbflächen skaliert",
+    "passed": true,
+    "old_range": [
+      -14.999999999999998,
+      4
+    ],
+    "new_range": [
+      -8.1461868129786,
+      2.1532125137753435
+    ]
+  },
+  {
+    "version": "1.2.4",
+    "check": "Hintergrund folgt Zoom, Doppelklick und Autoscale auch bei linearer Achse; keine zusätzliche Achsenausdehnung",
+    "passed": true
+  },
+  {
+    "version": "1.2.4",
+    "check": "Unter 0,001° durchgehend kräftiges Grün ohne Cyan-Sprung, konsistent in Legende, Liste und Plot",
+    "passed": true
+  },
+  {
+    "version": "1.2.4",
+    "check": "Eindeutige [n]-Kennungen in Aufbau, Eingaben, Auswahl, Achsen, Ergebniskopf, Unsicherheit und Export; Modellnamen bleiben editierbare Namen",
+    "passed": true,
+    "fit_values": [
+      118.00000000000003,
+      1.7599999999999991
+    ],
+    "additional_check": "Neu angelegte Schichten verwenden [2] Film ohne zusätzliche Nummer im gespeicherten Namen; Rückgängig geprüft."
+  },
+  {
+    "version": "1.2.4",
+    "check": "16 377 Messungen: Anfang/Ende, direkte Seite, direkte Messungsnummer und letzte Messung ohne Änderung der Auswahl",
+    "passed": true,
+    "rows": 16377,
+    "pages": 328
+  },
+  {
+    "version": "1.2.4",
+    "check": "Sprünge öffnen zugeklappte Gruppen; Filter werden respektiert und ausgeblendete Ziele verständlich gemeldet",
+    "passed": true
+  },
+  {
+    "version": "1.2.4",
+    "check": "390-px-Darstellung mit erreichbarer Endnavigation ohne horizontalen Seitenüberlauf und ohne JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

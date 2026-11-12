@@ -138,12 +138,18 @@ def put(model, path, value):
     obj[keys[-1]] = float(value)
 
 
-def parameter_label(model, path):
+def medium_label(model, path):
     parts = path.split('.')
     medium = model['layers'][int(parts[1])] if parts[0] == 'layers' else model[parts[0]]
+    if parts[0] == 'layers':
+        return f'[{int(parts[1])+1}] ' + medium['name']
+    return medium['name'] + (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
+
+
+def parameter_label(model, path):
+    parts = path.split('.')
     quantity = {'thickness_nm': 'Schichtdicke', 'n': 'Brechungsindex', 'k': 'Extinktionskoeffizient'}[parts[-1]]
-    position = f' (Schicht {int(parts[1])+1})' if parts[0] == 'layers' else (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
-    return quantity + ' „' + medium['name'] + '“' + position + (' (nm)' if parts[-1] == 'thickness_nm' else '')
+    return quantity + ' ' + medium_label(model, path) + (' (nm)' if parts[-1] == 'thickness_nm' else '')
 
 
 def wrap(value):

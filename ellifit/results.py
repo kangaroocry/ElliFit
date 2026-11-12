@@ -7,7 +7,7 @@ import time
 import numpy as np
 from scipy.optimize import brentq
 
-from .core import comparison, fixed_value_minimum, parameter_label, put, safe_list, simulate, wrap
+from .core import comparison, fixed_value_minimum, medium_label, parameter_label, put, safe_list, simulate, wrap
 from .statistics import group_periodic_candidates, parameter_uncertainty
 
 
@@ -153,7 +153,7 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     best_periods=best['periods']
     periodicity['periods']=best_periods
     if best_periods:periodicity['kind']='exact' if len(obj.paths)==1 else 'lattice' if len(best_periods)==2 else 'conditional'
-    result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path)) for p in request.parameters],
+    result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path),medium_label=medium_label(obj.model,p.path)) for p in request.parameters],
         settings=request.model_dump(exclude={'model','parameters','measurements'}),solutions=solutions,surface=surface,
         periodicity=periodicity,measurement_uncertainty=obj.analysis.public(),zero_tests=zero_tests,
         rms_definition=dict(formula='sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]',unit='degree',lower_is_better=True,
