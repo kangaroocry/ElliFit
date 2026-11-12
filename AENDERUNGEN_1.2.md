@@ -1,6 +1,16 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 12. November 2026. Quellstand 1.2.4; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 12. November 2026. Quellstand 1.2.5; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Gekoppelte Zweiparameterfits in 1.2.5
+
+- **Falsche innere Minima korrigiert:** Periodische Kopien nicht globaler Randminima können bei freiem n keine neuen inneren Minima begründen. Randfilter jetzt vor der Periodenbildung; Stationarität und lokale Abstiegsmöglichkeiten werden auch nach Verschiebungen geprüft. Skalierte lokale Optimierung mit zentralen Differenzen, Nachoptimierung unbestätigter Punkte.
+- **Gesättigte Fits erklären:** Ein Winkel und zwei Parameter liefern keine verbleibenden Freiheitsgrade zur Modellprüfung. Kennzeichnung numerischer Treffer der Mittelwerte, getrennte Angabe ihrer Abweichung und des verbleibenden Einzelwert-Streuungsanteils. Das in diesem Fall irreführende χ²red = 1 entfällt aus der Listenanzeige.
+- **Rang und Kopplung:** Stark korrelierte, aber lokal getrennt bestimmbare Parameter werden von numerisch schwachen/rangdefekten Fällen unterschieden. Sehr hohe Korrelationen werden nicht zu scheinbar exakt ±1 gerundet.
+- **Numerisches Talprofil:** Bedingte Nachoptimierung bei einem Winkel und starker Kopplung, eigene Mittelwert-RMS-Kurve und abschaltbare Talpunkte in Kontur/3D. Diese Punkte werden nicht als zusätzliche Minima nummeriert oder in die Lösungszahl eingerechnet.
+- **Zusammenhang der Parameter:** Lokale lineare Kompensationsrichtung; für passende transparente d/n-Filme zusätzlich die optische Phasennäherung. Beide folgen der gewählten Familie/Wiederholung und werden klar als Näherungen ausgewiesen.
+- **Mittelwertvergleich bei kleiner Stichprobe:** Gemeinsame 95-%-Verträglichkeit der beiden Winkelmittelwerte mit endlicher Hotelling-T²-Grenze statt ungeeigneter Großstichproben-Grenze; Voraussetzungen und Grenzen erklärt. Ohne geeignete aktive Wiederholkovarianz keine statistische Bereichsangabe.
+- **Exporte:** Talprofil-CSV sowie zusätzliche Bestimmbarkeits-/Mittelwertdiagnostik im Lösungs-CSV und vollständigen JSON-Bericht. Numerisch gleichwertige Familien werden deterministisch nach dem ersten in den Bereich fallenden Wertepaar geordnet.
 
 ## Bedienung und Autoscale in 1.2.4
 

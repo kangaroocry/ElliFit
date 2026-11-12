@@ -1,8 +1,36 @@
-# Prüfprotokoll – ElliFit 1.2.4
+# Prüfprotokoll – ElliFit 1.2.5
 
 Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.4
+## Aktuelle Prüfung von 1.2.5
+
+**52 Rechen-/API-Tests bestanden**, einschließlich des privaten ursprünglichen Importtests. Nach der abschließenden Präzisionsverbesserung der Profilstützstellen wurden die acht neuen Diagnosetests nochmals erfolgreich ausgeführt. JavaScript-Syntaxprüfung bestanden. Zwei Warnungen im Gesamtlauf betreffen die verwendeten Testbibliotheken AnyIO/Starlette und keine fehlgeschlagene Anwendungskontrolle.
+
+Die acht neuen synthetischen Tests prüfen:
+
+- Ein tatsächliches beschränktes Randminimum hat nach einer von n abhängigen Dickenperiodenverschiebung denselben Q-Wert, ist dort aber kein inneres Minimum. Es wird aus der Familienbildung ausgeschlossen.
+- Breiter Zweiparameter-Suchbereich mit zwei Filmen: zwei bestätigte Wurzeln und periodische Kopien; alle ausgegebenen Aliase auf Stationarität geprüft. Die frühere Version gab für denselben synthetischen Fall elf Einträge einschließlich nicht ausreichend verfeinerter Talpunkte aus. Die neue Version findet die zwei interpolierenden Familien.
+- Beide Mittelwerte werden getroffen, während der Einzelwert-RMS beim Wiederholstreuungsanteil bleibt. Q = 2(m−1) und das dadurch zwangsläufige χ²red = 1 werden vom unabhängigen Modellnachweis unterschieden.
+- Voller lokaler Rang trotz sehr starker Parameterkorrelation; kein fälschlich behauptetes exaktes Kontinuum. Profilwerte mit unabhängig berechneten Rohwertresiduen verglichen; Profilkurve trifft die bestätigten Wurzeln.
+- Endlicher gemeinsamer 95-%-Mittelwertvergleich bei drei Wiederholungen mit Hotelling-T²-Grenze 798 und konsistenter Punktkennzeichnung.
+- Lokale lineare Talrichtung gegen unabhängig erneut minimierte Nachbarprofile.
+- Ohne geeignete aktive Kovarianz keine erfundene 95-%-Bereichsangabe.
+- Optische Phasennäherung mit korrekter Dickenperiode; gleicher Phasenwert allein hält Δ/Ψ nicht exakt konstant.
+
+**8 tatsächliche Chromium-Szenarien bestanden:**
+
+1. Versions-/Cache-Schutz, Einparameter-Referenz und unverändertes 1D-Autoscale; ohne Anlass kein Talprofil.
+2. Synthetischer gesättigter Einwinkelfit: zwei Familien, Mittelwerttreffer, RMS-Streuungsanteil, voller Rang und präzise statt zu −1 gerundete Korrelation; kein irreführendes χ²red in der Liste.
+3. Abschaltbare, unnummerierte Talspurpunkte im Konturplot mit RMS-Farben; nummerierte Minima bleiben getrennt auswählbar.
+4. Familien-/Aliaswechsel aktualisiert lokale lineare Richtung und optische Phasennäherung.
+5. Talprofil-CSV, erweitertes Lösungs-CSV und vollständigen JSON-Bericht tatsächlich heruntergeladen und inhaltlich geprüft.
+6. Profilkurve, Kontur und 3D-Talspur ausführbar; Mittelwertvergleich mit endlicher Stichprobe erklärt.
+7. 390-px-Ansicht ohne bleibenden horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler oder ungültigen Plot-Eigenschaften.
+8. Nutzerbeispiel lokal mit frisch gestartetem endgültigem Rechenkern nachgerechnet: zwei numerisch interpolierende Familien mit Rang 2; dieselben Wurzeln im Profil, schaltbare Achsen und fehlerfreie schmale Ansicht. Private Eingangsdaten, Ergebnisse und Screenshots werden nicht veröffentlicht; protokolliert werden nur bestandene Prüfungen und Familienanzahl.
+
+Die bisherigen Farb-, Navigations- und Schichtkennungsfunktionen aus 1.2.4 bleiben enthalten. Historische Browserprüfungen und aktuelle Ergebnisse sind in `Pruefdaten_Browser.json` mit Versionsnummern getrennt.
+
+## Basisprüfung von 1.2.4
 
 **7 API-/Vergleichsplot-Tests und die JavaScript-Syntaxprüfung bestanden.** Die optischen Formeln und die Suche sind unverändert; ergänzt wurden Anzeigenamen und eindeutige Medium-Kennungen in den Ergebnisparametern.
 

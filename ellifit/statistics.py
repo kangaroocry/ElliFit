@@ -149,6 +149,22 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     result = dict(available=False, method='Lokale Kovarianzfortpflanzung', statistical=None, calibration=None,
         combined=None, covariance_statistical=None, correlation=None, bootstrap95=None,
         calibration_sources=[], weak=weak, note='Messstreuung wird durch den Fit fortgepflanzt; kein zusätzlicher pauschaler Fitfehler.')
+    weighted_jac=np.vstack([np.linalg.cholesky(w).T@J[j*width:(j+1)*width] for j,w in enumerate(weights)])
+    sj=np.linalg.svd(weighted_jac,compute_uv=False)
+    rank=int(np.sum(sj>max(1e-13,sj[0]*1e-10)))
+    coupling=None;relation=None
+    if len(values)==2:
+        denom=math.sqrt(max(0.,information[0,0]*information[1,1]))
+        coupling=float(np.clip(-information[0,1]/denom,-1,1)) if denom>0 else None
+        dependent=next((i for i,path in enumerate(obj.paths) if path.endswith('thickness_nm')),0)
+        independent=1-dependent
+        if not weak and information[dependent,dependent]>1e-15:
+            slope=-information[dependent,independent]/information[dependent,dependent]*scales[dependent]/scales[independent]
+            relation=dict(dependent_index=dependent,independent_index=independent,slope=float(slope),center=values.tolist(),
+                note='Lokale lineare Kompensationsrichtung der gewählten Lösungsfamilie; keine globale exakte Lösungskurve.')
+    result.update(sensitivity_rank=rank,sensitivity_singular_values=sj.tolist(),
+        condition_number=float(sj[0]/sj[-1]) if sj[-1]>0 else None,coupling_correlation=coupling,
+        strongly_correlated=coupling is not None and abs(coupling)>.995,local_relation=relation)
     if weak:
         result['note'] = 'Rangdefekt oder sehr starke Parameterkorrelation; keine verlässlichen lokalen Fehlerbalken.'
         return result

@@ -87,9 +87,19 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     if flat:candidates=candidates[:1]
     # Only the globally best boundary candidate is retained. k=0 remains
     # independently available to the zero/profile comparison even if excluded.
-    discarded=sum(boundary(z) for z,q in candidates[1:])
+    discarded=getattr(obj,'discarded_boundary_candidates',0)+sum(boundary(z) for z,q in candidates[1:])
     candidates=[c for i,c in enumerate(candidates) if i==0 or not boundary(c[0])]
     families=group_periodic_candidates(obj,candidates,flat)
+    # Numerical ties carry no preference between distinct interpolating roots.
+    # Make their order deterministic using the first in-range parameter tuple.
+    ordered=[];cluster=[];anchor=None
+    for family in families:
+        if anchor is not None and abs(family['q']-anchor)>1e-10*max(1.,abs(anchor)):
+            ordered.extend(sorted(cluster,key=lambda g:tuple(g['key'])));cluster=[];anchor=None
+        if anchor is None:anchor=family['q']
+        cluster.append(family)
+    ordered.extend(sorted(cluster,key=lambda g:tuple(g['key'])))
+    families=ordered
     solutions=[];all_aliases=[]
     progress(88,'Periodenfamilien und Parameterunsicherheiten')
     for rank,group in enumerate(families,1):
@@ -109,6 +119,13 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         all_aliases.extend([a|dict(rank=rank) for a in aliases])
     if not solutions:raise ValueError('Keine innere Lösung gefunden. Suchbereich vergrößern.')
     best=solutions[0]
+    from .diagnostics import fit_diagnostics
+    progress(90,'Bestimmbarkeit und numerisches Talprofil')
+    diagnostics=fit_diagnostics(obj,solutions,grids,progress)
+    if diagnostics['saturated']:
+        warnings.append('Gesättigter Fit: zwei freie Parameter bei einem Messwinkel. Die Winkelmittelwerte können interpoliert werden; es bleiben keine unabhängigen Freiheitsgrade zur Modellprüfung. χ²red aus derselben Wiederholstreuung ist hier kein Gütenachweis.')
+    if diagnostics.get('strongly_correlated'):
+        warnings.append('Die Parameter sind stark gekoppelt. Das numerische Talprofil zeigt Kompensationspaare; Talpunkte sind keine zusätzlichen exakten Lösungen. Lokale Unsicherheiten gelten nur innerhalb der gewählten Familie.')
     for s in solutions:s['equivalent']=s['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     for alias in all_aliases:alias['equivalent']=alias['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     if best['at_boundary']:
@@ -155,7 +172,8 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     if best_periods:periodicity['kind']='exact' if len(obj.paths)==1 else 'lattice' if len(best_periods)==2 else 'conditional'
     result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path),medium_label=medium_label(obj.model,p.path)) for p in request.parameters],
         settings=request.model_dump(exclude={'model','parameters','measurements'}),solutions=solutions,surface=surface,
-        periodicity=periodicity,measurement_uncertainty=obj.analysis.public(),zero_tests=zero_tests,
+        periodicity=periodicity,measurement_uncertainty=obj.analysis.public(),zero_tests=zero_tests,identifiability=diagnostics,
+        minimum_checks=getattr(obj,'minimum_checks',None),
         rms_definition=dict(formula='sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]',unit='degree',lower_is_better=True,
             note='Absolute Winkelabweichung über alle ausgewählten Rohwerte; kein Signifikanztest oder Beweis physikalischer Plausibilität.'),
         warnings=list(dict.fromkeys(warnings)),discarded_boundary_minima=discarded,

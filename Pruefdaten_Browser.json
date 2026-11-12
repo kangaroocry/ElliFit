@@ -192,5 +192,47 @@
     "version": "1.2.4",
     "check": "390-px-Darstellung mit erreichbarer Endnavigation ohne horizontalen Seitenüberlauf und ohne JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Version und Cache-Schutz; Einparameter-Referenz und Autoscale unverändert korrekt, kein unpassendes Talprofil",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Gesättigter synthetischer Einwinkelfit: zwei bestätigte Familien, Treffer der Mittelwerte, RMS-Streuungsanteil, Rang 2 und präzise Korrelation erklärt; kein irreführendes χ²red=1",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Talspur im Konturplot: separat erkennbare unnummerierte Punkte, RMS-Farben und abschaltbare Anzeige; Minima bleiben nummeriert",
+    "passed": true,
+    "profile_overlay_points": 599
+  },
+  {
+    "version": "1.2.5",
+    "check": "Familien- und Aliaswahl aktualisiert lineare Talrichtung und optische Phasennäherung mit korrekten Schichtkennungen",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Talprofil-, Lösungs-CSV und vollständigen JSON-Bericht tatsächlich heruntergeladen; beide RMS-Arten und Gültigkeitsinformationen enthalten",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Numerisches Talprofil und 3D-Talspur ausführbar; gemeinsamer 95-%-Mittelwertvergleich verwendet endliche Stichprobe mit drei Wiederholungen",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "390-px-Ansicht ohne horizontalen Seitenüberlauf, keine JavaScript-Laufzeitfehler oder ungültigen Plot-Eigenschaften",
+    "passed": true
+  },
+  {
+    "version": "1.2.5",
+    "check": "Privates Nutzerbeispiel mit frisch gestartetem Rechenkern: zwei numerisch interpolierende Familien, Rang 2; Talprofil trifft dieselben Wurzeln, Achsen schaltbar und mobile Ansicht fehlerfrei",
+    "passed": true,
+    "families": 2
   }
 ]

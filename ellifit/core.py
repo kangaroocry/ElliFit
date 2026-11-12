@@ -541,7 +541,7 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         de = differential_evolution(obj.scalar, [(0, 1)] * ndim, seed=1337, popsize=[8, 12, 16][level], maxiter=[55, 100, 180][level], polish=False, tol=1e-8, atol=1e-12, callback=callback)
         starts = [de.x, *points[idx[:maxlocal]], *de.population[np.argsort(de.population_energies)[:6]]]
         for k, z in enumerate(starts):
-            opt = least_squares(obj.residual, np.clip(z, 1e-12, 1 - 1e-12), bounds=(np.zeros(ndim), np.ones(ndim)), ftol=1e-12, xtol=1e-12, gtol=1e-10, max_nfev=[250, 450, 800][level])
+            opt = least_squares(obj.residual, np.clip(z, 1e-12, 1 - 1e-12), bounds=(np.zeros(ndim), np.ones(ndim)), jac='3-point', diff_step=1e-6, x_scale='jac', ftol=1e-12, xtol=1e-12, gtol=1e-10, max_nfev=[350, 600, 1000][level])
             candidates.append((opt.x, obj.scalar(opt.x)))
             if not opt.success:
                 warnings.append('Eine lokale Verfeinerung erreichte das Iterationslimit.')
@@ -555,6 +555,18 @@ def solve(request, progress=lambda p, m: None, cancel=None):
     candidates = unique_candidates(candidates)
     if not candidates:
         raise ValueError('Keine endliche Lösung gefunden.')
+    if ndim==2:
+        from .diagnostics import verify_candidates
+        progress(86,'Minima numerisch bestätigen')
+        candidates=unique_candidates(verify_candidates(obj,candidates))
+        if obj.minimum_checks['rejected']:
+            warnings.append(f"{obj.minimum_checks['rejected']} nicht bestätigte Optimierungspunkte verworfen; sie werden nicht als lokale Minima ausgegeben.")
+    # A constrained boundary minimum is not necessarily stationary after a
+    # thickness-period shift when that period depends on another free index.
+    # Discard non-global boundary points before creating periodic copies.
+    on_boundary=lambda z:bool(np.any(z<1e-6) or np.any(z>1-1e-6))
+    obj.discarded_boundary_candidates=sum(on_boundary(z) for z,q in candidates[1:])
+    candidates=[c for i,c in enumerate(candidates) if i==0 or not on_boundary(c[0])]
     dcols = [i for i, p in enumerate(obj.paths) if p.endswith('thickness_nm')]
     periodicity = dict(kind='none', message='Keine exakte gemeinsame Dickenperiode nachgewiesen.', periods=[])
     if len(obj.obs.angles) == 1 and dcols and not flat:
@@ -587,6 +599,10 @@ def solve(request, progress=lambda p, m: None, cancel=None):
             periodicity['message'] = 'Dickenperiode(n): ' + ', '.join(f'{p["period_nm"]:.7g} nm' for p in periodicity['periods']) + ('. Bei festem zweiten Parameter; die Periode kann zwischen Wertepaaren variieren.' if periodicity['kind'] == 'conditional' else '. Analytische Wiederholungen wurden nachgerechnet.')
     elif len(obj.obs.angles) > 1:
         periodicity['message'] = 'Mehrere Winkel haben im Allgemeinen unterschiedliche Dickenperioden. Ähnlich gute Minima allein beweisen keine Periodizität.'
+    if ndim==2:
+        # Also validate any period-shifted points; equality of function values
+        # alone does not certify an interior two-parameter minimum.
+        candidates=unique_candidates(verify_candidates(obj,candidates))
     from .results import finalize
     return finalize(request, obj, candidates, grids, points, scores, rms_grid,
                     periodicity, warnings, flat, started, progress, zero_candidates)

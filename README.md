@@ -1,8 +1,8 @@
-# ElliFit 1.2.4
+# ElliFit 1.2.5
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.4 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.5 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -100,7 +100,29 @@ Analytisch nachgewiesene Wiederholungen werden als **eine hervorgehobene Lösung
 
 Nicht globale Randminima werden aus der Ergebnisliste entfernt. Liegt das beste Minimum an einer künstlichen Suchgrenze, erscheint der Hinweis, den Bereich zu vergrößern. Die physikalische Grenze k = 0 wird ausdrücklich unterschieden. Eine praktisch flache Zielfunktion beziehungsweise eine rangdefiziente Sensitivität wird als fehlende Bestimmbarkeit gemeldet.
 
+Seit 1.2.5 werden nicht globale Randminima **vor** der Erzeugung periodischer Kopien ausgeschlossen. Eine Randlösung kann bei freiem n nach einer Dickenverschiebung denselben Fehlerwert haben, ohne am neuen Ort ein inneres Minimum zu sein: Die Periode hängt von n ab. Solche Punkte wurden zuvor fälschlich als zusätzliche Familien ausgegeben. Die zweidimensionalen Optimierungen verwenden jetzt eine skalierte Jacobi-Matrix mit zentralen Differenzen. Sowohl gefundene Kandidaten als auch periodische Kopien werden zusätzlich auf zulässige Stationarität und lokalen Abstieg geprüft; unbestätigte Punkte werden erneut optimiert oder verworfen. Das ist eine numerische Kontrolle, kein mathematischer Vollständigkeitsbeweis.
+
 Eine Familie kann viele Aliase enthalten. Bis zu 200 werden einzeln dargestellt; die analytische Gesamtzahl bleibt angegeben. Lokale Unsicherheiten gehören immer zur jeweiligen Familie beziehungsweise ausgewählten Wiederholung. Über periodische Aliase werden weder Parameter noch Unsicherheiten gemittelt.
+
+## Ein Messwinkel, zwei Parameter und schmale Fehlertäler
+
+Ein Messwinkel liefert zwei skalare Mittelwerte, Δ und Ψ. Mehrere Wiederholungen verbessern deren Bestimmung und die Streuungsschätzung, liefern aber keine zusätzliche Messgeometrie. Zwei freie Parameter bei einem Winkel ergeben einen **gesättigten Fit**: Auf Ebene der Mittelwerte bleiben `2 × Anzahl Winkel − Anzahl Parameter = 0` Freiheitsgrade zur unabhängigen Prüfung des Modells.
+
+Das bedeutet **nicht automatisch eine kontinuierliche Kurve exakter Lösungen**. Bei vollem Rang der lokalen Jacobi-Matrix sind exakte Wurzeln lokal isoliert. Ein sehr schmales Fehlertal kann trotzdem viele annähernd gute Wertepaare enthalten: Der Einfluss des einen Parameters wird durch den anderen weitgehend kompensiert. Ein tatsächlicher Rangdefekt ist von dieser starken, aber endlichen Korrelation zu unterscheiden. Rang und Korrelation werden angezeigt; sehr hohe Korrelationen werden mit zusätzlichen Stellen ausgegeben, damit etwa −0,9999993 nicht irreführend wie exakt −1 aussieht. Die Rangprüfung ist numerisch und lokal; sie beweist keine globale Eindeutigkeit oder exakte Mannigfaltigkeit.
+
+Bei passenden Daten können mehrere Familien beide Winkelmittelwerte praktisch exakt treffen. ElliFit kennzeichnet einen Treffer bei einem **RMS der Mittelwerte ≤ 0,000001°** als numerische Interpolation. Diese Toleranz ist eine Rechengenauigkeit, **keine experimentelle Unsicherheit**. Die Liste und die ursprüngliche Farbskala zeigen weiterhin den **RMS über alle Einzelmessungen**. Selbst bei genau getroffenen Mittelwerten bleibt darin die Wiederholstreuung stehen; dieser Streuungsanteil wird getrennt erläutert und nicht als zusätzlicher Fehler addiert. Numerisch gleichwertige Wurzeln erhalten eine stabile Reihenfolge nach ihrem ersten Wertepunkt im Suchbereich; diese Reihenfolge ist keine physikalische Präferenz.
+
+Ein χ²red nahe 1 ist hier besonders leicht misszuverstehen: Werden zwei Mittelwerte exakt getroffen und wird die 2×2-Kovarianz aus denselben m lokalen Wiederholungen geschätzt, beträgt der verbleibende gewichtete Streuungsanteil **Q = 2(m−1)**. Mit dem bisherigen Nenner `2m−2` ergibt sich χ²red = 1 zwangsläufig. Das ist **kein unabhängiger Gütenachweis**. Die gesättigte Ergebnisliste zeigt deshalb einen Interpolationshinweis statt dieses Werts; im vollständigen Bericht bleibt er ausdrücklich diagnostisch erhalten.
+
+Bei einem Winkel und starker Kopplung beziehungsweise schwacher Bestimmbarkeit ergänzt ElliFit:
+
+- **Numerisches Talprofil:** Ein Parameter wird vorgegeben, der andere mit dem vollständigen optischen Modell erneut minimiert. Bei d/n wird n vorgegeben und d profiliert. Eine vorhandene exakte Dickenperiode begrenzt die numerische Phasensuche auf einen Zyklus; weitere in den Suchbereich fallende Kopien werden ergänzt. Kleine umrandete, abschaltbare Punkte zeigen die Talspur im Kontur-/3D-Plot, getrennt von den nummerierten Minima. Sie sind **keine zusätzlichen Lösungen**. Ein eigenes Diagramm zeigt den RMS der Winkelmittelwerte entlang dieses Profils. Die Kurve ist eine numerische Stichprobe der jeweils besten bedingten Anpassung; ein endliches Raster kann schmale oder zusätzliche Äste übersehen.
+- **Lokale lineare Kompensation:** `p₁ ≈ p₁* + a(p₂−p₂*)`, berechnet aus der lokalen gewichteten Empfindlichkeit. Bei d/n wird nach Möglichkeit d als abhängige Größe angegeben. Die Relation und ihre Mitte folgen der ausgewählten Familie und periodischen Wiederholung. Sie gilt nur in der unmittelbaren Umgebung, mit festen übrigen Modellwerten und aktuellen Fitgewichten.
+- **Optische Phasennäherung bei transparentem d/n-Film:** `d sqrt(n² − n₀² sin²φ) ≈ C`, mit n₀ des Einfallsmediums. Die rechte Seite verändert sich zwischen periodischen Kopien exakt um λ/2. Konstante Phase allein hält die Fresnel-Amplituden jedoch nicht konstant: Diese Formel ist **keine exakte globale Δ/Ψ-Lösungskurve**. Das numerische Profil berücksichtigt die Amplituden vollständig.
+
+Für einen gemeinsamen **95-%-Mittelwertvergleich** wird bei einem Winkel und aktiv verwendeter geeigneter Wiederholkovarianz S die Größe `T² = m r̄ᵀ S⁻¹ r̄` betrachtet. Für zwei Komponenten und m > 2 gilt unter unabhängigen normalverteilten lokalen Winkelabweichungen die Grenze `2(m−1)/(m−2) × F[2,m−2](0,95)`. Bei **drei Wiederholungen ist diese Grenze 798**, erheblich größer als die asymptotische χ²-Grenze. Entsprechende Profilpunkte sind im Profilplot und CSV gekennzeichnet. Dies ist eine bedingte Betrachtung ausschließlich der Messstreuung bei festen übrigen Modell- und Kalibrierwerten; keine globale Parameterintervall- oder Modellgültigkeitsaussage. Ohne geeignete aktive Kovarianz wird kein statistischer Bereich erfunden. Diese Behandlung des gemeinsamen Winkelmittelwerts ist vom weiterhin asymptotischen k-Nullvergleich zu unterscheiden.
+
+Zusätzliche ausreichend verschiedene Messwinkel können Tal und Mehrdeutigkeiten einschränken und erstmals verbleibende Freiheitsgrade zur Modellprüfung schaffen. Mehr Wiederholungen desselben Winkels liefern dafür keinen Ersatz. Auch ein Mehrwinkelfit muss auf systematische Fehler und unzutreffende feste Material-/Schichtwerte geprüft werden.
 
 ## Messunsicherheiten aus Wiederholungen
 
@@ -147,9 +169,10 @@ Mit vollständiger Kovarianzgewichtung erfolgt ein näherungsweiser **einseitige
 
 - **Sitzung:** Modell, Messwerte, Auswahl, Suchkonfiguration und Ansichtsoptionen als JSON. Nach dem Öffnen Fits neu berechnen. Alte explizite Δ-Konventionen und Suchskalen bleiben erhalten; frühere pauschale σ-Vorgaben werden nicht als gemessene Unsicherheiten übernommen.
 - **Messdaten-CSV:** Alle geladenen Zeilen; erneut importierbar.
-- **Lösungsfamilien-CSV:** Parameter, RMS, Perioden/Aliase, Randstatus und gegebenenfalls χ²red; keine absolute Q-Spalte.
+- **Lösungsfamilien-CSV:** Parameter, RMS der Einzelwerte und Mittelwerte, Perioden/Aliase, Randstatus, diagnostisches χ²red und Freiheitsgrade zur Modellprüfung; keine absolute Q-Spalte.
 - **Residuen-CSV:** Alle ursprünglichen ausgewählten Einzelwerte der angezeigten Lösung, auch bei einem Mittelwertfit.
 - **Fehlerlandschaft-CSV:** Parameter und Winkel-RMS.
+- **Talprofil-CSV:** Bedingte Wertepaare, RMS der Einzelwerte und Mittelwerte, gegebenenfalls T² mit 95-%-Vergleichsgrenze und Kennzeichnung. Nur verfügbar, wenn ein Talprofil berechnet wurde.
 - **Fitbericht-JSON:** Vollständige Daten einschließlich Modell, Einstellungen, Familien, Oberfläche, Unsicherheiten und aktuell angezeigter Lösung. Q bleibt für Diagnosezwecke enthalten.
 
 CSV verwendet Semikolon, Dezimalkomma und UTF-8-BOM. Die Kamera in der Plot-Werkzeugleiste exportiert SVG. Geänderte Eingaben markieren alte Ergebnisse sichtbar als veraltet.
