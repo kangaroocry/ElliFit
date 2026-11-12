@@ -1,14 +1,14 @@
-# ElliFit 1.2
+# ElliFit 1.2.1
 
 Lokale Auswertung monochromatischer Ellipsometrie: Schichtmodelle und Materialien speichern und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)**
+**[ElliFit 1.2.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
 - [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/ellifit-1.2/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll: 42 Tests und 15 Browserprüfpunkte](https://github.com/kangaroocry/ElliFit/blob/ellifit-1.2/PRUEFPROTOKOLL.md)
+- [Prüfprotokoll: 42 Tests und 18 Browserprüfpunkte](https://github.com/kangaroocry/ElliFit/blob/ellifit-1.2/PRUEFPROTOKOLL.md)
 
-Neu sind zusammengefasste Periodenfamilien, eine feste farbliche Fitgüte, unabhängige Log-Achsen, gruppierbare Messdaten, eine Materialbibliothek, Rückgängig und konsistente deutsche Zahlenformate. Messunsicherheiten werden aus geeigneten Wiederholungen abgeleitet; statistische und optionale Kalibrierbeiträge bleiben getrennt. k kann einschließlich null über positive logarithmische Stützstellen untersucht werden.
+Neu in 1.2.1 sind die direkte Auswahl fix/X/Y an den Modellwerten und Schichtpositionen in Klammern. Enthalten sind außerdem zusammengefasste Periodenfamilien, Winkel-RMS mit festen Farbstufen und dezent gefärbtem 1D-Hintergrund, unabhängige Log-Achsen, gruppierbare Messdaten, eine Materialbibliothek, Rückgängig und konsistente deutsche Zahlenformate. Messunsicherheiten werden aus geeigneten Wiederholungen abgeleitet; statistische und optionale Kalibrierbeiträge bleiben getrennt. k kann einschließlich null über positive logarithmische Stützstellen untersucht werden.
 
 ZIP vollständig in einen beschreibbaren Ordner entpacken. Mit vorhandenem WinPython **`Start_WinPython.bat`** doppelklicken; voreingestellt ist `C:\Programme_portable\WinPython\WPy64-31290`. Der Starter verwendet eine private Umgebung im ElliFit-Ordner, ohne WinPython oder den System-PATH zu verändern. Alternativ mit Python 3.11 oder neuer (64 Bit) `Start_Windows.bat` verwenden. Beim ersten Start werden Abhängigkeiten aus dem Internet installiert. Danach läuft das Programm lokal mit Browseroberfläche.
 
