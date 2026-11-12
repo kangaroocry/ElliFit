@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import threading
@@ -11,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import plotly
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Literal
@@ -38,8 +39,10 @@ async def same_origin(request: Request, next_handler):
         return JSONResponse({'detail': 'Nur Aufrufe aus der lokalen Oberfläche sind erlaubt.'}, status_code=403)
     response = await next_handler(request)
     response.headers['X-Content-Type-Options'] = 'nosniff'
-    if request.url.path.startswith('/api/'):
-        response.headers['Cache-Control'] = 'no-store'
+    # A browser may otherwise reuse an earlier JavaScript/CSS bundle after an
+    # in-place update, even when it has already loaded the new HTML page.
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-ElliFit-Version'] = __version__
     return response
 
 
@@ -55,7 +58,12 @@ async def bad_file(request, exc):
 
 @app.get('/')
 def home():
-    return FileResponse(STATIC / 'index.html')
+    html = (STATIC / 'index.html').read_text(encoding='utf-8')
+    bundle = hashlib.sha256((STATIC / 'app.js').read_bytes() + (STATIC / 'style.css').read_bytes()).hexdigest()[:16]
+    for asset in ('/static/app.js', '/static/style.css'):
+        html = html.replace('"' + asset + '"', '"' + asset + '?v=' + __version__ + '&amp;build=' + bundle + '"')
+    html = html.replace('"/plotly.js"', '"/plotly.js?v=' + plotly.__version__ + '"')
+    return HTMLResponse(html)
 
 
 @app.get('/plotly.js')

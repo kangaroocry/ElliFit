@@ -1,6 +1,14 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 12. November 2026. Quellstand 1.2.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 12. November 2026. Quellstand 1.2.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Korrektur in 1.2.2
+
+- Versions- und inhaltsabhängige Adressen für JavaScript/CSS; keine Wiederverwendung alter Dateien beim Update.
+- Cache-Control: no-store für die lokalen Antworten; Browserstart mit Versionsangabe in der URL.
+- Oberfläche und Rechenkern prüfen ihre Versionsnummern gegeneinander und melden Abweichungen.
+- Konsole nennt Programmversion und Ordner. Ein belegter Port wird ausdrücklich als fehlgeschlagener Start erklärt.
+- Vorheriges Fehlerbild mit bewusst gefülltem Cache nachgestellt: Seite zeigt 1.2.1, aber graue Ergebnisse und keine fix/X/Y-Felder. Danach im selben Browserkontext auf 1.2.2 gewechselt, ohne den Cache zu löschen: Farben und Auswahlfelder vorhanden.
 
 ## Ergänzungen in 1.2.1
 

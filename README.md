@@ -1,8 +1,8 @@
-# ElliFit 1.2.1
+# ElliFit 1.2.2
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -15,6 +15,10 @@ Für andere Installationen den Pfad am Anfang der Batchdatei oder `ELLIFIT_WINPY
 **Mit normal installiertem Python 3.11 oder neuer, 64 Bit:** `Start_Windows.bat` doppelklicken. Der Starter verwendet den Python Launcher beziehungsweise `python` und erstellt `.venv` im Programmordner.
 
 Beim ersten Start benötigen beide Starter Internet für die Python-Pakete. Danach öffnet sich der Browser mit `http://127.0.0.1:8765`. Das Konsolenfenster offen lassen; mit `Strg+C` beenden. Bei Fehlern die Ausgabe im Konsolenfenster beachten. Eine beschädigte private Umgebung kann umbenannt und vom Starter neu erstellt werden.
+
+**Updates und Browser-Cache:** Ab 1.2.2 werden HTML und Oberflächendateien nicht dauerhaft im Browser zwischengespeichert. JavaScript und CSS erhalten zusätzlich Dateiadressen mit Version und Inhaltskennung; beim normalen Start öffnet sich eine URL mit Versionsangabe. So werden alte Oberflächendateien bei einem Update nicht mit dem neuen Rechenkern kombiniert. Eine zusätzliche Versionsprüfung meldet Abweichungen verständlich. Die Konsole nennt Version und Programmordner. Ist der Port belegt, wird ausdrücklich angezeigt, dass die neue Version nicht gestartet wurde.
+
+In 1.2.0/1.2.1 konnten trotz neuer Versionsnummer in der Seite noch ältere JavaScript-Dateien aus dem Cache geladen werden. Das konnte graue Ergebniszeilen, fehlende 1D-Farben und fehlende fix/X/Y-Auswahlfelder verursachen. In diesem Fall half das Löschen der Browserdaten für die lokale Seite; ein damit wieder funktionierendes 1.2.1 kann weiterverwendet werden.
 
 Nach der Erstinstallation läuft ElliFit offline. Plotly-JavaScript wird lokal ausgeliefert; es gibt keinen CDN-Zugriff. Messdaten werden nicht an GitHub oder andere Dienste gesendet. Die Anwendung besteht aus **Python und JavaScript mit Startdateien, nicht aus einer kompilierten EXE**.
 

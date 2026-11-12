@@ -1,5 +1,9 @@
 from fastapi.testclient import TestClient
+import html
+import re
+import shutil
 from ellifit import server
+from ellifit import __version__
 from ellifit.core import Model
 
 
@@ -57,3 +61,32 @@ def test_session_normalizes_legacy_defaults_and_preserves_explicit_convention():
     session['parameters']=[dict(path=''),dict(path='')]
     assert client.post('/api/validate-session',json=session).status_code==200
     assert client.post('/api/fit',json=dict(model=model,measurements=session['measurements'],parameters=[])).status_code==422
+
+
+def test_browser_assets_are_versioned_and_never_heuristically_cached():
+    client=TestClient(server.app)
+    page=client.get('/')
+    assets=[html.unescape(path) for path in re.findall(r'(?:src|href)="([^"]+)"',page.text) if path.startswith(('/static/','/plotly.js'))]
+    assert len(assets)==3
+    assert all('?v=' in path for path in assets)
+    assert all('&build=' in path for path in assets if path.startswith('/static/'))
+    for path in ['/', '/api/info', *assets]:
+        response=client.get(path)
+        assert response.status_code==200
+        assert response.headers['cache-control']=='no-store'
+        assert response.headers['x-ellifit-version']==__version__
+
+
+def test_asset_addresses_change_when_contents_change_without_version_bump(tmp_path,monkeypatch):
+    for name in ['index.html','app.js','style.css']:
+        shutil.copy2(server.STATIC/name,tmp_path/name)
+    monkeypatch.setattr(server,'STATIC',tmp_path)
+    client=TestClient(server.app)
+    def bundle():return re.search(r'/static/app\.js\?v=[^" ]+',client.get('/').text).group()
+    first=bundle()
+    app=tmp_path/'app.js'
+    app.write_text(app.read_text()+'\n// changed asset\n')
+    second=bundle()
+    css=tmp_path/'style.css'
+    css.write_text(css.read_text()+'\n/* changed style */\n')
+    assert first!=second and second!=bundle()

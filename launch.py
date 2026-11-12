@@ -5,6 +5,8 @@ import socket
 import threading
 import webbrowser
 
+from ellifit import __version__
+
 
 def main():
     parser = argparse.ArgumentParser(description='ElliFit · lokale Ellipsometrie')
@@ -21,11 +23,14 @@ def main():
         with socket.socket() as probe:
             probe.bind(('127.0.0.1', args.port))
     except OSError:
-        print(f'Port {args.port} ist belegt. Mit --port {args.port + 1} starten.')
+        print(f'Port {args.port} ist belegt. Die neue ElliFit-Version wurde nicht gestartet.\n'
+              f'Falls noch ElliFit läuft: dessen Konsolenfenster mit Strg+C beenden.\n'
+              f'Alternativ mit --port {args.port + 1} starten.')
         raise SystemExit(1)
     import uvicorn
-    url = f'http://127.0.0.1:{args.port}'
-    print(f'ElliFit: {url}\nDieses Fenster offen lassen. Beenden mit Strg+C.')
+    url = f'http://127.0.0.1:{args.port}/?v={__version__}'
+    print(f'ElliFit {__version__}: {url}\nProgrammordner: {Path(__file__).resolve().parent}\n'
+          'Dieses Fenster offen lassen. Beenden mit Strg+C.')
     if not args.no_browser:
         timer = threading.Timer(1.2, lambda: webbrowser.open(url))
         timer.daemon = True

@@ -78,5 +78,13 @@
   {
     "check": "JavaScript-Laufzeitfehler",
     "count": 0
+  },
+  {
+    "check": "Gefüllter Browser-Cache: alte Dateien reproduzieren graue Ergebnisse und fehlende Auswahl; Update lädt ohne Cache-Löschen die neuen Dateien",
+    "passed": true
+  },
+  {
+    "check": "Unterschiedliche Versionen von Oberfläche und Rechenkern werden verständlich gemeldet; Fit bleibt deaktiviert",
+    "passed": true
   }
 ]

@@ -1,10 +1,10 @@
-# Prüfprotokoll – ElliFit 1.2.1
+# Prüfprotokoll – ElliFit 1.2.2
 
 Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
 ## Automatisierte Rechen- und API-Tests
 
-**42 Tests bestanden**, einschließlich des privaten Importtests mit den ursprünglichen Dateien:
+**44 Tests bestanden**, einschließlich des privaten Importtests mit den ursprünglichen Dateien:
 
 ```sh
 ELLIFIT_EXAMPLES_DIR=/Pfad/zu/privaten/Beispielen python -m pytest -q
@@ -23,11 +23,13 @@ Ohne diese privaten Dateien wird genau dieser Importtest übersprungen. Die Date
 - Exaktes k = 0 plus logarithmischer positiver Bereich, Wiederfinden von k = 10⁻⁵ und Profil-Obergrenze bei mit null verträglichen Daten. Eine physikalische k-Nullgrenze verdeckt keine weitere künstliche Suchgrenze.
 - Unveränderter Winkel-RMS unverändert beim Vervielfachen derselben Werte. Modell-/Materialpersistenz, Validierung, Dateinamenprüfung, Origin-Prüfung und Normalisierung alter Sitzungen bei Erhalt expliziter Konventionen. Sitzungen ohne ausgewählte Parameter werden gespeichert; Fitaufrufe ohne Parameter bleiben ungültig.
 
+Zusätzlich geprüft: versionsabhängige Datei-URLs, no-store-Antworten sowie neue Datei-URLs nach Inhaltsänderungen ohne Versionsänderung.
+
 JavaScript-Syntaxprüfung mit `node --check ellifit/static/app.js` bestanden. Zwei Warnungen stammen aus AnyIOs pytest-Anbindung und Starlettes Testclient bezüglich künftiger Schnittstellen; kein Anwendungstest ist fehlgeschlagen.
 
 ## Browserprüfung
 
-Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 18 protokollierte Prüfpunkte in [Pruefdaten_Browser.json](Pruefdaten_Browser.json):
+Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 20 protokollierte Prüfpunkte in [Pruefdaten_Browser.json](Pruefdaten_Browser.json):
 
 | Prüfung | Ergebnis |
 |---|---|
@@ -49,6 +51,8 @@ Automatisierte tatsächliche Bedienung mit Playwright und Chromium; 18 protokoll
 | Abbruch | Globale Zweiparametersuche über die Oberfläche abgebrochen |
 | Schmale Ansicht | 390 px ohne horizontalen Seitenüberlauf |
 | JavaScript-Laufzeitfehler | Keine |
+| Vorher gefüllter Browser-Cache | Altes JavaScript/CSS mit neuer 1.2.1-Seite reproduziert fehlende Farben und Auswahlfelder; nach Wechsel auf 1.2.2 im selben Browser ohne Löschen des Caches behoben |
+| Versionsabweichung | Oberfläche 1.2.2 mit absichtlich abweichender API-Version 1.2.1 meldet den Fehler und deaktiviert den Fit |
 
 Die JSON-Prüfdaten enthalten ausschließlich synthetische Ergebnisse und Importanzahlen; keine privaten Messwertlisten. Browserprüfung bezeichnet die tatsächliche Ausführung und Bedienung der lokal gestarteten Anwendung im Browser, nicht einen Upload der Messdaten an einen Webdienst.
 
