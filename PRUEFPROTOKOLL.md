@@ -1,8 +1,29 @@
-# Prüfprotokoll – ElliFit 1.2.6
+# Prüfprotokoll – ElliFit 1.2.7
 
 Stand: 13. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.6
+## Aktuelle Prüfung von 1.2.7
+
+**64 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. Nach verständlicherer Bereichsvalidierung der Probelösungen wurden die sechs neuen Prüfungen gezielt nochmals erfolgreich ausgeführt. JavaScript-Syntaxprüfung bestanden. Die zwei Bibliothekswarnungen betreffen AnyIO/Starlette.
+
+Neue Prüfungen umfassen direkte Modellrechnung einer Probelösung ohne Optimierung/Änderung vorhandener Fitfamilien, physikalisch zulässiges d = 0 außerhalb einer positiven logarithmischen Suche, Ein- und Mehrwinkelvergleich, Ablehnung ungültiger Werte/Parameterzahlen, verfügbare abgeschlossene Jobs, umgekehrte Nummerierung einschließlich Substrat [0] sowie die Einstufung kritischer Hinweise.
+
+**10 tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Feldpfeile mit der Maus geklickt: n um 0,001, d um 0,1 nm und kleine k-Werte mit angepassten Schritten. Drei/eine Nachkommastellen; Tastaturpfeile ändern das Modell nicht.
+2. Neue Schicht bei exakt 0 nm; Nummerierung von Substrat [0] nach oben in Diagramm, Eingaben, Parameterwahl und Materialziel. Rückgängig/Wiederherstellen und tatsächlicher JSON-Export erhalten optische Reihenfolge und ursprüngliche Namen.
+3. Messdaten links und Ergebnisse rechts vor den Plots; Namen in der Kennzahlenleiste. Hinweise/Analyse standardmäßig eingeklappt. Die zusätzliche Nullschicht verändert das Wiederfinden der Referenzdicke nicht.
+4. Probelösungen tatsächlich eingegeben, ausgewählt, verglichen, gelöscht und als CSV/JSON heruntergeladen. d = 0 ist im Fehlerplot darstellbar, die Fitfamilien bleiben unverändert und es werden keine Fitunsicherheiten für Probelösungen ausgegeben.
+5. Verweilen mit echten Mausradereignissen: zehn fortlaufende Scrollereignisse bleiben global; nach Ruhe über der Liste ist lokales Scrollen aktiv. Verlassen beendet die Freigabe. Eine alte Scrollschalter-Einstellung aus einer Sitzung wird ignoriert.
+6. Nach Verweilen echtes lokales 2D-Zoom; Seitenscrollen und RMS-Farbhintergrund bleiben nutzbar.
+7. Tatsächlicher Zweiparameterfit mit d[2]/n[2], vorhandenen Lösungsregionen und aufklappbarem Analyseplot. Eigenes Wertepaar bleibt unoptimiert; n = 0 wird abgewiesen. Echtes lokales 3D-Zoom nach Verweilen.
+8. Alle vier Hinweistypen erzeugt und verschiedene Hintergrundfarben geprüft. Ein globales Randminimum bleibt als kritischer Hinweis sichtbar und öffnet die Details.
+9. 390-px-Ansicht ohne horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler.
+10. Endgültige Oberfläche mit drei Filmen als [3]/[2]/[1] über Substrat [0], neue Filme bei null. Feldpfeile bewahren explizite Nullunsicherheiten, Hinweisfarben und schmale Ansicht korrekt.
+
+Private Messwerte und Screenshots werden nicht veröffentlicht. Historische und aktuelle Browserprüfungen bleiben in `Pruefdaten_Browser.json` nach Version getrennt. Der WinPython-Starter bleibt unverändert.
+
+## Basisprüfung von 1.2.6
 
 **58 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. JavaScript-Syntaxprüfung bestanden. Die zwei Warnungen betreffen AnyIO/Starlette als Testbibliotheken.
 

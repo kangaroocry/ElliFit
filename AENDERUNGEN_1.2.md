@@ -1,6 +1,16 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 13. November 2026. Quellstand 1.2.6; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 13. November 2026. Quellstand 1.2.7; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Kompakte Auswertung und Probelösungen in 1.2.7
+
+- **Neue Schichten bei 0 nm:** Hinzufügen verändert das optische Modell zunächst nicht durch eine endliche neue Dicke.
+- **Nummern von unten nach oben:** Substrat [0], darüber [1], [2] usw.; höchste Filmnummer oben. Gilt durchgängig für Diagramm, Editor, Auswahl, Achsen, Gleichungen, Tabellen und Exporte. Optische Reihenfolge und gespeicherte Pfade bleiben erhalten.
+- **Eigene Probelösungen:** Ein oder zwei Werte direkt eingeben, berechnen, auswählen und im Modellvergleich betrachten. Separate T-Markierungen/Zeilen, keine Optimierung und keine erfundenen Fitunsicherheiten. Zulässige Werte außerhalb der Suchgrenzen einschließlich d = 0 möglich; physikalisch ungültige Werte werden verständlich abgewiesen. CSV und JSON bewahren Probelösungen getrennt von Fitfamilien.
+- **Messdaten und Lösungen über den Plots:** Bei breiter Ansicht nebeneinander. Datennamen sind Teil der weißen Kennzahlenleiste; weitere Bezeichnungen werden dort aufgeklappt.
+- **Hinweise gruppiert und farblich:** Informationen blau, Erfolg grün, Warnungen gelb, kritische Hinweise rot. Weniger wichtige Hinweise/Analysen eingeklappt; kritische Suchgrenzenhinweise bleiben sichtbar.
+- **Verweilen statt Scroll-Schalter:** Nach etwa 0,5 s Ruhe über Liste/Diagramm lokales Scrollen beziehungsweise Zoom. Fortlaufendes Seitenscrollen bleibt global. Dezente Umrandung und weiterhin Alt+Mausrad als direkte Bedienung.
+- **Feldpfeile an den Eingaben:** n/k normalerweise ±0,001, d ±0,1 nm; für kleine Werte angepasst. Keine spezielle Tastaturpfeil-Bedienung nötig. Normale Werte mit drei beziehungsweise einer Nachkommastelle; kleine Werte genauer. Volle Rechenpräzision bleibt erhalten.
 
 ## Lösungsregionen und Bedienung in 1.2.6
 

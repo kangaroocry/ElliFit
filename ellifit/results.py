@@ -7,7 +7,7 @@ import time
 import numpy as np
 from scipy.optimize import brentq
 
-from .core import comparison, fixed_value_minimum, medium_label, parameter_label, put, safe_list, simulate, wrap
+from .core import comparison, fixed_value_minimum, medium_label, parameter_label, parameter_symbol, put, safe_list, simulate, wrap
 from .statistics import group_periodic_candidates, parameter_uncertainty
 
 
@@ -174,7 +174,7 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     best_periods=best['periods']
     periodicity['periods']=best_periods
     if best_periods:periodicity['kind']='exact' if len(obj.paths)==1 else 'lattice' if len(best_periods)==2 else 'conditional'
-    result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path),medium_label=medium_label(obj.model,p.path)) for p in request.parameters],
+    result=dict(model=obj.model,parameters=[p.model_dump()|dict(label=parameter_label(obj.model,p.path),medium_label=medium_label(obj.model,p.path),symbol=parameter_symbol(obj.model,p.path)) for p in request.parameters],
         settings=request.model_dump(exclude={'model','parameters','measurements'}),solutions=solutions,surface=surface,
         periodicity=periodicity,measurement_uncertainty=obj.analysis.public(),zero_tests=zero_tests,identifiability=diagnostics,
         minimum_checks=getattr(obj,'minimum_checks',None),
@@ -190,5 +190,29 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     result['measurement_context']=dict(count=len(obj.rows),label_count=len(labels),
         labels=[dict(source=s,comment=c,count=n) for (s,c),n in list(labels.items())[:200]],
         omitted_labels=max(0,len(labels)-200))
+    result['notices']=result_notices(result)
     progress(100,'Fit abgeschlossen')
     return result
+
+
+def result_notices(result):
+    notices=[dict(kind='success',title='Fit abgeschlossen',text=f"{len(result['solutions'])} Lösungsfamilien berechnet.")]
+    notices.append(dict(kind='success' if any(s['periodic'] for s in result['solutions']) else 'info',
+        title='Lösungsfamilien',text=result['periodicity']['message']+(
+            f" {result['discarded_boundary_minima']} weitere Randminima ausgeblendet." if result['discarded_boundary_minima'] else '')))
+    for text in result['warnings']:
+        low=text.lower()
+        if any(word in low for word in ('global kleinste minimum liegt an einer suchgrenze','rangdefekt','keine verlässlichen lokalen fehlerbalken')):
+            kind,title='critical','Prüfung erforderlich'
+        elif 'physikalischen nullgrenze' in low:
+            kind,title='info','Physikalische Grenze'
+        elif 'ein messwinkel liefert zwei' in low:
+            kind,title='info','Messgeometrie'
+        elif 'gesättigter fit' in low or 'stark gekoppelt' in low:
+            kind,title='warning','Bestimmbarkeit'
+        elif any(word in low for word in ('streuung','kovarianz','unsicherheit','drift','residuen')):
+            kind,title='warning','Messung und Unsicherheit'
+        else:
+            kind,title='warning','Suche und Grenzen'
+        notices.append(dict(kind=kind,title=title,text=text))
+    return notices

@@ -19,7 +19,7 @@ from typing import Literal
 
 from . import __version__
 from .core import Cancelled, FitRequest, Model, Observations, Row, comparison, parse_data, simulate, solve
-from .core import Medium, Objective
+from .core import Medium, Objective, parameter_label, put
 from .statistics import RepeatAnalysis, parameter_uncertainty
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -334,6 +334,46 @@ def validate_session(body: dict):
         FitRequest(model=model, measurements=rows, parameters=[p for p in pars if p.get('path')], **body.get('settings', {}))
     return body | dict(model=model.model_dump(), measurements=[r.model_dump() for r in rows],
         parameters=[Parameter.model_validate(p).model_dump() if p.get('path') else p for p in pars])
+
+
+class TrialInput(BaseModel):
+    values:list[float]=Field(min_length=1,max_length=2)
+    name:str=Field(default='',max_length=120)
+
+
+@app.post('/api/jobs/{key}/trial')
+def trial_solution(key:str,body:TrialInput):
+    job=job_by_id(key)
+    if job['status']!='completed':raise HTTPException(409,'Zuerst eine globale Suche abschließen.')
+    req=job['request']
+    if len(body.values)!=len(req.parameters) or not np.isfinite(body.values).all():
+        raise ValueError('Für jeden Fitparameter einen endlichen Wert eingeben.')
+    model=req.model.model_dump()
+    for parameter,value in zip(req.parameters,body.values):
+        field=parameter.path.split('.')[-1]
+        minimum=0.;maximum=1e8 if field=='thickness_nm' else 100.
+        if value<minimum or value>maximum or (field=='n' and value==0):
+            label=parameter_label(model,parameter.path)
+            bounds='größer als 0 und höchstens 100' if field=='n' else 'zwischen 0 und 100 000 000 nm' if field=='thickness_nm' else 'zwischen 0 und 100'
+            raise ValueError(f'{label}: einen Wert {bounds} eingeben.')
+        put(model,parameter.path,value)
+    Model.model_validate(model)
+    obj=Objective(req)
+    delta,psi=simulate(obj.model,obj.obs.angles,np.array([body.values]),obj.paths)
+    if not np.isfinite(delta).all() or not np.isfinite(psi).all():
+        raise ValueError('Diese Probelösung ergibt keine definierten ellipsometrischen Winkel.')
+    q=float(obj.analysis.sse(delta,psi)[0]);rms=float(obj.analysis.raw_rms(delta,psi)[0])
+    from .landscape import MeanCompatibility
+    from .diagnostics import mean_deviation
+    compatibility=MeanCompatibility(obj)
+    p=float(compatibility.from_prediction(delta,psi)[0]) if compatibility.available else None
+    outside=any(not parameter.lower<=value<=parameter.upper for parameter,value in zip(req.parameters,body.values))
+    notes=[]
+    if outside:notes.append(dict(kind='warning',title='Probelösung außerhalb des Suchbereichs',text='Der Modellvergleich wurde berechnet. Für diese Parameterwerte wurde keine globale Suche durchgeführt.'))
+    best=min(s['q'] for s in job['result']['solutions'])
+    if q<best-1e-7*max(1.,best):notes.append(dict(kind='warning',title='Probelösung passt besser als die gefundenen Minima',text='Suchbereich und Suchdichte prüfen; die Probelösung wurde nicht lokal optimiert.'))
+    return dict(name=body.name.strip(),values=body.values,q=q,rmse_deg=rms,mean_fit=mean_deviation(obj,body.values),
+        compatibility_p=p,outside_search=outside,optimized=False,comparison=comparison(req,body.values),notices=notes)
 
 
 app.mount('/static', StaticFiles(directory=STATIC), name='static')

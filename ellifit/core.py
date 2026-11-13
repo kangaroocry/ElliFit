@@ -142,8 +142,15 @@ def medium_label(model, path):
     parts = path.split('.')
     medium = model['layers'][int(parts[1])] if parts[0] == 'layers' else model[parts[0]]
     if parts[0] == 'layers':
-        return f'[{int(parts[1])+1}] ' + medium['name']
-    return medium['name'] + (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
+        return f'[{len(model["layers"])-int(parts[1])}] ' + medium['name']
+    return ('[0] ' if parts[0]=='substrate' else '') + medium['name'] + (' (Substrat)' if parts[0] == 'substrate' else ' (Einfallsmedium)')
+
+
+def parameter_symbol(model,path):
+    parts=path.split('.')
+    quantity='d' if parts[-1]=='thickness_nm' else parts[-1]
+    index=len(model['layers'])-int(parts[1]) if parts[0]=='layers' else 0 if parts[0]=='substrate' else 'Einfall'
+    return f'{quantity}[{index}]'
 
 
 def parameter_label(model, path):

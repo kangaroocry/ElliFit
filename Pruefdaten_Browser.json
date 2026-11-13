@@ -298,5 +298,55 @@
     "version": "1.2.6",
     "check": "Endgültige Oberfläche: Suchraster/Achsen gemeinsam rückgängig und wiederhergestellt; gecachte Zahlenformatierung korrekt, Regionshinweise kompakt mit aufklappbaren Voraussetzungen, 3D-Netz und schmale Ansicht fehlerfrei",
     "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Sichtbare Feldpfeile tatsächlich geklickt: n um 0,001, d um 0,1 nm, kleine k-Werte angepasst; drei/eine Nachkommastellen und keine Tastatur-Sonderbehandlung",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Neue Schicht mit exakt 0 nm; Nummerierung vom Substrat [0] aufwärts in Diagramm, Eingaben, Parameterauswahl und Materialziel; Rückgängig/Export bewahren physikalische Reihenfolge und rohe Namen",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Messdaten links und Lösungen rechts oberhalb der Plots; Datennamen in der weißen Kennzahlenleiste, farblich gruppierte Hinweise und Detailanalysen standardmäßig eingeklappt; Nullschicht verändert Referenzfit nicht",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Manuelle Probelösungen ohne Optimierung eingegeben, ausgewählt, verglichen, gelöscht und exportiert; d=0 außerhalb der Log-Suche darstellbar, Fitminima bleiben unverändert und es werden keine Fitunsicherheiten behauptet",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Verweilzeit mit echten Mausradereignissen: fortlaufendes globales Scrollen bleibt global; nach 0,5 s Ruhe scrollt die Liste lokal, Verlassen deaktiviert die Freigabe; alter Schalterzustand aus Sitzungen wird ignoriert",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Nach Verweilen funktioniert echtes lokales Diagramm-Zoom; Seitenscrollen und 1D-Farbhintergrund bleiben nutzbar",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Zweiparameterfit mit d[2]/n[2], vorhandenen 95-/99-%-Regionen und angepasstem Analyseplot; eigenes Wertepaar ohne Optimierung, ungültiges n abgewiesen, echtes lokales 3D-Zoom nach Verweilen",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Hinweistypen tatsächlich erzeugt: blau/grün/gelb/rot verschieden; kritisches globales Randminimum bleibt prominent sichtbar und öffnet die Details",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "390-px-Ansicht ohne horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "version": "1.2.7",
+    "check": "Endgültige Oberfläche: drei Schichten als [3]/[2]/[1] über Substrat [0], neue Schichten bei null; Feldpfeile bewahren explizite Nullunsicherheiten, Hinweisfarben korrekt und schmale Ansicht fehlerfrei",
+    "passed": true
   }
 ]
