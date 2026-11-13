@@ -161,6 +161,10 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         dq=obj.batch(detail[:,None]);dr=obj.last_rms.copy()
         x=np.r_[grids[0],detail];q=np.r_[scores,dq];r=np.r_[rms_grid,dr];order=np.argsort(x)
         surface.update(axes=[obj.decode(x[order,None])[:,0].tolist()],q=safe_list(q[order]),rms=safe_list(r[order]))
+    from .landscape import build_landscape
+    mesh,regions=build_landscape(obj,grids,solutions,diagnostics,progress)
+    if mesh:surface['mesh']=mesh
+    diagnostics['regions']=regions
     equal=[a for a in all_aliases if a['equivalent']]
     periodicity['first_solutions']=sorted(equal,key=lambda a:tuple(a['values']))[:12]
     periodicity['equivalent_count']=sum(s['equivalent'] for s in solutions)
@@ -179,5 +183,12 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         warnings=list(dict.fromkeys(warnings)),discarded_boundary_minima=discarded,
         counts=dict(selected=len(obj.rows),effective=obj.obs.count,angles=len(obj.obs.angles),grid=len(points),evaluations=obj.calls,families=len(solutions),aliases=sum(s['alias_count'] for s in solutions)),
         elapsed_seconds=time.perf_counter()-started,comparison=comparison(request,best['values']))
+    labels={}
+    for row in obj.rows:
+        key=(row['source'],row['comment'])
+        labels[key]=labels.get(key,0)+1
+    result['measurement_context']=dict(count=len(obj.rows),label_count=len(labels),
+        labels=[dict(source=s,comment=c,count=n) for (s,c),n in list(labels.items())[:200]],
+        omitted_labels=max(0,len(labels)-200))
     progress(100,'Fit abgeschlossen')
     return result

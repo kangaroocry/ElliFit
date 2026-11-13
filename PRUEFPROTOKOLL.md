@@ -1,8 +1,36 @@
-# Prüfprotokoll – ElliFit 1.2.5
+# Prüfprotokoll – ElliFit 1.2.6
 
-Stand: 12. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand: 13. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.5
+## Aktuelle Prüfung von 1.2.6
+
+**58 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. JavaScript-Syntaxprüfung bestanden. Die zwei Warnungen betreffen AnyIO/Starlette als Testbibliotheken.
+
+Zusätzliche Prüfungen gegenüber 1.2.5:
+
+- Jeder ausgegebene Minimum-/Talanker ist nicht nur als Punkt vorhanden, sondern Teil mindestens einer Fläche des adaptiven Netzes. Seine Höhe entspricht dem direkt berechneten Winkel-RMS. Die Kontrolle hat nahezu zusammenfallende Punkte aufgedeckt, die eine gewöhnliche Triangulierung als koplanar weglassen konnte; die Vernetzung erhält diese Anker jetzt.
+- Schmale, gekrümmte 95-%-Profilbänder bleiben als zusammenhängende Teilbereiche mit korrekt zugeordneten Periodenwiederholungen erhalten. Nachgerechnete Grenzpunkte erfüllen den Mittelwertvergleich; bei 99 % verbinden sich im synthetischen Beispiel die beiden Familien.
+- Endlicher Hotelling-T²-Mittelwertvergleich: drei Wiederholungen ergeben die 95-%-Grenze 798; bei zwei gleichzeitig betrachteten Winkeln berücksichtigt die Darstellung die Bonferroni-Korrektur.
+- Ohne aktiv verwendete geeignete Kovarianz wird kein statistischer Bereich erfunden. Grenzextraktion erhält Löcher und Beschneidung durch den Suchbereich.
+
+**12 tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Version, Cache-Schutz, Einparameter-Referenz, Datensatzbezeichnung und unverändertes 1D-Autoscale.
+2. Synthetischer gekoppelter Fit mit zwei Familien: prominente 95-%-Bereiche, Voraussetzungen und Parameter-Spannweiten; Namen/Kommentare der gefitteten Daten sichtbar.
+3. Umschaltung 95/99 %, sich bei breiterem Niveau verbindende Familien und abschaltbare Umrandung; RMS-Farben bleiben erhalten.
+4. Große Schichtkennungen außerhalb der Kästchen; d[1]/n[1] in Gleichungen und Punktinfos; neue Nachkommastellen und Unterscheidung kleiner positiver k-Werte von null.
+5. Tatsächliche 3D-Darstellung mit 68 064 nachgerechneten Netzpunkten, 604 expliziten Ankern und 136 099 Dreiecken im synthetischen Beispiel.
+6. Lösungsbereiche, adaptive Stützpunkte und vollständigen Fitbericht tatsächlich heruntergeladen und auf Inhalte/Bezeichnungen geprüft.
+7. Echte Mausradereignisse über langen Listen und dem 3D-Plot: standardmäßig Seitenscrollen, unveränderte lokale Listenposition bzw. Diagrammkamera. Alt+Mausrad und ausdrückliche lokale Freigabe bedienen die Liste.
+8. Jeweils zwei Dicken sowie zwei Brechungsindizes tatsächlich gefittet: eindeutige Schichtkennung, passende Suchraster-/Anzeigeachsen und keine erfundene Region bei fehlender Kovarianz.
+9. Suchrasterwechsel synchronisiert die Anzeige; die Bezeichnungen eines gezeigten Fits bleiben nach Auswahländerungen erhalten.
+10. 390-px-Ansicht ohne horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler.
+11. Privates Nutzerbeispiel mit zwei Familien: 95-%-Bereiche stimmen mit der unabhängigen vorherigen Störungsanalyse überein, 99-%-Bereiche verbinden Familien. Adaptives 3D-Netz und mobile Ansicht fehlerfrei. Nur bestandene Kontrolle und Familienanzahl werden veröffentlicht.
+12. Endgültige Oberfläche: Raster und Achsen gemeinsam rückgängig/wiederhergestellt; Zahlenformatierung korrekt, kompakte Regionshinweise mit aufklappbaren Voraussetzungen, 3D und schmale Ansicht fehlerfrei.
+
+Private Messwerte, Analysedateien und Screenshots sind weiterhin nicht im Repository enthalten. Historische Prüfungen und aktuelle Kontrollen sind in `Pruefdaten_Browser.json` mit Versionsnummern getrennt.
+
+## Basisprüfung von 1.2.5
 
 **52 Rechen-/API-Tests bestanden**, einschließlich des privaten ursprünglichen Importtests. Nach der abschließenden Präzisionsverbesserung der Profilstützstellen wurden die acht neuen Diagnosetests nochmals erfolgreich ausgeführt. JavaScript-Syntaxprüfung bestanden. Zwei Warnungen im Gesamtlauf betreffen die verwendeten Testbibliotheken AnyIO/Starlette und keine fehlgeschlagene Anwendungskontrolle.
 

@@ -234,5 +234,69 @@
     "check": "Privates Nutzerbeispiel mit frisch gestartetem Rechenkern: zwei numerisch interpolierende Familien, Rang 2; Talprofil trifft dieselben Wurzeln, Achsen schaltbar und mobile Ansicht fehlerfrei",
     "passed": true,
     "families": 2
+  },
+  {
+    "version": "1.2.6",
+    "check": "Versions-/Cache-Schutz, Einparameter-Referenz, Datensatzbezeichnung und 1D-Autoscale funktionieren weiter",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Gekoppelter Zweiparameterfit: hervorgehobene 95-%-Lösungsbereiche mit Voraussetzungen, Parameter-Spannweiten und gleichrangigen Familien; feste Datensatznamen sichtbar",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "95-/99-%-Umschaltung verbindet bei breiterem Verträglichkeitsniveau Familien; Umrandungen abschaltbar, RMS-Palette unverändert",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Große Schichtnummern außerhalb der Kästchen; d[1]/n[1] in Gleichungen und Hovers; Dicken mit einer und n/k/Winkel mit drei Nachkommastellen, kleines positives k bleibt von null unterscheidbar",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Tatsächliche 3D-Darstellung als adaptives Netz mit nachgerechneten Talpunkten, Minima und Verträglichkeitsgrenzen",
+    "passed": true,
+    "vertices": 68064,
+    "anchors": 604,
+    "faces": 136099
+  },
+  {
+    "version": "1.2.6",
+    "check": "Lösungsbereiche, adaptives Flächennetz und Fitbericht tatsächlich exportiert; Datenbezeichnungen im unveränderlichen Fitbericht enthalten",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Mausrad über langen Listen und 3D-Diagramm bewegt standardmäßig die Seite; Alt+Mausrad und explizite lokale Freigabe scrollen die Liste; Diagrammkamera bleibt beim Seitenscrollen unverändert",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Zwei Dicken und zwei Brechungsindizes tatsächlich gefittet: Schichtkennungen in Tabellen und Punktinfos eindeutig; Achsen übernehmen Suchrasterskalen; fehlende Messkovarianz erzeugt keine erfundene Region",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Suchrasterwechsel synchronisiert Anzeige sofort; nach Auswahländerungen bleiben Bezeichnungen des bereits gezeigten Fits erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "390-px-Ansicht ohne horizontalen Seitenüberlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "version": "1.2.6",
+    "check": "Privates Nutzerbeispiel: zwei Familien; 95-%-Profilbereiche stimmen mit unabhängiger Störungsanalyse überein, 99-%-Bereiche verbinden Familien; adaptives 3D-Netz und mobile Ansicht fehlerfrei",
+    "passed": true,
+    "families": 2
+  },
+  {
+    "version": "1.2.6",
+    "check": "Endgültige Oberfläche: Suchraster/Achsen gemeinsam rückgängig und wiederhergestellt; gecachte Zahlenformatierung korrekt, Regionshinweise kompakt mit aufklappbaren Voraussetzungen, 3D-Netz und schmale Ansicht fehlerfrei",
+    "passed": true
   }
 ]

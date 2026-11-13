@@ -134,3 +134,33 @@ def test_phase_relation_is_explicitly_approximate_and_predicts_thickness_period(
     exact=mean_deviation(obj,best['values'])['rmse_deg']
     other_n=n+.01;other_d=relation['optical_thickness_nm']/np.sqrt(other_n**2-relation['tangent_squared'])
     assert mean_deviation(obj,[other_d,other_n])['rmse_deg']>exact+1e-3
+
+
+def test_adaptive_surface_contains_each_minimum_and_valley_anchor(coupled_result):
+    result=coupled_result;mesh=result['surface']['mesh']
+    obj=Objective(coupled_request())
+    vertices=np.asarray(mesh['values']);z=obj.encode(vertices)
+    used=set(np.asarray(mesh['triangles']).ravel())
+    anchors=[a for solution in result['solutions'] for a in solution['aliases']]
+    anchors+=result['identifiability']['profile']['overlay']
+    for anchor in anchors:
+        index=int(np.argmin(np.max(abs(z-obj.encode(anchor['values'])),axis=1)))
+        assert np.max(abs(z[index]-obj.encode(anchor['values'])[0]))<2e-11
+        assert index in used
+        np.testing.assert_allclose(mesh['rms'][index],anchor['rmse_deg'],atol=2e-7,rtol=1e-7)
+
+
+def test_thin_confidence_regions_remain_connected_and_preserve_periods(coupled_result):
+    from ellifit.landscape import MeanCompatibility
+    result=coupled_result;obj=Objective(coupled_request());compatibility=MeanCompatibility(obj)
+    region=result['identifiability']['regions'];level=region['levels'][0]
+    assert region['available'] and level['broad']
+    assert len(level['polygons'])==5
+    members=[(m['family'],m['alias']) for p in level['polygons'] for m in p['members']]
+    assert set(members)=={(s['rank'],a['index']) for s in result['solutions'] for a in s['aliases']}
+    for polygon in level['polygons']:
+        for loop in polygon['loops']:
+            _,p=compatibility.evaluate(obj.encode(loop['values']))
+            assert np.min(p)>.05-2e-5
+    wider=region['levels'][1]
+    assert any(len({m['family'] for m in p['members']})>1 for p in wider['polygons'])

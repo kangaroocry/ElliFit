@@ -1,6 +1,18 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 12. November 2026. Quellstand 1.2.5; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 13. November 2026. Quellstand 1.2.6; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Lösungsregionen und Bedienung in 1.2.6
+
+- **Lösungsregionen hervorheben:** Eigene Warn-/Informationskarte, 95-/99-%-Messverträglichkeit, abschaltbare Umrandung/Füllung und Parameter-Spannweiten zur gewählten Familie/Wiederholung. Feste RMS-Farben bleiben erhalten. Voraussetzungen, Messstreuung allein und mögliche Beschneidung werden erklärt; keine erfundene Region ohne geeignete aktive Kovarianzen.
+- **Sehr schmale Talbänder:** Bereichsgrenzen entlang nachgerechneter Profilquerschnitte, damit eine grobe Vernetzung keine falschen Inseln erzeugt. Bei mehreren Winkeln konservativer simultaner Mittelwertvergleich. Zusätzliche Äste und nicht aufgelöste Details können weiterhin fehlen.
+- **Talpunkte in der 3D-Fläche:** Adaptives Dreiecksnetz mit tatsächlich berechneten Minima, Talpunkten, Querstützstellen und gezielten Nachrechnungen. Nahezu zusammenfallende Stützpunkte werden bei der Vernetzung erhalten. Die Punkte hängen nicht mehr unter einer zu grob interpolierten Rechteckfläche.
+- **Schichten eindeutig benennen:** d[1], d[2], n[1], n[2] usw. in Gleichungen, Hovers und Ergebnisköpfen; größere Nummern links neben den farbigen Schichtkästchen und Eingabekarten.
+- **Punktinfos runden:** Eine Nachkommastelle für Dicken in nm, drei für n/k/Winkel. Kleine positive Werte bleiben als „< 0,001“ von null unterscheidbar; Rechenwerte und Exporte behalten volle Präzision.
+- **Suchraster und Anzeige:** Rasterwahl linear/log stellt die Parameterachsen automatisch passend ein; nach dem Fit bleiben manuelle Achsenwechsel möglich.
+- **Messbezeichnungen prominent:** Probennamen/Kommentare, Quellen und Anzahlen für die aktuelle Auswahl und den gezeigten Fit. Ergebnisbezeichnungen bleiben nach Auswahländerungen erhalten und werden im Bericht gespeichert.
+- **Mausrad für die Seite:** Standardmäßig Seitenscrollen über Listen/Plots, breitere Scrollleisten; Alt+Mausrad für Listen und ausdrücklicher Seitenscroll-/Lokalschalter. Diagrammziehen und -drehen bleiben verfügbar.
+- **Exporte:** Neues Lösungsbereiche-CSV und adaptive Stützpunkte im Fehlerlandschaft-CSV, einschließlich ergänzter Messbezeichnungen im JSON-Bericht.
 
 ## Gekoppelte Zweiparameterfits in 1.2.5
 

@@ -637,6 +637,6 @@ def comparison(request, values):
             residuals.append(r | dict(model_angle=float(obs.angles[j]), fit_delta=float(fd[0, j]), fit_psi=float(fp[0, j]), delta_residual=float(wrap(fd[0, j] - r['delta'])), psi_residual=float(fp[0, j] - r['psi'])))
         display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=analysis.records[j]['mean_delta'], psi=analysis.records[j]['mean_psi'], source=f'Mittelwert aus {len(group)} Messungen')]
         for r in display:
-            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source']))
+            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source'],comment=r.get('comment',''),line=r.get('line',0)))
     fixed_label = parameter_label(m, request.parameters[1 - col].path) if not multi and len(request.parameters) == 2 else None
-    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)
+    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, parameter_path=None if multi else request.parameters[col].path, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)

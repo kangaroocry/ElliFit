@@ -1,8 +1,8 @@
-# ElliFit 1.2.5
+# ElliFit 1.2.6
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.5 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.6 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -41,6 +41,10 @@ Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pi
 5. **Global suchen.** Mehrere ausgewählte Winkel ergeben automatisch einen Mehrwinkelfit. Wiederholungen werden standardmäßig gemeinsam gefittet. Mittelung und eine Rückfrage lassen sich unter „Fitverfahren und Unsicherheiten“ wählen. Ein laufender Fit kann abgebrochen werden.
 6. **Lösungsfamilien vergleichen.** Zeile, nummerierten Punkt im Fehlerplot oder eine Wiederholung innerhalb einer Periodenfamilie anklicken. Der Modellvergleich folgt der Auswahl. „Ins Modell übernehmen“ überträgt die Werte; anschließend das Modell speichern.
 
+Die **Bezeichnungen der ausgewählten Messungen** stehen prominent über dem Auswertungsbereich, einschließlich Kommentaren/Probennamen und Quelldateien. Nach einem Fit bleibt diese Bezeichnung als Teil des Ergebnisses erhalten. Ändert sich die Auswahl, werden die Daten des gezeigten Fits und die Auswahl für den nächsten Fit getrennt angezeigt. Ein Filter ändert keine Auswahl.
+
+**Mausrad:** Standardmäßig wird die ganze Seite gescrollt, auch wenn der Zeiger über einer Liste oder einem Diagramm steht. Listen lassen sich über die verbreiterten Scrollleisten oder mit **Alt+Mausrad** lokal bedienen. Der Kopfzeilenschalter **„Mausrad: Seite/lokal“** gibt lokales Scrollen und Diagrammzoom ausdrücklich frei. Diagramme können weiterhin durch Ziehen verschoben/gedreht werden; Werkzeugleisten bleiben bedienbar. Strg/Command-Pinch-Zoom und Umschalt-Scrollen werden nicht abgefangen. In geöffneten Dialogen bleibt das Scrollen im Dialog.
+
 **Nur Messungen derselben unveränderten Probe gemeinsam fitten.** Gleiche Winkel belegen keine gleiche Probe. Die ursprüngliche `.dat`-Sammlung enthält unterschiedliche Probenkommentare und ist deshalb nicht automatisch eine gemeinsame Wiederholungsserie.
 
 Die mitgelieferte **synthetische Referenz** hat d = 118 nm und n = 1,46. Das Modell startet bei d = 80 nm; die globale Suche sollte 118 nm wiederfinden. Die Referenz ist rauschfrei und liefert keine experimentelle Unsicherheitsangabe. Für die ursprüngliche reale `.phi`-Probe ist nur die Wellenlänge bestätigt; ohne verifizierten Schichtaufbau und feste Materialwerte wird kein physikalisch validiertes Probenergebnis behauptet. Private Originaldateien und Handbuch sind nicht im öffentlichen Repository enthalten.
@@ -55,13 +59,17 @@ Die separate **Materialbibliothek** speichert Name, n, k, optionale Wellenlänge
 
 Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen wieder her, einschließlich gelöschter/verschobener Schichten und angewendeter Materialien. Wiederherstellen ist ebenfalls möglich. Gespeicherte Dateien und Messdatenlöschungen werden dadurch nicht zurückgenommen. Die Historie umfasst bis zu 80 Schritte und gilt für die aktuelle Sitzung. `Strg+Z` außerhalb eines Texteingabefeldes wirkt ebenfalls auf diese Historie.
 
-Eingabefelder zeigen in der Regel **vier signifikante Stellen**, Ergebnisse werden intern mit voller Gleitkommapräzision berechnet. Unveränderte, gerundet angezeigte Felder runden das Modell nicht. Ein Tooltip zeigt mehr Stellen. Pfeiltasten ändern n typischerweise um 0,001 und d um 0,1 nm; bei großen Werten beziehungsweise sehr kleinem k passt sich der Schritt an. Die Oberfläche verwendet Dezimalkomma und Leerzeichen zur Tausendertrennung. JSON-Dateien verwenden das standardisierte Zahlenformat mit Punkt.
+Eingabefelder zeigen in der Regel **vier signifikante Stellen**, Ergebnisse werden intern mit voller Gleitkommapräzision berechnet. Unveränderte, gerundet angezeigte Felder runden das Modell nicht. Punktinfos/Tooltips zeigen **eine Nachkommastelle für Dicken in nm und drei für n, k und Winkel**. Sehr kleine positive Werte werden als „< 0,001“ von exakt null unterschieden. Vollständige Rechenwerte bleiben in JSON und CSV erhalten. Pfeiltasten ändern n typischerweise um 0,001 und d um 0,1 nm; bei großen Werten beziehungsweise sehr kleinem k passt sich der Schritt an. Die Oberfläche verwendet Dezimalkomma und Leerzeichen zur Tausendertrennung. JSON-Dateien verwenden das standardisierte Zahlenformat mit Punkt.
 
 ## Diagramme und feste RMS-Farbstufen
 
-Anzeigeachsen und Suchraster sind **unabhängig**. Die Logarithmus-Häkchen ändern die Darstellung; sie lösen keinen neuen Fit aus. Die Fehlerachsen sind anfangs logarithmisch. Der Winkelvergleich startet mit linearer Winkelachse; auch dort ist eine logarithmische x-Achse wählbar.
+**Neue Fits übernehmen die Skalen der Suchraster** für die zugehörigen Parameterachsen. Auch ein Wechsel des Suchrasters zwischen linear/log aktualisiert die Darstellung. Danach lassen sich die Anzeigeachsen unabhängig über die Logarithmus-Häkchen umschalten, ohne einen neuen Fit zu starten. Die RMS-Achse eines Einparameterfits bleibt separat einstellbar. Der Winkelvergleich startet mit linearer Winkelachse; der Einwinkel-Parametervergleich übernimmt die Skala seines Kurvenparameters.
+
+**Schichtkennungen** stehen größer in einer eigenen Spalte links neben den farbigen Kästchen des Diagramms und der Eingabeschichten. Kompakte Symbole wie **d[1], d[2], n[1], n[2]** erscheinen in Gleichungen, Punktinfos und Ergebnisköpfen. Einfallsmedium und Substrat werden bei Bedarf als `n[Einfall]` bzw. `n[Substrat]` unterschieden. Vollständige Materialnamen bleiben zusätzlich auf Achsen und in Tabellen erhalten.
 
 Bei einem freien Parameter zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. **Kleinere Werte sind besser; die besten Fits liegen in den Minima.**
+
+Die **3D-Fläche verwendet ein adaptives Dreiecksnetz**. Bestätigte Minima und zusätzlich berechnete Talpunkte sind selbst Stützpunkte dieser Fläche. Schmale Talumgebungen werden quer zum Tal und anhand weiterer Modellrechnungen innerhalb der Dreiecke nachberechnet. Dadurch liegen die Talpunkte nicht mehr unter einer nur aus einem zu groben Rechteckraster interpolierten Landschaft. Die Fläche zwischen Stützpunkten bleibt eine Näherung; ein endliches Netz kann weitere Details übersehen. Die Kontur enthält das globale Suchraster, die nachgerechneten Talpunkte und separat umrandete Lösungsregionen. Der globale Suchalgorithmus wird durch die Darstellungsverfeinerung nicht ersetzt.
 
 ```text
 RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
@@ -122,6 +130,18 @@ Bei einem Winkel und starker Kopplung beziehungsweise schwacher Bestimmbarkeit e
 
 Für einen gemeinsamen **95-%-Mittelwertvergleich** wird bei einem Winkel und aktiv verwendeter geeigneter Wiederholkovarianz S die Größe `T² = m r̄ᵀ S⁻¹ r̄` betrachtet. Für zwei Komponenten und m > 2 gilt unter unabhängigen normalverteilten lokalen Winkelabweichungen die Grenze `2(m−1)/(m−2) × F[2,m−2](0,95)`. Bei **drei Wiederholungen ist diese Grenze 798**, erheblich größer als die asymptotische χ²-Grenze. Entsprechende Profilpunkte sind im Profilplot und CSV gekennzeichnet. Dies ist eine bedingte Betrachtung ausschließlich der Messstreuung bei festen übrigen Modell- und Kalibrierwerten; keine globale Parameterintervall- oder Modellgültigkeitsaussage. Ohne geeignete aktive Kovarianz wird kein statistischer Bereich erfunden. Diese Behandlung des gemeinsamen Winkelmittelwerts ist vom weiterhin asymptotischen k-Nullvergleich zu unterscheiden.
 
+## Messverträgliche Lösungsregionen
+
+Bei zwei freien Parametern zeigt ein hervorgehobener Bereich die **Messverträglichkeit statt ausschließlich isolierter Minima**. **95 % und 99 %** sind umschaltbar. Türkise Umrandung und transparente Füllung im Konturplot haben eine andere Bedeutung als die feste RMS-Farbskala; in 3D werden die nachgerechneten Bereichsgrenzen eingezeichnet. Minima bleiben als Punktschätzungen markiert. Gleich gut interpolierende Familien besitzen keine durch den Fehlerwert belegte physikalische Rangfolge.
+
+Die angegebenen Parameter-Spannweiten gehören zum Bereich der ausgewählten Familie und Wiederholung. **Sie sind keine frei kombinierbaren Werteintervalle:** Nur die Wertepaare innerhalb der Umrandung erfüllen den gemeinsamen Vergleich. Durch Suchgrenzen oder Profilabschnitte beschnittene Bereiche werden gekennzeichnet. Periodische Wiederholungen werden bei der Anzeige berücksichtigt und nicht als zusätzliche unabhängige Messinformation interpretiert.
+
+Für einen Winkel wird der oben beschriebene endliche Hotelling-T²-Vergleich invertiert. Bei mehreren Winkeln werden die einzelnen Mittelwertvergleiche mit **Bonferroni-Korrektur** simultan berücksichtigt; diese Darstellung ist konservativ. Das gemeinsame Niveau beruht auf mindestens drei geeigneten unabhängigen Wiederholungen pro Winkel und lokalen Normalverteilungsannahmen. Automatische Kovarianzgewichtung muss aktiv sein; andernfalls wird kein statistischer Bereich behauptet.
+
+Diese Regionen berücksichtigen **nur Messstreuung bei festem Schichtmodell und festen übrigen Modell-/Kalibrierwerten**. Sie sind weder eine Wahrscheinlichkeit für das wahre Parameterpaar noch eine Prüfung unbekannter systematischer Fehler. Die angezeigten lokalen Standardunsicherheiten sind keine abgesicherten engen 95-%-Intervalle bei nur drei Wiederholungen. Ein exakter Mittelwerttreffer bleibt mit einem falschen Schichtmodell möglich.
+
+Bei einem erkannten schmalen Tal werden die Bereichsgrenzen mit erneut minimierten Profilquerschnitten und direkten Modellrechnungen verfolgt. Ein gewöhnliches Dreiecksnetz kann solche extrem dünnen gekrümmten Bänder sonst fälschlich in viele Inseln aufteilen. Zusätzliche nicht erfasste Profiläste können dennoch fehlen. Ohne Talprofil werden die Grenzen aus dem adaptiv berechneten Netz angenähert. Alle angezeigten Bereiche sind numerisch begrenzt; sie stellen keinen Vollständigkeitsnachweis dar. Das 95-%-Profil bleibt im separaten Profilplot als zusätzliche Diagnose erhalten, während die 95-/99-%-Wahl die umrandeten Regionen steuert.
+
 Zusätzliche ausreichend verschiedene Messwinkel können Tal und Mehrdeutigkeiten einschränken und erstmals verbleibende Freiheitsgrade zur Modellprüfung schaffen. Mehr Wiederholungen desselben Winkels liefern dafür keinen Ersatz. Auch ein Mehrwinkelfit muss auf systematische Fehler und unzutreffende feste Material-/Schichtwerte geprüft werden.
 
 ## Messunsicherheiten aus Wiederholungen
@@ -171,8 +191,9 @@ Mit vollständiger Kovarianzgewichtung erfolgt ein näherungsweiser **einseitige
 - **Messdaten-CSV:** Alle geladenen Zeilen; erneut importierbar.
 - **Lösungsfamilien-CSV:** Parameter, RMS der Einzelwerte und Mittelwerte, Perioden/Aliase, Randstatus, diagnostisches χ²red und Freiheitsgrade zur Modellprüfung; keine absolute Q-Spalte.
 - **Residuen-CSV:** Alle ursprünglichen ausgewählten Einzelwerte der angezeigten Lösung, auch bei einem Mittelwertfit.
-- **Fehlerlandschaft-CSV:** Parameter und Winkel-RMS.
+- **Fehlerlandschaft-CSV:** Parameter und Winkel-RMS; bei zwei Parametern die nachgerechneten Stützpunkte des adaptiven Flächennetzes. Das ursprüngliche Rechteckraster bleibt zusätzlich im JSON-Bericht enthalten.
 - **Talprofil-CSV:** Bedingte Wertepaare, RMS der Einzelwerte und Mittelwerte, gegebenenfalls T² mit 95-%-Vergleichsgrenze und Kennzeichnung. Nur verfügbar, wenn ein Talprofil berechnet wurde.
+- **Lösungsbereiche-CSV:** Grenzen der gewählten 95-/99-%-Messverträglichkeit, Parameter, nachgerechneter Winkel-RMS, Teilbereich/Schleife und Kennzeichnung beschnittener Bereiche.
 - **Fitbericht-JSON:** Vollständige Daten einschließlich Modell, Einstellungen, Familien, Oberfläche, Unsicherheiten und aktuell angezeigter Lösung. Q bleibt für Diagnosezwecke enthalten.
 
 CSV verwendet Semikolon, Dezimalkomma und UTF-8-BOM. Die Kamera in der Plot-Werkzeugleiste exportiert SVG. Geänderte Eingaben markieren alte Ergebnisse sichtbar als veraltet.
