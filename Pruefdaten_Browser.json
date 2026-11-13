@@ -348,5 +348,25 @@
     "version": "1.2.7",
     "check": "Endgültige Oberfläche: drei Schichten als [3]/[2]/[1] über Substrat [0], neue Schichten bei null; Feldpfeile bewahren explizite Nullunsicherheiten, Hinweisfarben korrekt und schmale Ansicht fehlerfrei",
     "passed": true
+  },
+  {
+    "version": "1.2.8",
+    "check": "Version/Cache-Schutz und zwölf benannte Modelle in der Auswahl; Referenzfit weiterhin bei 118 nm mit eindeutiger SiO2-Schichtkennung",
+    "passed": true
+  },
+  {
+    "version": "1.2.8",
+    "check": "Alle zwölf Schichtvorlagen tatsächlich geladen und aufgebaut; korrekte umgekehrte Nummerierung, ALD-Al2O3 über nativem SiO2 und Si, vorgegebene Dicken erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.2.8",
+    "check": "Alle zwanzig Materialien tatsächlich ausgewählt, Notizen und Wellenlänge geladen; kleines k bleibt sichtbar, Materialübernahme bewahrt Dicke und lässt sich rückgängig machen, neue Schicht weiterhin bei null",
+    "passed": true
+  },
+  {
+    "version": "1.2.8",
+    "check": "Glas/Polymer-Vorlage mit konkretem Glasindex und Rückseitenhinweis; Materialdialog und Seite bei 390 px ohne horizontalen Überlauf oder JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

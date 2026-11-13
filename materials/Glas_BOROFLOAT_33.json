@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Glas (BOROFLOAT 33)",
+  "n": 1.47,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Borosilikatglas nach SCHOTT; auf etwa n = 1,470 gerundeter Startwert bei 632,8 nm aus der Herstellerdispersion. Der tabellierte Wert 1,46953 gilt bei 643,8 nm und ist kein exakter 632,8-nm-Wert. Als Substrat muss die Rückseitenreflexion unterdrückt oder vom erfassten Strahl räumlich getrennt sein. Quelle: https://www.schott.com/en-us/products/borofloat/technical-details"
+}

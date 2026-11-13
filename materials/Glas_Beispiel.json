@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "name": "Glas Beispiel",
-  "n": 1.5,
-  "k": 0,
-  "wavelength_nm": 632.8,
-  "notes": "Editierbarer Beispielwert; keine zertifizierten Materialdaten."
-}

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "TiO2 (ALD, 120 °C)",
+  "n": 2.389,
+  "k": 2.1e-05,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Gerundete, auf 632,8 nm linear interpolierte n/k-Werte des von Zhukovsky et al. bereitgestellten Datensatzes: 20-nm-ALD-Film auf Si, Abscheidung bei 120 °C. Kein allgemeiner Wert für alle TiO2-Phasen oder Prozesse. Das sehr kleine k ist ein Datensatzwert und keine allgemeine Nachweisgrenze. Quelle: https://doi.org/10.1103/PhysRevLett.115.177402 Einzelwert aus dem CC0-Datensatz von refractiveindex.info (Zhukovsky)."
+}

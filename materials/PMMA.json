@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "PMMA",
+  "n": 1.489,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Poly(methylmethacrylat), trockener transparenter Film. Literaturwert bei 632,8 nm etwa 1,4888. Molmasse, Restlösemittel, Dichte und Temperatur beeinflussen den Filmwert. k = 0 ist die transparente Näherung. Quelle: https://doi.org/10.1364/AO.39.002067"
+}

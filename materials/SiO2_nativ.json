@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "SiO2 (nativ)",
+  "n": 1.46,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Effektives homogenes SiOx-Startmodell für natives Oxid auf Si, typische Anfangsdicke etwa 1–2 nm. n = 1,46 ist eine Annahme für die Auswertung, kein universeller Messwert für natives Oxid. Stöchiometrie, Grenzschicht, Feuchte und Reinigung können abweichen. Bei so dünnen Filmen d und n meist nicht gemeinsam frei fitten. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/sio2"
+}

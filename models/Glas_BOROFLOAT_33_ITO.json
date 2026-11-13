@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "Glas (BOROFLOAT 33) + ITO",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "ITO",
+      "n": 1.858,
+      "k": 0.058,
+      "thickness_nm": 100
+    }
+  ],
+  "substrate": {
+    "name": "Glas (BOROFLOAT 33)",
+    "n": 1.47,
+    "k": 0
+  },
+  "notes": "GLAS: Nur gültig ohne erfasste Rückseitenreflexion. Homogener ITO-Startfilm; reale n/k und Tiefengradienten sind stark prozessabhängig. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. ITO: d = 100 nm, n = 1,858, k = 0,058. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

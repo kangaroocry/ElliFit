@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Quarzglas (amorphes SiO2)",
+  "n": 1.457,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Fused silica, amorph und isotrop; kein kristalliner, doppelbrechender Quarz. Gerundeter n-Wert 1,45704. Als transparentes Substrat nur gültig, wenn die Rückseitenreflexion den Detektor nicht erreicht. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/sio2"
+}

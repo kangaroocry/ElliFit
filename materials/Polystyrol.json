@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Polystyrol (PS)",
+  "n": 1.587,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Trockener transparenter Polystyrolfilm. Literatur-/Herstellerwert bei 632,8 nm etwa 1,587. Restlösemittel und Filmpräparation können n verändern. k = 0 ist die transparente Näherung. Quelle: https://bangslabs.com/technical-library/material-properties-of-polystyrene-and-polymethyl-methacrylate-pmma-microspheres/"
+}

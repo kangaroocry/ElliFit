@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "Glas (N-BK7) + PMMA",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "PMMA",
+      "n": 1.489,
+      "k": 0,
+      "thickness_nm": 100
+    }
+  ],
+  "substrate": {
+    "name": "Glas (N-BK7)",
+    "n": 1.51509,
+    "k": 0
+  },
+  "notes": "GLAS: Nur gültig ohne erfasste Rückseitenreflexion; ElliFit rechnet ein halbunendliches Substrat. PMMA und N-BK7 besitzen geringen Indexkontrast, daher können besonders dünne Filme schwer bestimmbar sein. n zunächst fixieren und geeignete zusätzliche Winkel verwenden. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. PMMA: d = 100 nm, n = 1,489, k = 0. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

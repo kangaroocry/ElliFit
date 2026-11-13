@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Wasser (20 °C)",
+  "n": 1.33211,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Destilliertes Wasser bei 20 °C; n aus der Daimon/Masumura-Sellmeierformel bei 632,8 nm gerundet. k = 0 vernachlässigt die schwache sichtbare Absorption für die hier betrachteten kurzen optischen Wege. Bei Flüssigkeitszellen zusätzliche Fenster/Grenzflächen berücksichtigen. Quelle: https://doi.org/10.1364/AO.46.003811"
+}

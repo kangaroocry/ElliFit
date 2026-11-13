@@ -1,8 +1,23 @@
-# Prüfprotokoll – ElliFit 1.2.7
+# Prüfprotokoll – ElliFit 1.2.8
 
 Stand: 13. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.7
+## Aktuelle Prüfung von 1.2.8
+
+**64 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests; zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. JavaScript-Syntaxprüfung bestanden. Die optischen Formeln und der Suchalgorithmus wurden nicht geändert.
+
+Zusätzliche Bibliotheksprüfung: alle **20 Materialien und 12 Schichtvorlagen** über die realen API-Endpunkte geladen und validiert. Einheitliche 632,8 nm, Quellen in den Notizen, keine erfundenen Materialunsicherheiten, keine „Beispiel“-Namenszusätze, konsistente Materialwerte zwischen Vorlagen und Bibliothek. Optische Reihenfolge von ALD-Al2O3 / nativem Oxid / Si geprüft. **96 unabhängige tmm-Vergleiche** der komplexen Reflexionskoeffizienten: zwölf Modelle, vier Winkel, zwei Polarisationen, Toleranz 4 × 10⁻¹². Alle Vergleiche bestanden, alle berechneten Winkel endlich und Ψ im gültigen Bereich. Standardmodell stimmt mit der trockenen Oxidvorlage überein.
+
+**Vier tatsächliche Chromium-Szenarien bestanden:**
+
+1. Version und Cache-Schutz, zwölf sauber benannte Modelle; tatsächlicher Referenzfit weiterhin bei 118 nm mit eindeutiger SiO2-Schichtkennung.
+2. Alle zwölf Vorlagen tatsächlich in der Oberfläche geladen; korrekte Schichtnummern und ALD-/Oxid-Reihenfolge, Anfangsdicken erhalten.
+3. Alle zwanzig Materialien tatsächlich ausgewählt; Notizen und Wellenlänge geladen. Kleines positives k bleibt von null unterscheidbar. Materialübernahme bewahrt die Dicke und lässt sich rückgängig machen; neu eingefügte Schicht weiterhin bei 0 nm.
+4. Glas/Polymer-Vorlage mit konkretem Glasindex und Rückseitenhinweis; Seite und Materialdialog bei 390 px ohne horizontalen Überlauf oder JavaScript-Laufzeitfehler.
+
+Der WinPython-Starter ist bytegleich zu 1.2.7. Keine neue Laufzeitabhängigkeit. Private Messdaten, Handbuch, Rohdaten aus der Literaturrecherche und Screenshots werden nicht veröffentlicht. Die Quellen und Rundungsannahmen der einzelnen mitgelieferten Richtwerte sind in MATERIALIEN.md und den Materialdateien dokumentiert.
+
+## Basisprüfung von 1.2.7
 
 **64 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. Nach verständlicherer Bereichsvalidierung der Probelösungen wurden die sechs neuen Prüfungen gezielt nochmals erfolgreich ausgeführt. JavaScript-Syntaxprüfung bestanden. Die zwei Bibliothekswarnungen betreffen AnyIO/Starlette.
 

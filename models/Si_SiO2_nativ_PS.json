@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "name": "Si + natives SiO2 + Polystyrol",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "Polystyrol (PS)",
+      "n": 1.587,
+      "k": 0,
+      "thickness_nm": 100
+    },
+    {
+      "name": "SiO2 (nativ)",
+      "n": 1.46,
+      "k": 0,
+      "thickness_nm": 1.5
+    }
+  ],
+  "substrate": {
+    "name": "Si",
+    "n": 3.882,
+    "k": 0.019
+  },
+  "notes": "Trockener Polystyrolfilm auf nativ oxidiertem Si. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. SiO2 (nativ): d = 1,5 nm, n = 1,46, k = 0; Polystyrol (PS): d = 100 nm, n = 1,587, k = 0. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

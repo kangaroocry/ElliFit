@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "Blankes Substrat · n und k",
+  "name": "Si (oxidfrei)",
   "wavelength_nm": 632.8,
   "delta_convention": "reversed",
   "ambient": {
@@ -10,9 +10,9 @@
   },
   "layers": [],
   "substrate": {
-    "name": "Si · Beispiel",
+    "name": "Si",
     "n": 3.882,
     "k": 0.019
   },
-  "notes": "Materialwerte sind Beispiele. Für die reale Probe prüfen."
+  "notes": "Idealisiertes oxidfreies Si; eine reale, an Luft gelagerte Oberfläche besitzt häufig natives Oxid. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. . Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
 }

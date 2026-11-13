@@ -4,5 +4,5 @@
   "n": 1,
   "k": 0,
   "wavelength_nm": 632.8,
-  "notes": "Editierbarer Beispielwert; keine zertifizierten Materialdaten."
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Optische Näherung für ein transparentes Einfallsmedium. Reale Luft liegt abhängig von Druck, Temperatur und Feuchte geringfügig über n = 1."
 }

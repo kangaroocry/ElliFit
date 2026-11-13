@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Al",
+  "n": 1.448,
+  "k": 7.537,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Aluminium, gerundete linear interpolierte Rakić-Daten (1995) bei 632,8 nm. Natürliche Aluminiumoxid-Deckschichten bei realen Proben gegebenenfalls separat modellieren. Quelle: https://doi.org/10.1364/AO.34.004755 Einzelwerte aus den CC0-Datensätzen von refractiveindex.info."
+}

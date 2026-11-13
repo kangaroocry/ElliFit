@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "ITO",
+  "n": 1.858,
+  "k": 0.058,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Gerundeter KLA/Filmetrics-Startwert für Indium-Zinn-Oxid: n = 1,85844 und k = 0,0580774. Zusammensetzung, Ladungsträgerdichte, Prozess und Tiefengradienten ändern n/k deutlich. Ein homogener Film ist eine Vereinfachung. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/ito"
+}

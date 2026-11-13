@@ -231,7 +231,7 @@ async def upload(file: UploadFile = File(...)):
 
 @app.get('/api/reference')
 def reference():
-    m = Model(name='Synthetische Referenz · Luft / Film / Si')
+    m = Model(name='Synthetische Referenz · Si + SiO2')
     m.layers[0].thickness_nm = 118
     angles = np.arange(60., 77, 2)
     d, p = simulate(m.model_dump(), angles)

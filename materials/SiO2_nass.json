@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "SiO2 (nass)",
+  "n": 1.46,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Thermisches SiO2, nass gewachsen. Derselbe gerundete Anfangswert wie für trockenes Oxid. OH-Gehalt, Dichte, Nachbehandlung und Prozess können reale Unterschiede verursachen; es gibt hier keine behauptete universelle Wet/Dry-Korrektur. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/sio2"
+}

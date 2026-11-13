@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "name": "Si + natives SiO2 + Al2O3 (ALD)",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "Al2O3 (ALD)",
+      "n": 1.65,
+      "k": 0,
+      "thickness_nm": 20
+    },
+    {
+      "name": "SiO2 (nativ)",
+      "n": 1.46,
+      "k": 0,
+      "thickness_nm": 1.5
+    }
+  ],
+  "substrate": {
+    "name": "Si",
+    "n": 3.882,
+    "k": 0.019
+  },
+  "notes": "Native Grenzschicht bei 1,5 nm zunächst fixieren; ALD-Al2O3 als homogener amorpher Film. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. SiO2 (nativ): d = 1,5 nm, n = 1,46, k = 0; Al2O3 (ALD): d = 20 nm, n = 1,65, k = 0. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

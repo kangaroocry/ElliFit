@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Au",
+  "n": 0.184,
+  "k": 3.431,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Gold, gerundete linear interpolierte Johnson/Christy-Daten bei 632,8 nm. Reale dünne Filme hängen von Morphologie, Rauigkeit und Haftschicht ab; Haftschichten bei Bedarf separat modellieren. Quelle: https://doi.org/10.1103/PhysRevB.6.4370 Einzelwerte aus den CC0-Datensätzen von refractiveindex.info."
+}

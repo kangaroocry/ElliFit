@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Glas (N-BK7)",
+  "n": 1.51509,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Optisches Kronglas nach SCHOTT; n bei 632,8 nm = 1,51509. Kein allgemeiner Wert für Objektträgerglas. Als Substrat muss die Rückseitenreflexion unterdrückt oder vom erfassten Strahl räumlich getrennt sein. Quelle: https://us.shop.schott.com/advanced-optics/en/Optical-Glass/SCHOTT-N-BK7/c/glass-SCHOTT%20N-BK7%C2%AE"
+}

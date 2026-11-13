@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "SiO2 (trocken)",
+  "n": 1.46,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Dichtes thermisches SiO2, trocken gewachsen. Auf 1,46 gerundeter SiO2-Startwert. Der Prozessname allein legt keinen eindeutigen Brechungsindex fest; kein künstlicher fester Unterschied zu nass gewachsenem Oxid. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/sio2"
+}

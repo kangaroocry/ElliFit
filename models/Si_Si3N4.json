@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "Si + Si3N4",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "Si3N4",
+      "n": 2.023,
+      "k": 0,
+      "thickness_nm": 80
+    }
+  ],
+  "substrate": {
+    "name": "Si",
+    "n": 3.882,
+    "k": 0.019
+  },
+  "notes": "Idealisierter dichter Nitridfilm auf gereinigtem Si. Eine tatsächlich vorhandene Oxid-Grenzschicht muss ergänzt werden; PECVD-SiNx kann andere n/k besitzen. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. Si3N4: d = 80 nm, n = 2,023, k = 0. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

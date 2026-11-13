@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Si",
+  "n": 3.882,
+  "k": 0.019,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Kristallines Silizium bei Raumtemperatur. Gerundeter KLA/Filmetrics-Richtwert; Dotierung und Temperatur können abweichen. Die Oxidschicht ist ein eigenes Material und wird nicht in n/k von Si versteckt. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/si"
+}

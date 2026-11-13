@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "HfO2 (Film)",
+  "n": 1.91,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Typischer transparenter Hafniumoxidfilm, auch als erster Ansatz für ALD. KLA/Filmetrics nennt 1,91; ALD-Prozess, Dichte und Kristallinität können deutlich andere Werte ergeben. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/hfo2"
+}

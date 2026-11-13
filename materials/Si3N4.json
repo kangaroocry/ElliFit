@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Si3N4",
+  "n": 2.023,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Typischer dichter transparenter Siliziumnitridfilm. Gerundet aus n = 2,02252. Insbesondere PECVD-SiNx ist abhängig von Si/N-Verhältnis und Wasserstoffgehalt und kann erheblich abweichen. Quelle: https://www.filmetrics.com/products/instruments/refractive-index-database/si3n4"
+}

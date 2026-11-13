@@ -1,6 +1,14 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 13. November 2026. Quellstand 1.2.7; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 13. November 2026. Quellstand 1.2.8; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Materialbibliothek und Schichtvorlagen in 1.2.8
+
+- **20 Materialien bei 632,8 nm:** Si, drei SiO2-Prozessvarianten, Quarzglas, ALD-Al2O3, HfO2, ALD-TiO2, Si3N4, ITO, PMMA, Polystyrol, PDMS, N-BK7, BOROFLOAT 33, Au, Ag, Al, Wasser und Luft. Herkunft und Annahmen in jeder Materialdatei, vollständige Tabelle in [MATERIALIEN.md](MATERIALIEN.md).
+- **12 Schichtvorlagen:** Si/SiO2, Si/natives Oxid/ALD-Al2O3, Polymerfilme auf Si und Glas sowie Nitrid-, HfO2- und ITO-Aufbauten. Vorgegebene typische Dicken; physikalische Reihenfolge bleibt korrekt.
+- **Namen ohne „Beispiel“:** Gilt für die mitgelieferten Materialien, Modelle und das Standardmodell. Bestehende eigene Dateien bleiben erhalten.
+- **Prozessabhängige Startwerte kenntlich:** Natives, nasses und trockenes Oxid getrennt, ohne erfundene feste Brechungsindexunterschiede. ALD-Al2O3 wird von Saphir unterschieden. Gläser sind konkret benannt; Rückseitenreflexion und geringer Polymer/Glas-Kontrast werden erläutert.
+- **Rechenkern und Bedienung unverändert:** Keine neue Dispersions- oder Rückseitenrechnung; keine neuen Abhängigkeiten. WinPython-Starter unverändert, neu hinzugefügte Filme weiterhin bei 0 nm.
 
 ## Kompakte Auswertung und Probelösungen in 1.2.7
 

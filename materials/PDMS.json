@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "PDMS",
+  "n": 1.41,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Vernetztes transparentes Polydimethylsiloxan. Typischer Ellipsometrie-Ansatz n = 1,41 bei 632,8 nm; Mischungsverhältnis, Vernetzung und Quellung beeinflussen n. k = 0 ist eine transparente Näherung. Quelle: https://epub.uni-bayreuth.de/id/eprint/120/1/Diss_Kuznetsov.pdf"
+}

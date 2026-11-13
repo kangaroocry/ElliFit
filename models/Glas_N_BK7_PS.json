@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "Glas (N-BK7) + Polystyrol",
+  "wavelength_nm": 632.8,
+  "delta_convention": "reversed",
+  "ambient": {
+    "name": "Luft",
+    "n": 1,
+    "k": 0
+  },
+  "layers": [
+    {
+      "name": "Polystyrol (PS)",
+      "n": 1.587,
+      "k": 0,
+      "thickness_nm": 100
+    }
+  ],
+  "substrate": {
+    "name": "Glas (N-BK7)",
+    "n": 1.51509,
+    "k": 0
+  },
+  "notes": "GLAS: Nur gültig, wenn Rückseitenreflexion nicht zum erfassten Signal beiträgt. Rückseite optisch geeignet unterdrücken oder Strahlen räumlich trennen; ElliFit rechnet ein halbunendliches Substrat. PS wurde wegen des größeren Indexkontrasts gegenüber PMMA als bevorzugte Glasvorlage aufgenommen. Typische Startwerte bei 632,8 nm, keine Charakterisierung der realen Probe. Polystyrol (PS): d = 100 nm, n = 1,587, k = 0. Modellname: Substrat nach oben; Editor: Luft nach unten. Herkunft und Grenzen: MATERIALIEN.md und Materialnotizen."
+}

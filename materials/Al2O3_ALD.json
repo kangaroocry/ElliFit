@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Al2O3 (ALD)",
+  "n": 1.65,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Typischer transparenter amorpher ALD-Aluminiumoxidfilm. Veröffentlichte TMA/H2O- bzw. TMA/O3-Filme liegen um n = 1,64–1,65. Bei niedriger Abscheidetemperatur, Porosität, Wasseraufnahme oder Nachbehandlung kann n merklich anders sein. Nicht mit kristallinem Saphir gleichsetzen. Quelle: https://www.sciencedirect.com/science/article/abs/pii/S0925346720307114"
+}

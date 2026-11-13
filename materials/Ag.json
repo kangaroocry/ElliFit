@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Ag",
+  "n": 0.0563,
+  "k": 4.276,
+  "wavelength_nm": 632.8,
+  "notes": "Typischer Startwert bei 632,8 nm, keine zertifizierte Materialkonstante. Silber, gerundete linear interpolierte Johnson/Christy-Daten bei 632,8 nm. Reale Filme und angelaufene Oberflächen können abweichen; eine Deckschicht wird nicht automatisch berücksichtigt. Quelle: https://doi.org/10.1103/PhysRevB.6.4370 Einzelwerte aus den CC0-Datensätzen von refractiveindex.info."
+}
