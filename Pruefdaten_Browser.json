@@ -368,5 +368,55 @@
     "version": "1.2.8",
     "check": "Glas/Polymer-Vorlage mit konkretem Glasindex und Rückseitenhinweis; Materialdialog und Seite bei 390 px ohne horizontalen Überlauf oder JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Dateiname und Status für neue/geladene/geänderte Modelle; Status bereits beim Tippen, reine Suchänderung bleibt sauber und Rückgängig/Wiederherstellen erkennt den gespeicherten Stand",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Echte Überschreibrückfrage mit Abbrechen/Bestätigen und Dateikontrolle; Speicherpunkt und Dateizuordnung bleiben über Rückgängig/Wiederherstellen korrekt",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Speichern unter mit eigenem Dateinamen und ergänztem .json; Abbruch, ungültige Pfade und abgelehnte Kollisionen verändern keine Datei, erfolgreiche Kopie bewahrt das Original",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Dokumentwechsel mit Speichern/Verwerfen/Abbrechen tatsächlich durchlaufen; Abbruch bewahrt Auswahl, Speichern schreibt das alte Dokument vor dem Wechsel und Öffnen setzt die Bearbeitungshistorie zurück",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Neues ungespeichertes Modell beim Wechsel erst unter Dateinamen gespeichert; abgebrochener Speichern-unter-Dialog bewahrt den Entwurf vollständig",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Strg+S übernimmt noch fokussierte Eingaben; simuliertes Schreibversagen erhält Original und Änderungsstatus, erneutes Speichern gelingt; Browser-Neuladen tatsächlich per Rückfrage abgebrochen",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "JSON-Import bleibt als noch nicht in der Bibliothek gespeichertes Dokument erkennbar, Export markiert es nicht fälschlich als gespeichert; Sitzungswechsel mit Abbruch und erneutem Laden derselben Datei geprüft",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Materialien mit demselben Dateiverhalten: Status, überschreiben/abbrechen, Kopie und Wechsel mit Speichern/Abbrechen; Schließen bewahrt den Materialentwurf, Übernahme macht das Schichtmodell geändert",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Tatsächlicher Referenzfit und Ergebnisübernahme bewahren die Dateizuordnung; Modell wird geändert und lässt sich zum gespeicherten Stand zurücknehmen",
+    "passed": true
+  },
+  {
+    "version": "1.2.9",
+    "check": "Dateileiste und Speichern-unter-Dialog bei 390 px ohne horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

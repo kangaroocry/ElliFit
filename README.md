@@ -1,8 +1,8 @@
-# ElliFit 1.2.8
+# ElliFit 1.2.9
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.2.8 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.2.9 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows und mit WinPython
 
@@ -55,6 +55,19 @@ Die mitgelieferte **synthetische Referenz** hat d = 118 nm und n = 1,46. Das Mod
 
 Modelle werden als UTF-8-JSON im Modellordner gespeichert und aus einer Liste geladen. Standardordner: `models`. Einzelne Dateien können geöffnet und heruntergeladen werden. Elli-`.cfg` wird nicht direkt importiert; ein solches Dateiformat liegt nicht vor.
 
+**Dateiname und Speicherstatus** stehen direkt unter der Modellauswahl; Materialien besitzen dieselbe Dateileiste. „Gespeichert“ ist grün, „Geändert · nicht gespeichert“ gelb, ein noch nicht gespeichertes neues Dokument blau. Die Anzeige vergleicht den Inhalt mit dem zuletzt erfolgreich geladenen oder gespeicherten Stand. Nur tatsächliche Dokumentänderungen zählen: Suchgrenzen oder Fitparameterrollen allein machen die Modelldatei nicht geändert. Der Status reagiert bereits beim Tippen. Dateiänderungen durch andere Programme werden nicht laufend überwacht.
+
+| Aktion | Verhalten |
+|---|---|
+| **Speichern** | Überschreibt die zugeordnete Datei nach Rückfrage. Ohne Änderungen deaktiviert. Bei einem neuen/importierten Dokument wird zuerst nach dem Dateinamen gefragt. |
+| **Speichern unter …** | Fragt nach einem frei wählbaren Dateinamen im aktuellen Bibliotheksordner. `.json` wird ergänzt; bestehende Dateien werden nur nach einer zusätzlichen Rückfrage ersetzt. Das Dokument ist anschließend der neuen Datei zugeordnet. |
+| **Öffnen … / Listenauswahl / Neu** | Bei geänderten Dokumenten: **Speichern**, **Verwerfen** oder **Abbrechen**. Auch Referenz- und Sitzungswechsel schützen geänderte Modelle. Ein unveränderter neuer Standardentwurf benötigt keine Verwerfungsrückfrage. |
+| **JSON exportieren** | Lädt eine separate Kopie herunter. Ändert weder die Dateizuordnung noch den Speicherstatus im Bibliotheksordner. |
+
+Dateiname und frei editierbarer Modell-/Materialname sind unabhängig. „Speichern“ benennt eine Datei nicht um. Ein von außen geöffnetes JSON ist zunächst ein Import; die ursprüngliche Datei wird nicht automatisch überschrieben. Zielordner ist der in ElliFit gewählte Modell- beziehungsweise Materialordner, der im Dialog angezeigt wird. Dateinamen ohne Pfadangabe verwenden; unzulässige Windows-Zeichen und reservierte Gerätenamen werden abgewiesen. Abbruch oder fehlgeschlagenes Schreiben erhalten den aktuellen Entwurf und den bisherigen Speicherpunkt. `Strg+S` speichert das Modell beziehungsweise bei geöffnetem Materialdialog das Material; `Strg+Umschalt+S` öffnet „Speichern unter …“. Beim Verlassen/Neuladen einer Seite mit Änderungen fragt der Browser nach.
+
+Das Schließen der Materialbibliothek behält den Materialentwurf; „Werte übernehmen“ überträgt ihn ins Schichtmodell und macht dieses gegebenenfalls geändert. Die Materialdatei wird dadurch nicht automatisch gespeichert. Für Materialwechsel, neue Materialien und Materialimporte gelten dieselben Rückfragen wie für Modelle.
+
 Die separate **Materialbibliothek** speichert Name, n, k, optionale Wellenlänge, Notizen und optionale Standardunsicherheiten u(n)/u(k) im Ordner `materials`. Materialien lassen sich aus einem Medium übernehmen, bearbeiten, als JSON importieren/exportieren und auf Luft, Film oder Substrat anwenden. Die Schichtdicke bleibt erhalten. Bei abweichender Wellenlänge erscheint eine Rückfrage; eine Dispersionsumrechnung findet nicht statt. Ein absorbierendes Einfallsmedium wird nicht zugelassen.
 
 **Mitgeliefert sind 20 typische Materialien bei 632,8 nm:** Si, natives/trockenes/nasses SiO2, Quarzglas, ALD-Al2O3, HfO2, ALD-TiO2, Si3N4, ITO, PMMA, Polystyrol, PDMS, N-BK7, BOROFLOAT 33, Au, Ag, Al, Wasser und Luft. Die Namen enthalten keinen Zusatz „Beispiel“; Herkunft und Prozessabhängigkeit stehen in den Materialnotizen. Typwerte sind keine Kalibrierwerte, optionale Unsicherheiten bleiben unbekannt. Die SiO2-Prozessvarianten beginnen gemeinsam bei n = 1,46; ALD-Al2O3 bei n = 1,65. Die [vollständige Übersicht](MATERIALIEN.md) nennt n/k, Quellen und Annahmen.
@@ -65,7 +78,7 @@ Die separate **Materialbibliothek** speichert Name, n, k, optionale Wellenlänge
 
 **Schichtkennungen zählen vom Substrat nach oben:** Das Substrat trägt **[0]**, der Film direkt darüber **[1]**, der nächste **[2]** usw.; oben steht die höchste Filmnummer. Das Einfallsmedium bleibt unnummeriert. Dieselbe Kennung steht im Diagramm, neben dem Namen, in Auswahlfeldern, Achsen und Ergebnissen. Nummern werden beim Umordnen angepasst und sind kein Teil des Materialnamens. Die optische Reihenfolge und die gespeicherten Schichtpfade bleiben erhalten. Neu hinzugefügte Schichten starten mit **d = 0 nm**.
 
-Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen wieder her, einschließlich gelöschter/verschobener Schichten und angewendeter Materialien. Wiederherstellen ist ebenfalls möglich. Gespeicherte Dateien und Messdatenlöschungen werden dadurch nicht zurückgenommen. Die Historie umfasst bis zu 80 Schritte und gilt für die aktuelle Sitzung. `Strg+Z` außerhalb eines Texteingabefeldes wirkt ebenfalls auf diese Historie.
+Der Rückgängig-Pfeil stellt Modellbearbeitung und numerische Sucheinstellungen wieder her, einschließlich gelöschter/verschobener Schichten und angewendeter Materialien. Wiederherstellen ist ebenfalls möglich. Gespeicherte Dateien und Messdatenlöschungen werden dadurch nicht zurückgenommen. Die Historie umfasst bis zu 80 Schritte und gilt für das aktuelle Modelldokument; Öffnen/Neu/Sitzungswechsel beginnen eine neue Historie. „Speichern unter …“ erhält die Bearbeitungshistorie, die Dateizuordnung bleibt beim Rückgängig bei der aktuellen Datei. Entspricht der zurückgenommene Inhalt wieder dem Speicherpunkt, erscheint erneut „Gespeichert“. Wiederholte Änderungsereignisse ohne Inhaltsänderung erzeugen keinen leeren Rückgängig-Schritt. `Strg+Z` außerhalb eines Texteingabefeldes wirkt ebenfalls auf diese Historie.
 
 Eingabefelder und Parameteranzeigen verwenden **eine Nachkommastelle für Dicken in nm und drei für n, k und Winkel**. Kleinere Werte erhalten zusätzliche Nachkommastellen oder eine Exponentialdarstellung, damit beispielsweise k = 10⁻⁸ von null unterscheidbar bleibt. **Die kleinen Pfeile rechts am Zahlenfeld** ändern n/k normalerweise um 0,001 und d um 0,1 nm; bei kleinen Werten wird der Schritt angepasst. Eine besondere Bedienung über Tastaturpfeile ist nicht erforderlich. Ergebnisse werden intern mit voller Gleitkommapräzision berechnet; unveränderte gerundete Felder runden das Modell nicht. Vollständige Werte bleiben in JSON und CSV erhalten. Dezimaltrennzeichen ist das Komma, Tausendertrennung ein Leerzeichen. JSON verwendet sein standardisiertes Zahlenformat mit Punkt.
 

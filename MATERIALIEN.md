@@ -1,6 +1,6 @@
 # Materialbibliothek und Schichtvorlagen
 
-Stand: 13. November 2026 · ElliFit 1.2.8 · **alle Werte bei 632,8 nm**.
+Stand: 13. November 2026 · ElliFit 1.2.9 · **alle Werte bei 632,8 nm**. Bibliothekswerte seit 1.2.8 unverändert.
 
 Die 20 JSON-Materialdateien sind sofort in „Materialien …“ auswählbar. Die 12 Schichtvorlagen stehen in der Modellauswahl. Namen enthalten keinen Zusatz „Beispiel“. Es sind **editierbare typische Startwerte**, keine zertifizierten Konstanten oder vermessenen Proben. Herkunft und wichtige Annahmen stehen auch in jeder Materialdatei unter „Notizen“. Optionale Unsicherheiten bleiben unbekannt; aus diesen Richtwerten werden keine Messunsicherheiten erfunden.
 

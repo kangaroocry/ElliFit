@@ -1,8 +1,29 @@
-# Prüfprotokoll – ElliFit 1.2.8
+# Prüfprotokoll – ElliFit 1.2.9
 
 Stand: 13. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.8
+## Aktuelle Prüfung von 1.2.9
+
+**68 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Die zehn gezielten API-/Speicherprüfungen wurden vorab separat bestanden; beide JavaScript-Dateien bestehen die Syntaxprüfung.
+
+Neue Speicherprüfungen kontrollieren für Modelle und Materialien: unzulässige Pfade sowie reservierte Windows-Gerätenamen ohne Dateiveränderung abweisen; Konflikt ohne Überschreibbestätigung erhält das Original; Speichern als Kopie bewahrt die Ausgangsdatei; ausdrückliches Überschreiben persistiert den geänderten Inhalt. Die Versions-/Cache-Prüfung bezieht das neue Speichermodul ein und erkennt auch Änderungen an dessen Inhalt ohne Versionswechsel.
+
+**Zehn tatsächliche Chromium-Szenarien bestanden:**
+
+1. Dateiname und Status für neue, geladene und geänderte Modelle; Status schon beim Tippen. Reine Sucheinstellung ändert keine Modelldatei. Rückgängig/Wiederherstellen erkennt den Speicherpunkt.
+2. Echte Überschreibrückfrage abgebrochen und bestätigt, tatsächliche Datei kontrolliert. Dateizuordnung und Speicherpunkt bleiben beim Rückgängig korrekt.
+3. Speichern unter mit Dateinamen und ergänztem .json; Dialogabbruch, ungültiger Pfad und abgelehnte Dateikollision verändern nichts; erfolgreiche Kopie erhält das Original.
+4. Modellwechsel mit Speichern, Verwerfen und Abbrechen; Auswahl bei Abbruch korrekt. Das bisherige Dokument wird vor dem Wechsel gespeichert. Neue Dokumente erhalten eine neue Historie.
+5. Neuer Entwurf beim Wechsel zuerst unter Dateinamen gespeichert; abgebrochener Speichern-unter-Dialog bewahrt den Entwurf.
+6. Strg+S mit noch fokussierter Eingabe; absichtlich fehlgeschlagener Schreibzugriff erhält Datei und Änderungsstatus, erneuter Versuch gelingt. Tatsächliches Browser-Neuladen per Rückfrage abgebrochen.
+7. Externer JSON-Import bleibt als noch nicht in der Bibliothek gespeichert erkennbar. Export setzt den Speicherstatus nicht zurück. Sitzungswechsel nach Abbruch mit derselben Importdatei erneut ausführbar.
+8. Gleiches Dateiverhalten für Materialien: Status, überschreiben/abbrechen, Kopie, Wechsel mit Speichern/Abbrechen. Schließen bewahrt den Entwurf; Übernahme macht das Modell geändert.
+9. Tatsächlicher Referenzfit und Ergebnisübernahme behalten die Dateizuordnung; Übernahme ist eine rückgängig machbare Änderung des geladenen Dokuments.
+10. Dateileiste und Speichern-unter-Dialog bei 390 px ohne horizontalen Überlauf oder JavaScript-Laufzeitfehler.
+
+Die Browserprüfungen verwenden ausschließlich separate temporäre Bibliothekskopien. Keine Prüfschreibvorgänge in den mitgelieferten Modell-/Materialdateien. 20 Materialien und zwölf Schichtvorlagen sind unverändert aus 1.2.8 enthalten. WinPython-Starter bytegleich, optische Formeln und Suchverfahren unverändert. Private Daten und Screenshots werden nicht veröffentlicht.
+
+## Basisprüfung von 1.2.8
 
 **64 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests; zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. JavaScript-Syntaxprüfung bestanden. Die optischen Formeln und der Suchalgorithmus wurden nicht geändert.
 

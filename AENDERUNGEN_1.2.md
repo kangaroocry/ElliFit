@@ -1,6 +1,15 @@
 # ElliFit 1.2 – umgesetzte Änderungen
 
-Stand: 13. November 2026. Quellstand 1.2.8; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 13. November 2026. Quellstand 1.2.9; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Dateiverhalten für Modelle und Materialien in 1.2.9
+
+- **Dateiname und Speicherstatus sichtbar:** Gespeichert/grün, geändert/gelb oder noch nicht gespeichert/blau. Status bereits beim Tippen; tatsächlicher Inhaltsvergleich mit dem letzten Lade-/Speicherpunkt. Suchparameterrollen und reine Sucheinstellungen zählen nicht als Änderung der Modelldatei.
+- **Speichern und Speichern unter …:** Bestehende Datei nach Rückfrage überschreiben oder einen Dateinamen im aktuellen Bibliotheksordner wählen. Kollisionen gesondert bestätigen, ungültige Windows-Dateinamen abweisen. Export ist ein separater Download und setzt den Status nicht fälschlich zurück.
+- **Ungespeicherte Änderungen schützen:** Bei Dokumentwechsel, Neu, Import, Referenz und Sitzung speichern/verwerfen/abbrechen. Abgebrochene oder fehlgeschlagene Speicherung erhält den Entwurf. Warnung beim Neuladen/Verlassen, solange Änderungen bestehen.
+- **Rückgängig am Speicherpunkt:** Dateizuordnung bleibt bestehen, Rücknahme auf gespeicherten Inhalt wird sauber erkannt. Öffnen neuer Dokumente setzt die Historie zurück. Doppelte Ereignisse ohne Inhaltsänderung erzeugen keine leeren Historieneinträge. Fit-/Probelösungsübernahme ist eine rückgängig machbare Änderung der aktuellen Datei.
+- **Materialien gleichartig:** Speichern, Kopie, Status und Wechselrückfragen; Schließen behält den Entwurf. Übernahme in eine Schicht speichert die Materialdatei nicht automatisch.
+- **Bedienung:** Strg+S und Strg+Umschalt+S; Dateidialoge auch in schmaler Ansicht. Die 20 Materialien und zwölf Schichtvorlagen aus 1.2.8 sind enthalten; WinPython-Starter und Rechenverfahren bleiben unverändert.
 
 ## Materialbibliothek und Schichtvorlagen in 1.2.8
 

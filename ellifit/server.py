@@ -59,8 +59,9 @@ async def bad_file(request, exc):
 @app.get('/')
 def home():
     html = (STATIC / 'index.html').read_text(encoding='utf-8')
-    bundle = hashlib.sha256((STATIC / 'app.js').read_bytes() + (STATIC / 'style.css').read_bytes()).hexdigest()[:16]
-    for asset in ('/static/app.js', '/static/style.css'):
+    assets = ('app.js', 'documents.js', 'style.css')
+    bundle = hashlib.sha256(b''.join((STATIC / name).read_bytes() for name in assets)).hexdigest()[:16]
+    for asset in ('/static/' + name for name in assets):
         html = html.replace('"' + asset + '"', '"' + asset + '?v=' + __version__ + '&amp;build=' + bundle + '"')
     html = html.replace('"/plotly.js"', '"/plotly.js?v=' + plotly.__version__ + '"')
     return HTMLResponse(html)
@@ -81,9 +82,17 @@ def validate_model(model: Model):
     return model
 
 
+def validate_library_filename(name):
+    """Use the same portable JSON names on Windows and Unix."""
+    reserved = {'CON', 'PRN', 'AUX', 'NUL', *(f'COM{i}' for i in range(1, 10)), *(f'LPT{i}' for i in range(1, 10))}
+    if (not name or len(name) > 180 or not name.endswith('.json')
+            or name != name.strip() or re.search(r'[<>:"/\\|?*\x00-\x1f]', name)
+            or name.startswith('.') or name.split('.')[0].rstrip(' .').upper() in reserved):
+        raise ValueError('Ungültiger Dateiname: Bitte einen normalen Windows-Dateinamen mit .json ohne Pfadangabe verwenden.')
+
+
 def model_path(name):
-    if Path(name).name != name or not name.endswith('.json') or len(name) > 180:
-        raise ValueError('Ungültiger Modell-Dateiname.')
+    validate_library_filename(name)
     p = MODEL_DIR / name
     if p.is_symlink() or p.resolve().parent != MODEL_DIR:
         raise ValueError('Ungültiger Modellpfad.')
@@ -159,8 +168,7 @@ class SaveMaterial(BaseModel):
 
 
 def material_path(name):
-    if Path(name).name != name or not name.endswith('.json') or len(name)>180:
-        raise ValueError('Ungültiger Material-Dateiname.')
+    validate_library_filename(name)
     p=MATERIAL_DIR/name
     if p.is_symlink() or p.resolve().parent!=MATERIAL_DIR:
         raise ValueError('Ungültiger Materialpfad.')
