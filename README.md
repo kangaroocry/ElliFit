@@ -1,14 +1,16 @@
-# ElliFit 1.2.5
+# ElliFit 1.2.6
 
 Lokale Auswertung monochromatischer Ellipsometrie: Schichtmodelle und Materialien speichern und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.2.5 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/c0a16a2c2e968f3d56589520847f0669c6fe8836.zip)**
+**[ElliFit 1.2.6 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/d3baab24059bae4d6e86128f2727009a93b917af.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
 - [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/ellifit-1.2/AENDERUNGEN_1.2.md)
 - [Prüfprotokoll einschließlich aktueller Bedienprüfung](https://github.com/kangaroocry/ElliFit/blob/ellifit-1.2/PRUEFPROTOKOLL.md)
 
-Neu in 1.2.5: Gekoppelte Zweiparameterfits werden robuster geprüft. Nicht globale Randminima werden vor der Periodenbildung entfernt; lokale Optimierungen und verschobene Kandidaten werden nachgeprüft. Ein Messwinkel mit zwei freien Parametern wird als gesättigter Fit erklärt: Treffer der beiden Winkelmittelwerte beweisen weder Modellgültigkeit noch Eindeutigkeit. Die neue Diagnose zeigt Rang, präzise Parameterkorrelation, numerische Talspur und Mittelwert-RMS-Profil sowie lokale lineare und optische Phasennäherungen. Talpunkte sind von bestätigten Minima getrennt und als CSV exportierbar. Ein gemeinsamer Mittelwertvergleich berücksichtigt die endliche Anzahl von Wiederholungen. Geprüft mit 52 Rechen-/API-Tests und acht tatsächlichen Browser-Szenarien einschließlich der privaten Nachrechnung; private Daten bleiben außerhalb des Repositorys.
+Neu in 1.2.6: Hervorgehobene 95-/99-%-Lösungsregionen zeigen messverträgliche Wertepaare und Spannweiten bei festem Schichtmodell; Voraussetzungen und Grenzen werden erläutert. Die 3D-Fläche nimmt Minima und zusätzlich berechnete Talpunkte in ein adaptiv nachgerechnetes Netz auf. Große Schichtnummern links neben den Kästchen und kompakte Symbole wie d[1]/n[2] machen die Zuordnung deutlich. Punktinfos verwenden eine Nachkommastelle für Dicken und drei für n/k/Winkel. Suchrasterskalen werden automatisch auf die Plotachsen übertragen. Messbezeichnungen bleiben am gezeigten Fit sichtbar. Das Mausrad scrollt standardmäßig die Seite, mit ausdrücklicher lokaler Freigabe und Alt+Mausrad für Listen. Neue Exporte enthalten Lösungsbereiche und adaptive Stützpunkte. Geprüft mit 58 Rechen-/API-Tests und zwölf tatsächlichen Browser-Szenarien einschließlich der privaten Nachrechnung.
+
+Seit 1.2.5: Gekoppelte Zweiparameterfits werden robuster geprüft. Nicht globale Randminima werden vor der Periodenbildung entfernt; lokale Optimierungen und verschobene Kandidaten werden nachgeprüft. Ein Messwinkel mit zwei freien Parametern wird als gesättigter Fit erklärt: Treffer der beiden Winkelmittelwerte beweisen weder Modellgültigkeit noch Eindeutigkeit. Die neue Diagnose zeigt Rang, präzise Parameterkorrelation, numerische Talspur und Mittelwert-RMS-Profil sowie lokale lineare und optische Phasennäherungen. Talpunkte sind von bestätigten Minima getrennt und als CSV exportierbar. Ein gemeinsamer Mittelwertvergleich berücksichtigt die endliche Anzahl von Wiederholungen. Geprüft mit 52 Rechen-/API-Tests und acht tatsächlichen Browser-Szenarien einschließlich der privaten Nachrechnung; private Daten bleiben außerhalb des Repositorys.
 
 Seit 1.2.4 enthalten: Autoscale berücksichtigt den farbigen 1D-Hintergrund nicht mehr. Anfang/Ende, direkte Seiten-/Messungsnummern und „Letzte Messung“ erschließen lange Listen mit einem Sprung. Unter 0,001° bleibt kräftiges Grün ohne Cyan-Stufe. Schichtkennungen wie [2] Al2O3 stehen einheitlich in Aufbau, Eingaben, Achsen und Ergebnisüberschriften.
 
