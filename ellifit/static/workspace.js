@@ -114,25 +114,27 @@ function selectNearbyMinimum(el,event){
  return selectPlotTarget(closest);
 }
 function decorateWorkspacePlot(el){
- const options=el._elliPlotOptions;if(!options||!el._fullLayout||el._elliDecorating)return;
+ const options=el._elliPlotOptions;if(!options||!el._fullLayout)return;if(el._elliDecorating)return el._elliDecorationTask;
  const patch=axisTickPatch(el,options);
  if(!options.scene&&options.labels){const labels=minimumAnnotations(el,options.labels);if(JSON.stringify(el.layout.annotations||[])!==JSON.stringify(labels))patch.annotations=labels;}
  if(!Object.keys(patch).length)return;
  el._elliDecorating=true;
- Promise.resolve(Plotly.relayout(el,patch)).finally(()=>{el._elliDecorating=false;});
+ return el._elliDecorationTask=Promise.resolve(Plotly.relayout(el,patch)).finally(()=>{el._elliDecorating=false;});
 }
-function queuePlotDecoration(el){cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=requestAnimationFrame(()=>decorateWorkspacePlot(el));}
+function queuePlotDecoration(el){cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=requestAnimationFrame(()=>{el._elliDecorationFrame=null;decorateWorkspacePlot(el);});}
+function nextPaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
 function renderWorkspacePlot(id,traces,layout,options){
  const el=$(id),key=plotKey(id,options),serial=(el._elliSerial||0)+1;el._elliSerial=serial;
  preservePlotView(el,layout,key,options);layout.uirevision=key;
  el._elliViewKey=key;el._elliPlotOptions=options;
- return Plotly.react(el,traces,layout,plotOptions).then(()=>{
+ return Plotly.react(el,traces,layout,plotOptions).then(async()=>{
   if(el._elliSerial!==serial)return;
   if(!el._elliViewEvents){el.on('plotly_clickannotation',event=>selectPlotTarget(el._elliLabelTargets?.[event.index]));el.on('plotly_relayout',change=>{
    if(el._elliDecorating||Object.keys(change).every(k=>/^(annotations|shapes)|tick(mode|vals|text)$/.test(k)))return;
    queuePlotDecoration(el);if(id==='errorPlot'&&!el._elliPlotOptions?.scene)syncRmsBackground(el);
   });el._elliViewEvents=true;}
-  queuePlotDecoration(el);
+  await nextPaint();
+  if(el._elliSerial===serial){cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=null;await decorateWorkspacePlot(el);}
  });
 }
 function currentFitRequest(){return {model:clone(state.model),measurements:clone(selectedRows()),parameters:state.parameters.filter(p=>p.path).map(clone),...settings()};}

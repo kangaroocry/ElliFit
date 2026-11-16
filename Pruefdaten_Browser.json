@@ -483,5 +483,45 @@
     "version": "1.3.0",
     "check": "Speichern unter im neuen Layout, abgebrochenes Überschreiben und Rückgängig zum Datei-/Fit-Speicherpunkt; Fitbericht und endgültige breite Ansicht ohne Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Gesamte Oberfläche bis nach tatsächlich verzögerter Plotly-Darstellung grau und inert; Fortschritt/Abbruch erreichbar, keine Tastatur-Speicherung; Freigabe erst mit fertigen 1D-Ergebnissen, auch bei 390 px",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Zoomerhalt und versetzte Minimum-Beschriftungen nach asynchroner Ergebnisdarstellung weiterhin korrekt",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Echter Zweiparameterfit mit linearer Parameter-Y-Achse; Sperre wartet auch auf das zusätzlich verzögerte Talprofil im Diagnosebereich",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Nach linearem Y-Parameter im Zweiparameterfit startet der Einparameterfit mit logarithmischer RMS-Achse; manuelles lineares Umschalten bleibt möglich und wird erst beim nächsten Fit zurückgesetzt",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Laufenden echten Zweiparameterfit über das aktive Abbruchfeld beendet; danach Oberfläche, Fokus und Eingaben wieder freigegeben",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Fehlgeschlagener Fitstart hebt die Sperre auf und zeigt den konkreten Fehler, ohne Eingaben zu verlieren",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Gezielter Plotfehler sauber abgefangen und Sperre aufgehoben; anschließender echter Fit vollständig farbig und fehlerfrei, keine JavaScript-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "version": "1.3.1",
+    "check": "Echter Zweiparameterfit direkt in 3D; logarithmische RMS-Z-Achse und Sperre bis nach absichtlich verzögerter Mesh-Darstellung, anschließend vollständige Freigabe ohne Laufzeitfehler",
+    "passed": true
   }
 ]

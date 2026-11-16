@@ -1,8 +1,27 @@
-# Prüfprotokoll – ElliFit 1.3.0
+# Prüfprotokoll – ElliFit 1.3.1
 
 Stand: 16. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.3.0
+## Aktuelle Prüfung von 1.3.1
+
+**Zehn gezielte Start-/API-Tests bestanden**: vier neue Prüfungen des Browseraufrufs und die sechs bestehenden API-/Cache-Prüfungen. Die neuen Tests kontrollieren, dass der Browser auf Serverbereitschaft und Nachlauf wartet, bei beendetem/fehlgeschlagenem Start nicht geöffnet wird und ein Abbruch die Wartezeit unterbricht. Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen; alle drei JavaScript-Dateien bestehen die Syntaxprüfung. Die optischen Rechenmodule sind bytegleich zu 1.3.0; dessen 68 Rechen-/API-Tests bleiben die numerische Basisprüfung.
+
+**Tatsächlicher Serverstart mit zusätzlicher Verzögerung von 1,6 Sekunden:** Der automatisch ausgelöste Browseraufruf wurde abgefangen und seine URL sofort per HTTP angefragt. Genau ein Aufruf, erst rund eine Sekunde nach geöffneten Server-Sockets; erster Seitenaufruf HTTP 200 und passende API-Version 1.3.1. Kein Aktualisieren nötig. Der Prüflauf mit `--no-browser` startet weiterhin ohne Browseraufruf.
+
+**Acht tatsächliche Chromium-Szenarien bestanden:**
+
+1. Ganze Oberfläche während Berechnung und absichtlich verzögerter Diagrammdarstellung grau und inert. Fortschritt/Abbruch bleiben erreichbar; Strg+S öffnet kein Speicherdialog. Freigabe erst nach fertigen 1D-Ergebnissen, auch bei 390 px ohne horizontalen Überlauf.
+2. Zoom und versetzte Minimum-Beschriftungen nach der nun abgewarteten Ergebnisdarstellung weiterhin korrekt.
+3. Echter gekoppelter Zweiparameterfit mit linearer Parameter-Y-Achse; die Sperre wartet auch auf das absichtlich verzögerte Talprofil im Diagnosebereich.
+4. Anschließender Einparameterfit startet mit logarithmischer RMS-Achse. Manuelles Umschalten auf linear bleibt möglich; der nächste Fit startet erneut logarithmisch.
+5. Laufenden echten Zweiparameterfit über das aktive Abbruchfeld beendet; Eingaben und Fokus danach wieder freigegeben.
+6. Absichtlich fehlgeschlagener Fitstart zeigt die konkrete Fehlermeldung und hebt die Sperre auf, ohne Eingaben zu verlieren.
+7. Absichtlicher Plotfehler wird abgefangen; Sperre aufgehoben und anschließender echter Fit wieder vollständig farbig und erfolgreich. Keine JavaScript-Laufzeitfehler.
+8. Echter Zweiparameterfit direkt in 3D; logarithmische RMS-Z-Achse, Sperre bis nach absichtlich verzögerter Mesh-Darstellung und anschließende vollständige Freigabe.
+
+Die Browserprüfungen verwenden synthetische Messungen und separate Bibliotheksordner. Windows-Batchdateien, Laufzeitabhängigkeiten und Material-/Modellwerte sind unverändert. Ein echter Windows-/WinPython-Start wurde weiterhin nicht durchgeführt. Private Dateien und Browserartefakte werden nicht veröffentlicht. Aktuelle und frühere Prüfpunkte sind in [Pruefdaten_Browser.json](Pruefdaten_Browser.json) getrennt erfasst.
+
+## Basisprüfung von 1.3.0
 
 **68 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests; zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Alle drei JavaScript-Dateien bestehen die Syntaxprüfung. Die Versions-/Cache-Prüfung umfasst das neue Ansichtsmodul und erkennt dessen Inhaltsänderungen ohne Versionswechsel. Optische Formeln, Suchverfahren, Anforderungen und Windows-Starter bleiben unverändert; im Standardmodell ändern sich nur Name und Notizen.
 

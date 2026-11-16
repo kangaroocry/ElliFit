@@ -8,6 +8,15 @@ import webbrowser
 from ellifit import __version__
 
 
+def open_browser_when_ready(server, url, stopped, delay=1.0):
+    """Wait for Uvicorn's listening sockets and a short settling interval."""
+    while not server.started:
+        if stopped.wait(0.05):
+            return
+    if not stopped.wait(delay) and not server.should_exit:
+        webbrowser.open(url)
+
+
 def main():
     parser = argparse.ArgumentParser(description='ElliFit · lokale Ellipsometrie')
     parser.add_argument('--port', type=int, default=8765)
@@ -31,11 +40,14 @@ def main():
     url = f'http://127.0.0.1:{args.port}/?v={__version__}'
     print(f'ElliFit {__version__}: {url}\nProgrammordner: {Path(__file__).resolve().parent}\n'
           'Dieses Fenster offen lassen. Beenden mit Strg+C.')
+    server = uvicorn.Server(uvicorn.Config('ellifit.server:app', host='127.0.0.1', port=args.port, log_level='warning'))
+    stopped = threading.Event()
     if not args.no_browser:
-        timer = threading.Timer(1.2, lambda: webbrowser.open(url))
-        timer.daemon = True
-        timer.start()
-    uvicorn.run('ellifit.server:app', host='127.0.0.1', port=args.port, log_level='warning')
+        threading.Thread(target=open_browser_when_ready, args=(server, url, stopped), daemon=True).start()
+    try:
+        server.run()
+    finally:
+        stopped.set()
 
 
 if __name__ == '__main__':

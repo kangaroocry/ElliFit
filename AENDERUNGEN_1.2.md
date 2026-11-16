@@ -1,6 +1,13 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 16. November 2026. Quellstand 1.3.0; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 16. November 2026. Quellstand 1.3.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Berechnung und Start in 1.3.1
+
+- **Bis zur fertigen Darstellung ausgegraut:** Eingaben und Ergebnisansichten sind während der Suche und beim anschließenden Zeichnen gesperrt. Ein separates Fortschrittsfeld bleibt sichtbar; die laufende Suche ist dort abbrechbar. Erst nach fertig gezeichneten Kurven, Beschriftungen und gegebenenfalls Talprofil werden die Ansichten wieder farbig. Abbruch und Fehler heben die Sperre ebenfalls auf.
+- **Browser erst nach Serverbereitschaft:** Der bisherige feste Timer vor dem Serverstart entfällt. Der Browser wartet auf die geöffneten Server-Sockets und eine weitere Sekunde. Abbruch oder fehlgeschlagener Start verhindern einen nachträglichen Browseraufruf; `--no-browser` bleibt verfügbar.
+- **RMS-Achse neuer Einparameterfits logarithmisch:** Eine zuvor lineare Parameter-Y-Achse im Zweiparameterfit wird nicht auf den nachfolgenden Fehlerkurvenplot übertragen. Auch ein vorher manuell linear gestellter RMS-Plot startet beim nächsten Fit wieder logarithmisch. Manuelles Umschalten danach bleibt möglich; zwei freie Parameter übernehmen weiterhin ihre jeweiligen Suchrasterskalen.
+- **Unverändert:** Optische Rechenmodule, globale Suche, Material-/Modellwerte, Laufzeitabhängigkeiten und Windows-Batchdateien. Die neue Anordnung aus 1.3.0 bleibt erhalten.
 
 ## Breiter Arbeitsplatz und verlässliche Ansichten in 1.3.0
 
