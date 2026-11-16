@@ -1,8 +1,8 @@
 # Materialbibliothek und Schichtvorlagen
 
-Stand: 13. November 2026 · ElliFit 1.2.9 · **alle Werte bei 632,8 nm**. Bibliothekswerte seit 1.2.8 unverändert.
+Stand: 16. November 2026 · ElliFit 1.3.0 · **alle Werte bei 632,8 nm**.
 
-Die 20 JSON-Materialdateien sind sofort in „Materialien …“ auswählbar. Die 12 Schichtvorlagen stehen in der Modellauswahl. Namen enthalten keinen Zusatz „Beispiel“. Es sind **editierbare typische Startwerte**, keine zertifizierten Konstanten oder vermessenen Proben. Herkunft und wichtige Annahmen stehen auch in jeder Materialdatei unter „Notizen“. Optionale Unsicherheiten bleiben unbekannt; aus diesen Richtwerten werden keine Messunsicherheiten erfunden.
+Die 18 JSON-Materialdateien sind sofort in „Materialien …“ auswählbar. Die 11 Schichtvorlagen stehen in der Modellauswahl. Namen enthalten keinen Zusatz „Beispiel“. Es sind **editierbare typische Startwerte**, keine zertifizierten Konstanten oder vermessenen Proben. Herkunft und wichtige Annahmen stehen auch in jeder Materialdatei unter „Notizen“. Optionale Unsicherheiten bleiben unbekannt; aus diesen Richtwerten werden keine Messunsicherheiten erfunden.
 
 Die Rechnung verwendet N = n + i k. k = 0 bezeichnet bei transparenten Einträgen eine Modellnäherung, keinen Nachweis exakt verschwindender Absorption. Bei anderer Wellenlänge müssen passende n/k eingesetzt werden; das Ändern der Wellenlänge rechnet die Bibliothekswerte **nicht** automatisch um.
 
@@ -12,9 +12,7 @@ Die Rechnung verwendet N = n + i k. k = 0 bezeichnet bei transparenten Einträge
 |---|---:|---:|---|
 | Luft | 1 | 0 | Transparentes Einfallsmedium, n ≈ 1 |
 | Si | 3,882 | 0,019 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/si) |
-| SiO2 (nativ) | 1,46 | 0 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/sio2); n = 1,46 als gemeinsamer gerundeter Startwert |
-| SiO2 (trocken) | 1,46 | 0 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/sio2); n = 1,46 als gemeinsamer gerundeter Startwert |
-| SiO2 (nass) | 1,46 | 0 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/sio2); n = 1,46 als gemeinsamer gerundeter Startwert |
+| SiO2 | 1,46 | 0 | [KLA/Filmetrics](https://www.filmetrics.com/products/instruments/refractive-index-database/sio2); gemeinsamer typischer Film-Startwert |
 | Quarzglas (amorphes SiO2) | 1,457 | 0 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/sio2) |
 | Al2O3 (ALD) | 1,65 | 0 | [Quelle](https://www.sciencedirect.com/science/article/abs/pii/S0925346720307114) |
 | HfO2 (Film) | 1,91 | 0 | [Quelle](https://www.filmetrics.com/products/instruments/refractive-index-database/hfo2); prozessabhängiger Richtwert, kein festes ALD-Rezept |
@@ -33,7 +31,11 @@ Die Rechnung verwendet N = n + i k. k = 0 bezeichnet bei transparenten Einträge
 
 ## Natives, nass und trocken gewachsenes SiO2
 
-Die drei Einträge sind bewusst getrennt, beginnen aber jeweils mit **n = 1,46, k = 0**. Der dichte SiO2-Referenzwert bei 632,8 nm liegt um 1,457; 1,46 ist hier ein sinnvoll gerundeter Modellansatz. Es gibt keinen zuverlässigen universellen Zahlenversatz allein aus den Bezeichnungen „nativ“, „wet“ und „dry“. Dichte, OH-/Wassergehalt, Stöchiometrie, Grenzschicht und Nachbehandlung beeinflussen den tatsächlichen Wert. Bei nur etwa 1–2 nm nativem Oxid kann ein homogenes SiO2-Modell zudem nur eine effektive Beschreibung sein. Eine feste Prozesskorrektur würde mehr Genauigkeit vortäuschen, als bekannt ist. Den nativen Film zunächst mit n = 1,46 und d = 1,5 nm fixieren, wenn der darüberliegende Film bestimmt werden soll; bei bekannten Kalibrierwerten entsprechend ändern.
+Die früheren drei Materialeinträge hatten identische n/k-Werte und sind deshalb zu **einem SiO2-Eintrag mit n = 1,46, k = 0** zusammengefasst. Ebenso ersetzt eine allgemeine Vorlage „Si + SiO2“ die identischen Wet-/Dry-Vorlagen. **Natives SiO2 bleibt in den Schichtmodellen ausdrücklich erhalten**, mit typischer Anfangsdicke 1,5 nm; seine Bezeichnung beschreibt dort den Aufbau, keinen anderen hinterlegten Brechungsindex.
+
+Die erneute Prüfung bedeutet nicht, dass reale Oxide immer gleich sind: Prozess, Dichte, OH-Gehalt und Grenzschicht können Unterschiede verursachen. [Herstellungsabhängige Oxid-/Grenzschichteffekte](https://www.sciencedirect.com/science/article/pii/S004060909700833X) sind beschrieben. Ohne verifizierte probenspezifische Werte rechtfertigt „nativ“, „wet“ oder „dry“ hier aber keinen getrennten Bibliotheksdatensatz. Bei ultradünnem nativem Oxid ist das homogene SiO2-Modell zudem eine effektive Beschreibung, und n/d können stark gekoppelt sein.
+
+Quarzglas bleibt als explizites Bulk-/Substratmaterial mit dem gerundeten Wert n = 1,457 getrennt vom allgemeinen Film-Startwert. Es handelt sich nicht um eine zusätzliche Wet-/Dry-Kategorie.
 
 ## ALD-Al2O3 und weitere Filme
 
@@ -46,8 +48,7 @@ Die Modellnamen lesen sich **vom Substrat zur Oberfläche**. Im Editor und in de
 | Modell | Schichten vom Substrat nach oben, Anfangsdicken |
 |---|---|
 | Si (oxidfrei) | keine Filme |
-| Si + SiO2 (trocken) | SiO2 (trocken) 80 nm |
-| Si + SiO2 (nass) | SiO2 (nass) 100 nm |
+| Si + SiO2 | SiO2 80 nm |
 | Si + natives SiO2 | SiO2 (nativ) 1,5 nm |
 | Si + natives SiO2 + Al2O3 (ALD) | SiO2 (nativ) 1,5 nm; Al2O3 (ALD) 20 nm |
 | Si + natives SiO2 + PMMA | SiO2 (nativ) 1,5 nm; PMMA 100 nm |
@@ -58,7 +59,7 @@ Die Modellnamen lesen sich **vom Substrat zur Oberfläche**. Im Editor und in de
 | Glas (N-BK7) + PMMA | PMMA 100 nm |
 | Glas (BOROFLOAT 33) + ITO | ITO 100 nm |
 
-Die Vorlagen enthalten angenommene, endliche Anfangsdicken. **Neu per „Schicht hinzufügen“ eingefügte Filme starten unverändert bei 0 nm.** Die Bibliotheksmodelle ändern keine vorhandenen eigenen Modell- oder Sitzungsdateien.
+Die elf Vorlagen enthalten angenommene, endliche Anfangsdicken. **Neu per „Schicht hinzufügen“ eingefügte Filme starten unverändert bei 0 nm.** Die Bibliotheksmodelle ändern keine vorhandenen eigenen Modell- oder Sitzungsdateien.
 
 ## Polymer auf Glas
 
@@ -75,3 +76,5 @@ Literatur- oder Herstellertypwerte dürfen die Kalibrierung mit einer bekannten 
 ## Vorhandene eigene Bibliotheksordner
 
 Wer in ElliFit einen anderen Material-/Modellordner gespeichert hat, sieht weiterhin diesen Ordner. Die neuen JSON-Dateien aus `materials` beziehungsweise `models` in den eigenen Ordner **ergänzen** oder den Ordner in der Oberfläche umstellen. Eigene Dateien mit gleichem Namen vor einem Ersetzen sichern. Alte Dateien mit „Beispiel“ im Namen können in einer übernommenen Bibliothek weiter existieren; ElliFit benennt eigene Dateien nicht automatisch um.
+
+**Update eigener Bibliotheksordner:** Neue Version frisch entpacken. Frühere Stock-Dateien `SiO2_nativ.json`, `SiO2_nass.json`, `SiO2_trocken.json` sowie `Si_SiO2_nass.json` und `Si_SiO2_trocken.json` sind im neuen Paket durch `SiO2.json` beziehungsweise `Si_SiO2.json` ersetzt. In einem selbst weiterverwendeten Ordner bleiben alte Dateien erhalten; eigene Dateien werden nicht automatisch gelöscht. Die native Modellvorlage `Si_SiO2_nativ.json` bleibt enthalten.

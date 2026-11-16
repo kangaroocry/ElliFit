@@ -37,13 +37,13 @@ class Layer(Medium):
 
 class Model(Validated):
     schema_version: Literal[1] = 1
-    name: str = Field(default='Si + SiO2 (trocken)', min_length=1, max_length=160)
+    name: str = Field(default='Si + SiO2', min_length=1, max_length=160)
     wavelength_nm: float = Field(default=632.8, gt=0, le=1e6)
     delta_convention: Literal['standard', 'reversed'] = 'reversed'
     ambient: Medium = Field(default_factory=lambda: Medium(name='Luft', n=1))
-    layers: list[Layer] = Field(default_factory=lambda: [Layer(name='SiO2 (trocken)', n=1.46)], max_length=40)
+    layers: list[Layer] = Field(default_factory=lambda: [Layer(name='SiO2', n=1.46)], max_length=40)
     substrate: Medium = Field(default_factory=lambda: Medium(name='Si', n=3.882, k=0.019))
-    notes: str = Field(default='Typische Startwerte bei 632,8 nm; SiO2 (trocken) mit d = 80 nm. Reihenfolge im Editor: Luft, Film, Si. Materialwerte und Dicke für die reale Probe prüfen; Herkunft siehe MATERIALIEN.md.', max_length=10000)
+    notes: str = Field(default='Typische Startwerte bei 632,8 nm; SiO2 mit d = 80 nm. Reihenfolge im Editor: Luft, Film, Si. Materialwerte und Dicke für die reale Probe prüfen; Herkunft siehe MATERIALIEN.md.', max_length=10000)
 
     @model_validator(mode='after')
     def incident_medium(self):

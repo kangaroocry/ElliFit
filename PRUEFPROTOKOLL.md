@@ -1,8 +1,32 @@
-# Prüfprotokoll – ElliFit 1.2.9
+# Prüfprotokoll – ElliFit 1.3.0
 
-Stand: 13. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand: 16. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.2.9
+## Aktuelle Prüfung von 1.3.0
+
+**68 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests; zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Alle drei JavaScript-Dateien bestehen die Syntaxprüfung. Die Versions-/Cache-Prüfung umfasst das neue Ansichtsmodul und erkennt dessen Inhaltsänderungen ohne Versionswechsel. Optische Formeln, Suchverfahren, Anforderungen und Windows-Starter bleiben unverändert; im Standardmodell ändern sich nur Name und Notizen.
+
+**18 Materialien und elf Schichtvorlagen** über die realen API-Endpunkte validiert. Die bisherigen identischen SiO2-Materialeinträge sind zusammengefasst; native Oxidmodelle mit 1,5 nm bleiben enthalten. Alle Vorlagen verwenden konsistente Materialwerte. **88 unabhängige tmm-Vergleiche** der komplexen Reflexionskoeffizienten bestanden: elf Modelle, vier Winkel, zwei Polarisationen. Das Standardmodell stimmt mit der allgemeinen Si/SiO2-Vorlage überein. Herkunft und Grenzen der Richtwerte stehen in [MATERIALIEN.md](MATERIALIEN.md).
+
+**13 tatsächliche Chromium-Szenarien bestanden:**
+
+1. Version und Cache-Schutz; 100 Zeilen je Seite, „Ohne Gruppen“, editierbarer Aufbau vor Vorschau, 18 Materialien und elf Modelle einschließlich nativem Oxid.
+2. Echter Referenzfit mit 118 nm; Lösungsliste, Fehlerlandschaft und Modellvergleich in einer Reihe; Eingaben einklappbar, helle Minimum-Beschriftungen mit Abstand zum Punkt.
+3. Zoom bleibt bei Listenwahl und tatsächlichem Klick auf sichtbare Minimum-Punkte erhalten. Eine außerhalb liegende Lösung verschiebt die Ansicht bei gleicher Zoomstufe.
+4. Achsenticks und Zahlenauflösung folgen engen Zooms auf Log-, Parameter- und Winkelachsen sowie beiden Δ-/Ψ-Achsen. Vergleichszoom bleibt beim Lösungswechsel erhalten.
+5. Frühere Ergebnisse schon beim Tippen/Ändern gekennzeichnet; Rückgängig stellt den passenden Eingabestand wieder her. Fit-Zähler und Unsicherheitsdiagnosen bleiben am tatsächlich berechneten Stand.
+6. 16 050 synthetische Messungen: frei eingestellte Seitenlänge 37, umgekehrte Dateiansicht, Anfang/Ende, direkte Messungsnummer und letzte Messung auch mit Gruppen. Rohdaten und Fit-Auswahl bleiben unverändert.
+7. Seitenlänge, Reihenfolge und ausdrückliche Gruppierung mit einer Sitzung gespeichert und wiederhergestellt; ältere Sitzungsoptionen bleiben lesbar.
+8. Echter gekoppelter Zweiparameterfit mit Talprofil und Lösungsregionen. Konturzoom bleibt bei Familien-/Aliaswahl erhalten; enge n-Achsenticks bleiben unterscheidbar.
+9. Gedrehte 3D-Kamera beim Lösungswechsel erhalten; Rückkehr zur Kontur, Talprofil und Diagnoseansicht nutzbar.
+10. Nach 3D wieder korrekte 1D-Ansicht; eigene Null-Dicken-Probe auf Hybridachse, dynamische physikalische Ticks nahe null und RMS-Hintergrund nach Zoom.
+11. Ansichten von 1 920 bis 390 px ohne horizontalen Seitenüberlauf. Ab 1 240 px stehen alle drei Ergebnisansichten nebeneinander, darunter sinnvoller Umbruch. Keine JavaScript-Laufzeitfehler.
+12. Minimum-Nummer tatsächlich angeklickt; positive kleine RMS-Ticks werden nicht als null beschriftet. Echter Autoscale-Knopf richtet den Bereich nach Daten statt Farbhintergrund aus.
+13. Speichern unter im neuen Layout, abgebrochenes Überschreiben und Rückgängig zum Datei-/Fit-Speicherpunkt; Fitbericht heruntergeladen und endgültige breite Ansicht geprüft.
+
+Browser-Schreibprüfungen verwenden separate temporäre Bibliothekskopien. Private Messdateien, Handbuch, Analysen und Screenshots werden nicht veröffentlicht. Aktuelle und historische Prüfungen sind in [Pruefdaten_Browser.json](Pruefdaten_Browser.json) nach Version getrennt.
+
+## Basisprüfung von 1.2.9
 
 **68 Rechen-/API-Tests bestanden**, einschließlich des privaten Importtests. Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Die zehn gezielten API-/Speicherprüfungen wurden vorab separat bestanden; beide JavaScript-Dateien bestehen die Syntaxprüfung.
 

@@ -418,5 +418,70 @@
     "version": "1.2.9",
     "check": "Dateileiste und Speichern-unter-Dialog bei 390 px ohne horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Version/Cache-Schutz, 100 Zeilen ohne Gruppen, editierbarer Aufbau vor Vorschau; 18 Materialien mit einem SiO2 und elf Modellen einschließlich nativem Oxid",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Tatsächlicher Referenzfit; Lösungsliste, Fehlerlandschaft und Vergleich in einer breiten Reihe; Eingaben einklappbar, Minima mit getrennten hell hinterlegten Beschriftungen unter dem Punkt",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Zoom bleibt bei Listenwahl und echtem Klick auf einen sichtbaren Minimum-Punkt erhalten; ein außerhalb liegendes Minimum wird ohne Verlust der Zoomstufe in die Ansicht verschoben",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Achsenwerte und Dezimalauflösung folgen engen Zooms auf logarithmischer Parameterachse, Winkelachse und beiden Δ-/Ψ-Achsen; Vergleichszoom bleibt bei Lösungswechsel erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Frühere Ergebnisse und Hinweise schon beim Tippen/Ändern klar gekennzeichnet; Rückgängig stellt aktuellen Bezug wieder her, Fit-Zähler und Wiederholungsdiagnosen bleiben am unveränderten Fit-Snapshot",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "16 050 synthetische Zeilen: frei gewählte Seitenlänge 37, umgekehrte Anzeige, Anfang/Ende, direkte Messung und letzte Messung auch bei Gruppierung; Rohdaten und Fit-Auswahl bleiben unverändert",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Seitenlänge, Reihenfolge und explizite Gruppierung werden mit der Sitzung gespeichert und wiederhergestellt; alte Sitzungsoptionen bleiben lesbar",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Echter gekoppelter Zweiparameterfit mit Talprofil und messverträglichen Regionen; eindeutige Schichtkennung, Konturzoom bei Familien-/Aliaswahl erhalten und enge n-Achse mit unterscheidbaren Dezimalwerten",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "3D-Fläche behält die gedrehte Kamera beim Lösungswechsel; Rückkehr zur Kontur, aufklappbares Talprofil und Diagnoseansicht bleiben nutzbar",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Nach 3D wieder korrektes 1D-Verhalten; eigene Null-Dicken-Probe auf Hybridachse, dynamische physikalische Ticks nahe null und RMS-Hintergrund nach Zoom erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Ansichten von 1920 bis 390 px ohne horizontalen Seitenüberlauf; ab 1240 px alle drei Ergebnisansichten nebeneinander, darunter sinnvoller Umbruch; keine JavaScript-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Nummernbeschriftung tatsächlich angeklickt; Autoscale-Knopf hält die RMS-Achse am Datenbereich, ohne Ausdehnung durch den Farbhintergrund",
+    "passed": true
+  },
+  {
+    "version": "1.3.0",
+    "check": "Speichern unter im neuen Layout, abgebrochenes Überschreiben und Rückgängig zum Datei-/Fit-Speicherpunkt; Fitbericht und endgültige breite Ansicht ohne Laufzeitfehler",
+    "passed": true
   }
 ]

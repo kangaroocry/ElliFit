@@ -1,6 +1,17 @@
-# ElliFit 1.2 – umgesetzte Änderungen
+# ElliFit – umgesetzte Änderungen
 
-Stand: 13. November 2026. Quellstand 1.2.9; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 16. November 2026. Quellstand 1.3.0; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Breiter Arbeitsplatz und verlässliche Ansichten in 1.3.0
+
+- **Eingaben oben, Ergebnisse über volle Breite:** Modell, Suche und Messdaten oben, insgesamt einklappbar; editierbarer Stack vor der Vorschau. Ab 1 240 px Lösungsliste, Fehlerlandschaft und Modellvergleich in einer Zeile, darunter angepasster Umbruch. Keine dauerhafte linke Eingabespalte mehr.
+- **Zoom erhalten:** Auswahl über Liste, Punkt oder Nummer erhält die Ansicht. Nur außerhalb liegende gewählte Minima verschieben das Fenster bei gleicher Zoomstufe. Vergleichsansicht, Talprofil und 3D-Kamera behalten ebenfalls ihre Ansicht im selben Fit.
+- **Minima lesbar beschriften:** Abgesetzte helle Nummern vorzugsweise unter dem Punkt, platzabhängig versetzt und anklickbar. Klicks auf Minima werden auch dann erkannt, wenn Plotly die darüberliegende Kurve bevorzugt trifft.
+- **Achsen aktualisieren:** Sichtbare Bereiche bestimmen Tickpositionen und Zahlenauflösung; native Log-, lineare und Null-Hybridachsen sowie Δ/Ψ berücksichtigt. Kleine positive Werte bleiben erkennbar. RMS-Hintergrund und Autoscale behalten ihr bisheriges Verhalten.
+- **Messlisten:** 100 Einträge je Seite, frei wählbare positive Seitenlänge, Dateianfang/Dateiende zuerst, „Ohne Gruppen“ voreingestellt. Navigation und „Letzte Messung“ funktionieren in beiden Richtungen. Originaldaten und Auswahl bleiben erhalten; Sitzungen speichern die Ansichtsoptionen.
+- **Hinweise zum richtigen Fit:** Zeitpunkt, Modell und Eingabestand sichtbar. Änderungen kennzeichnen alte Ergebnisse und deren Hinweise ausdrücklich. Fit-Zähler und Unsicherheitstabellen verwenden den alten Fit-Snapshot, die Messliste zeigt die aktuelle Auswahl. Rückgängig kann den passenden Stand wiederherstellen.
+- **SiO2 zusammengefasst:** Ein gemeinsamer Materialeintrag statt drei identischer n/k-Datensätze; eine allgemeine Si/SiO2-Vorlage statt Wet-/Dry-Duplikaten. Native Oxidmodelle mit 1,5 nm bleiben. Reale Prozessabhängigkeit wird erläutert, keine universellen Wet-/Dry-Korrekturen behauptet. Neu: 18 Materialien, elf Schichtvorlagen.
+- **Unverändert:** Optische Formeln, Suchalgorithmen, RMS-Farben und WinPython-Starter; keine neuen Laufzeitabhängigkeiten.
 
 ## Dateiverhalten für Modelle und Materialien in 1.2.9
 

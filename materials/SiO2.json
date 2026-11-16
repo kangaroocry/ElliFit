@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "SiO2",
+  "n": 1.46,
+  "k": 0,
+  "wavelength_nm": 632.8,
+  "notes": "Gemeinsamer typischer Startwert für SiO2-Filme bei 632,8 nm: n = 1,46, k = 0. Natives, nass und trocken gewachsenes Oxid erhalten ohne probenspezifisch belegte n/k-Unterschiede keine getrennten Materialeinträge. Reale Prozess-, Dichte-, OH- und Grenzschichteffekte sind möglich; der Herstellungsname allein definiert keinen eindeutigen Satz n/k. Für natives Oxid ist das homogene Modell nur eine effektive Näherung. Quellen: https://www.filmetrics.com/products/instruments/refractive-index-database/sio2 und https://www.sciencedirect.com/science/article/pii/S004060909700833X"
+}
