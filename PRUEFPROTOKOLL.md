@@ -1,8 +1,23 @@
-# Prüfprotokoll – ElliFit 1.3.1
+# Prüfprotokoll – ElliFit 1.3.2
 
-Stand: 16. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand: 17. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.3.1
+## Aktuelle Prüfung von 1.3.2
+
+**26 gezielte Rechen-/API-/Starttests bestanden**, mit zwei unveränderten AnyIO-/Starlette-Bibliothekswarnungen. Enthalten sind sämtliche Wiederholungs-/Unsicherheitsprüfungen aus `test_statistics12.py`, API-/Cache- und Startprüfungen. Zwei neue synthetische Fälle führen Import und Wiederholungsanalyse bis zur HTTP-Antwort: weit verteilte Δ-Werte ohne geeignete Kovarianz und gültige Wiederholungen am 0°-/360°-Übergang. Zusätzlich werden native Wahrheitswerte und strikte JSON-Serialisierbarkeit kontrolliert. Alle drei JavaScript-Dateien bestehen die Syntaxprüfung.
+
+**Private neu hochgeladene DAT unabhängig über die API geprüft:** 16 434 Messungen, keine verworfenen Datenzeilen, sieben Winkelgruppen. Import HTTP 200. Die anschließende Wiederholungsanalyse reproduziert in 1.3.1 exakt den gemeldeten NumPy-/JSON-Fehler (HTTP 400); in 1.3.2 HTTP 200 und ausschließlich native `bool`-Felder. Keine Messwerte oder Kommentare werden veröffentlicht.
+
+**Vier tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Vollständiger Import derselben privaten DAT, automatische Streuungsanalyse aller Winkel ohne NumPy-/JSON-Fehler, 100 Zeilen pro Seite und erhaltene Auswahl.
+2. Direkter Sprung zur letzten Messung, Auswahl von drei Zeilen und vollständiger Fit samt JSON-Ergebnis und Diagrammen. Diese Ausführungsprüfung behauptet keine physikalische Gültigkeit des angenommenen Schichtmodells.
+3. Unabhängiger synthetischer Auslöser mit breit verteilten Δ-Werten durch Import, Wiederholungsanalyse und Fit: ungewichteter Modus, unbekannte Unsicherheit und lesbarer JSON-Fitbericht korrekt erhalten.
+4. Anschließender synthetischer Referenzfit mit 118 nm, Versions-/Cache-Schutz, logarithmischer RMS-Achse, Freigabe nach fertiger Darstellung und 390-px-Ansicht ohne Laufzeitfehler oder horizontalen Überlauf.
+
+Der gemeinsame Windows-Starter wurde statisch auf PATH-Vorrang, Interpreterprüfung, lokale Paketinstallation, Fehlerpfade und Argumentweitergabe geprüft; CRLF-Zeilenenden bestätigt. Ein tatsächlicher Windows-/WinPython-Lauf wurde nicht durchgeführt. Der separate WinPython-Starter entfällt. Optische Formeln, Suchverfahren, Material-/Modellwerte und Abhängigkeiten sind unverändert; in der Statistik ändert sich nur der Datentyp des Freigabewerts bei gleicher Entscheidungslogik. Private Dateien und Analyseartefakte bleiben außerhalb des Pakets.
+
+## Basisprüfung von 1.3.1
 
 **Zehn gezielte Start-/API-Tests bestanden**: vier neue Prüfungen des Browseraufrufs und die sechs bestehenden API-/Cache-Prüfungen. Die neuen Tests kontrollieren, dass der Browser auf Serverbereitschaft und Nachlauf wartet, bei beendetem/fehlgeschlagenem Start nicht geöffnet wird und ein Abbruch die Wartezeit unterbricht. Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen; alle drei JavaScript-Dateien bestehen die Syntaxprüfung. Die optischen Rechenmodule sind bytegleich zu 1.3.0; dessen 68 Rechen-/API-Tests bleiben die numerische Basisprüfung.
 
@@ -232,6 +247,6 @@ Die JSON-Prüfdaten enthalten ausschließlich synthetische Ergebnisse und Import
 
 Geprüft mit Python 3.12.14, NumPy 2.3.5, SciPy 1.17.0, FastAPI 0.141.1, Pydantic 2.13.4, Uvicorn 0.52.1, Plotly 7.1.0, pytest 9.2.0, tmm 0.2.0 und Playwright 1.62.0. Die Anforderungen erlauben kompatible Versionsbereiche.
 
-Ein tatsächlicher Windows-/WinPython-Lauf wurde nicht durchgeführt. Die Batchdateien und der voreingestellte WinPython-Pfad bleiben im Paket; die Batchdateien verwenden Windows-Zeilenenden. Windows 7 ist nicht unterstützt. Das Paket enthält Quellcode, keine kompilierte EXE.
+Ein tatsächlicher Windows-/WinPython-Lauf wurde nicht durchgeführt. Ab 1.3.2 wird ausschließlich `Start_Windows.bat` mit Python aus PATH beziehungsweise dem Python-Launcher ausgeliefert; die Datei verwendet Windows-Zeilenenden. Windows 7 ist nicht unterstützt. Das Paket enthält Quellcode, keine kompilierte EXE.
 
 Numerische Referenzen sind keine experimentelle Genauigkeitsangabe. Die reale Probe kann ohne verifiziertes Schichtsystem und Materialwerte nicht physikalisch validiert werden. Lokale Kovarianzen, bedingte Bootstrapintervalle und asymptotische k-Profile ersetzen weder die Kontrolle systematischer Fehler noch die Prüfung globaler Mehrdeutigkeit. Eine endliche globale Suche kann Minima übersehen; Details stehen in der [README](README.md).

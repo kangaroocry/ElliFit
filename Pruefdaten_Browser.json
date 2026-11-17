@@ -523,5 +523,25 @@
     "version": "1.3.1",
     "check": "Echter Zweiparameterfit direkt in 3D; logarithmische RMS-Z-Achse und Sperre bis nach absichtlich verzögerter Mesh-Darstellung, anschließend vollständige Freigabe ohne Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.3.2",
+    "check": "Aktuell hochgeladene private DAT mit 16 434 Messungen vollständig im Browser importiert; automatische Streuungsanalyse für alle Winkel HTTP 200 ohne NumPy-/JSON-Fehler, 100 Zeilen pro Seite und unveränderte Auswahl",
+    "passed": true
+  },
+  {
+    "version": "1.3.2",
+    "check": "In der privaten DAT direkt zur letzten Messung gesprungen, drei Zeilen ausgewählt und Fit samt JSON-Ergebnis und Diagrammen abgeschlossen; keine Aussage über physikalische Gültigkeit des angenommenen Modells",
+    "passed": true
+  },
+  {
+    "version": "1.3.2",
+    "check": "Synthetischer Auslöser mit breit verteilten Delta-Werten durch Import, Wiederholungsanalyse und Fit geführt; ungewichteter Modus und fehlende Unsicherheiten bleiben korrekt erhalten, API-/Fitbericht als JSON lesbar",
+    "passed": true
+  },
+  {
+    "version": "1.3.2",
+    "check": "Version/Cache und anschließender synthetischer Referenzfit mit 118 nm; logarithmische RMS-Achse, vollständige Freigabe und mobile Ansicht ohne Laufzeitfehler",
+    "passed": true
   }
 ]

@@ -1,6 +1,13 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 16. November 2026. Quellstand 1.3.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 17. November 2026. Quellstand 1.3.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## DAT-Import und gemeinsamer Windows-Start in 1.3.2
+
+- **NumPy-Wahrheitswert nach Import korrigiert:** Stark verteilte Δ-Werte konnten in der Wiederholungsanalyse einen `numpy.bool_` erzeugen, den FastAPI nicht in JSON übertragen konnte. Jetzt ausdrücklich nativer `bool`; Wiederholungsregeln und Unsicherheitsrechnung bleiben gleich. Der Import selbst war bereits erfolgreich. Neue synthetische API-Regressionen prüfen breite Verteilung und gültige Wiederholungen über den 0°-/360°-Übergang.
+- **Ein gemeinsamer Windows-Starter:** `Start_WinPython.bat` entfernt. `Start_Windows.bat` bevorzugt funktionierendes Python aus PATH, prüft Version/64 Bit und verwendet sonst `py -3`. Lokale `.venv`, keine Paketinstallation ins portable Python; vorhandene Umgebung validiert und Startargumente weitergereicht. CRLF-Zeilenenden; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt.
+- **Prüfung:** 26 gezielte Rechen-/API-/Starttests, private DAT mit 16 434 Einträgen und vier echte Browserabläufe. Rohdatei, private Ergebnisse und Screenshots bleiben außerhalb des Repositorys.
+- **Unverändert:** Optische Formeln, globale Suche, Material-/Modellwerte, Laufzeitabhängigkeiten und Oberflächenverhalten aus 1.3.1.
 
 ## Berechnung und Start in 1.3.1
 

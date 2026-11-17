@@ -2,9 +2,38 @@ from fastapi.testclient import TestClient
 import html
 import re
 import shutil
+import json
+import pytest
 from ellifit import server
 from ellifit import __version__
 from ellifit.core import Model
+from ellifit.statistics import RepeatAnalysis
+
+
+@pytest.mark.parametrize('deltas,psis,usable', [
+    ([0, 120, 240], [20, 25, 30], False),
+    ([359.98, 0.01, 0.03], [30, 30.02, 29.99], True),
+])
+def test_import_then_repeat_analysis_is_json_serializable(deltas, psis, usable):
+    client = TestClient(server.app)
+    content = '\n'.join(f'70 {d} {p} >> synthetic' for d, p in zip(deltas, psis)).encode()
+    imported = client.post('/api/import', files={'file': ('synthetic.dat', content)})
+    assert imported.status_code == 200
+    rows = imported.json()['rows']
+    public = RepeatAnalysis(rows).public()
+    # This failed for np.bool_(False) in the broad-Delta branch.
+    json.dumps(public, allow_nan=False)
+    assert public['groups'][0]['usable'] is usable
+    response = client.post('/api/observations', json={'measurements': rows})
+    assert response.status_code == 200
+    stats = response.json()
+    assert stats['groups'][0]['usable'] is usable
+    assert stats['weighted'] is usable
+    if not usable:
+        assert stats['mode'] == 'unweighted'
+        assert stats['groups'][0]['uncertainty_mean_delta'] is None
+        assert stats['groups'][0]['uncertainty_mean_psi'] is None
+        assert stats['warnings']
 
 
 def test_model_save_load_and_validation(tmp_path, monkeypatch):

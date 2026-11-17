@@ -40,7 +40,8 @@ class RepeatAnalysis:
                     if np.std(col[:-1]) > 0 and np.std(col[1:]) > 0:
                         r = np.corrcoef(col[:-1], col[1:])[0, 1]
                         drift |= bool(abs(r) > .65)
-            valid = m >= 3 and unique >= 3 and abs(z) > .95 and not drift
+            # A failed NumPy comparison can short-circuit to np.bool_, not bool.
+            valid = bool(m >= 3 and unique >= 3 and abs(z) > .95 and not drift)
             if valid:
                 eig = np.linalg.eigvalsh(covariance)
                 valid = bool(eig.min() > max(1e-16, eig.max() * 1e-10))

@@ -1,20 +1,20 @@
-# ElliFit 1.3.1
+# ElliFit 1.3.2
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.3.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.3.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
-## Start unter Windows und mit WinPython
+## Start unter Windows
 
-Das ZIP **vollständig in einen beschreibbaren Ordner entpacken**, etwa unter Dokumente. Eine vorhandene ältere Version zunächst behalten; eigene Modell-, Material- und Sitzungsdateien können übernommen werden.
+Das ZIP **vollständig in einen neuen beschreibbaren Ordner entpacken**, etwa unter Dokumente. Eine vorhandene ältere Version zunächst behalten; eigene Modell-, Material- und Sitzungsdateien können übernommen werden.
 
-**Mit vorhandenem WinPython:** `Start_WinPython.bat` doppelklicken. Voreingestellt ist der vom Nutzer genannte Pfad `C:\Programme_portable\WinPython\WPy64-31290`. Der Starter findet `python.exe` direkt dort, in `python` oder in einem Unterordner `python-*`. Er erstellt die private Umgebung `.venv-winpython` im ElliFit-Ordner. WinPython und der System-PATH werden dabei nicht verändert; eine zusätzliche Python-Installation und Adminrechte sind dafür nicht erforderlich. Der ElliFit-Ordner muss beschreibbar sein und der Rechner die Ausführung erlauben.
+**`Start_Windows.bat` doppelklicken.** Ab 1.3.2 gibt es einen gemeinsamen Windows-Starter, auch für WinPython. Er bevorzugt ein funktionierendes **Python 3.11 oder neuer in 64 Bit aus dem Benutzer-PATH** und verwendet andernfalls den Python-Launcher `py -3`. Geprüft wird der tatsächliche Interpreter; ein Microsoft-Store-Verweis allein genügt nicht.
 
-Für andere Installationen den Pfad am Anfang der Batchdatei oder `ELLIFIT_WINPYTHON_ROOT` anpassen. WinPython muss auch bei späteren Starts vorhanden sein. Eine gegebenenfalls bestehende `.venv` wird von diesem Starter nicht verwendet.
+Bei WinPython den Ordner mit `python.exe` in den Benutzer-PATH aufnehmen, zum Beispiel `C:\Programme_portable\WinPython\WPy64-31290\python`, und dort vor `Microsoft\WindowsApps` anordnen. `where.exe python` und `python --version` in einer neu über das Startmenü geöffneten Eingabeaufforderung prüfen. Die Python-/WinPython-Installation muss auch später vorhanden bleiben.
 
-**Mit normal installiertem Python 3.11 oder neuer, 64 Bit:** `Start_Windows.bat` doppelklicken. Der Starter verwendet den Python Launcher beziehungsweise `python` und erstellt `.venv` im Programmordner.
+Der Starter erstellt **`.venv` im ElliFit-Ordner** und installiert Pakete nur dort. Python selbst und der System-PATH werden dabei nicht verändert. Adminrechte sind bei beschreibbarem Programmordner und erlaubter Programmausführung nicht erforderlich. Der separate `Start_WinPython.bat` und die feste WinPython-Pfadsuche entfallen. Eine frühere `.venv-winpython` wird nicht automatisch umgebaut oder kopiert; beim ersten Start im neuen Ordner werden die Pakete einmal neu eingerichtet.
 
-Beim ersten Start benötigen beide Starter Internet für die Python-Pakete. Der Browser öffnet sich erst, wenn der Server tatsächlich lauscht, und nach einer zusätzlichen Sekunde bei `http://127.0.0.1:8765`. Langsame Bibliotheksimporte lösen keinen vorzeitigen Seitenaufruf mehr aus. Bei beendetem oder fehlgeschlagenem Start wird kein Browseraufruf nachgeholt. Das Konsolenfenster offen lassen; mit `Strg+C` beenden. Bei Fehlern die Ausgabe im Konsolenfenster beachten. Eine beschädigte private Umgebung kann umbenannt und vom Starter neu erstellt werden.
+Beim ersten Start benötigt der Starter Internet für die Python-Pakete. Der Browser öffnet sich erst, wenn der Server tatsächlich lauscht, und nach einer zusätzlichen Sekunde bei `http://127.0.0.1:8765`. Langsame Bibliotheksimporte lösen keinen vorzeitigen Seitenaufruf mehr aus. Bei beendetem oder fehlgeschlagenem Start wird kein Browseraufruf nachgeholt. Das Konsolenfenster offen lassen; mit `Strg+C` beenden. Bei Fehlern die Ausgabe im Konsolenfenster beachten. Eine beschädigte private Umgebung kann umbenannt und vom Starter neu erstellt werden.
 
 **Updates und Browser-Cache:** Ab 1.2.2 werden HTML und Oberflächendateien nicht dauerhaft im Browser zwischengespeichert. JavaScript und CSS erhalten zusätzlich Dateiadressen mit Version und Inhaltskennung; beim normalen Start öffnet sich eine URL mit Versionsangabe. So werden alte Oberflächendateien bei einem Update nicht mit dem neuen Rechenkern kombiniert. Eine zusätzliche Versionsprüfung meldet Abweichungen verständlich. Die Konsole nennt Version und Programmordner. Ist der Port belegt, wird ausdrücklich angezeigt, dass die neue Version nicht gestartet wurde.
 
@@ -27,10 +27,14 @@ Nach der Erstinstallation läuft ElliFit offline. Plotly-JavaScript wird lokal a
 Bei belegtem Port beispielsweise:
 
 ```bat
-Start_WinPython.bat --port 8766
+Start_Windows.bat --port 8766
 ```
 
 Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
+
+## Korrektur nach DAT-Import in 1.3.2
+
+Die Meldung `[TypeError("'numpy.bool' object is not iterable"), TypeError('vars() argument must have __dict__ attribute')]` konnte nach einem bereits erfolgreichen Import auftreten. Ursache war ein NumPy-Wahrheitswert in der anschließenden Wiederholungsanalyse bei stark verteilten Δ-Werten. Er wird nun ausdrücklich in einen normalen Python-Wahrheitswert umgewandelt, sodass Statistik und Fitberichte als JSON übertragbar bleiben. Messwerte und Regeln für geeignete Wiederholungen werden dadurch nicht geändert; fehlende Unsicherheit bleibt unbekannt. Der Fehler wurde mit der neu hochgeladenen privaten DAT und einem unabhängigen synthetischen Auslöser reproduziert und behoben. Private Dateien werden nicht mitgeliefert.
 
 ## Erste Auswertung
 
