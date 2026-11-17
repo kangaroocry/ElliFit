@@ -1,8 +1,37 @@
-# Prüfprotokoll – ElliFit 1.4.0
+# Prüfprotokoll – ElliFit 1.4.1
 
 Stand: 17. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.4.0
+## Aktuelle Prüfung von 1.4.1
+
+**85 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Die optische Berechnung, Optimierung und Kovarianzgewichtung sind unverändert; ergänzt wurden Definition/Übertragung der tatsächlichen Zielfunktion und konsistente Darstellungen.
+
+Fünf neue unabhängige Regressionsprüfungen:
+
+- Synthetischer Mehrschichtfall mit anisotroper, korrelierter Wiederholstreuung und Modellabweichung: direkte Residuen und separat invertierte Stichprobenkovarianz liefern dasselbe gewichtete Minimum wie die Suche. Das unabhängig minimierte ungewichtete RMS hat eine andere Position. Die dargestellte Fit-Abweichung ist die monotone Größe √(Q/K).
+- Ungewichteter gemeinsamer Fit: Fitgröße stimmt weiterhin exakt mit dem bisherigen Winkel-RMS überein.
+- Stokes-Abweichung direkt aus Stokes-Vektoren verglichen; Winkel-RMS wird nicht als Stokes-Zielfunktion ausgegeben.
+- Ungewichtete Winkelmittelwerte mit ungleichen Wiederholungszahlen: eigene Gradeinheit und passende Normierung statt anders gewichteter Rohwert-RMS.
+- Q-Werte im nachgerechneten zweidimensionalen Netz gegen direkte Modellberechnungen geprüft. Einparametrige Nachrechnung behält exakte Minimum-Anker zusätzlich zum regulären Raster.
+
+Der vorgelegte Screenshot-Fall wurde mit der privaten Originaldatei und dem abgelesenen Schichtmodell lokal nachgerechnet. Die automatische Gewichtung ist aktiv; das Suchergebnis ist ein Minimum der gewichteten Zielfunktion, während das Minimum der zuvor gezeichneten ungewichteten RMS-Kurve woanders liegt. Der Bildbefund ist damit erklärt, ohne die Gewichtung stillschweigend auszuschalten. Private Messungen, Schichtdateien, Zahlenresultate und Screenshots werden nicht veröffentlicht.
+
+**Zehn tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Ungewichteter Referenzfit bei 118 nm unverändert; Winkel-RMS, bisheriger Hintergrund, logarithmische Fehlerachse und Versions-/Cache-Schutz erhalten.
+2. Privater Fall mit vier Messungen: gewichtete Lösung unverändert, Marker exakt im Minimum der minimierten Kurve; Kovarianzgewichtung und dimensionslose Einheit sichtbar erklärt.
+3. Wechsel zur gekennzeichneten RMS-Kontrollansicht zeigt das andere Minimum; Rückkehr erhält x-Zoom und Ergebnisliste. Die Ansicht ändert keine Sucheinstellung.
+4. Zoom-Nachrechnung enthält den exakten Minimum-Anker. Eine Probelösung mit kleinerem Winkel-RMS, aber schlechterer gewichteter Fitgröße wird korrekt höher dargestellt. JSON definiert Zielfunktion und Ansichtsart.
+5. Bewusst deaktivierte Gewichtung findet das unabhängig bestätigte Winkel-RMS-Minimum; Plot und Marker stimmen überein.
+6. Gewichteter Zweiparameterfit: Kontur, Talprofil und Minima verwenden dieselbe Zielfunktion. Neutrale Landschaftsfarben und feste RMS-Punkt-/Listenfarben sind ausdrücklich getrennt.
+7. 3D-Höhen und nachgerechnetes Netz verwenden Q; Kameralage bleibt erhalten. Landschafts-CSV führt Fit-Abweichung, Einheit und Winkel-RMS getrennt.
+8. Stokes-Fit zeigt eigene Zielfunktion statt einer Winkel-RMS-Landschaft. Lösungs-CSV enthält beide Größen mit Einheit.
+9. Ungewichteter Mittelwertfit mit ungleichen Wiederholungszahlen zeigt die minimierte Mittelwertabweichung in Grad.
+10. Größenwahl, Hinweise und Fehlerachsen von 1 680 bis 390 px ohne bleibenden horizontalen Überlauf oder JavaScript-Laufzeitfehler.
+
+Zusätzliche Mesh-Werte und die Normierungsdefinition sind Bestandteil der API/JSON-Ausgaben. Optionale Konfidenzlinien mit RMS-Höhen werden nicht auf eine andere 3D-Fitgrößenachse übertragen; 2D-Parametergrenzen bleiben optional verfügbar. Materialien, Schichtvorlagen, Abhängigkeiten und gemeinsamer Windows-Starter sind unverändert. Ein tatsächlicher Windows-Lauf wurde nicht durchgeführt.
+
+## Basisprüfung von 1.4.0
 
 **80 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Der übersprungene Test benötigt die ursprünglichen privaten Beispieldateien über eine ausdrücklich gesetzte Umgebungsvariable; diese werden nicht ausgeliefert. Die gesamte öffentliche Rechen-/API-/Startsuite einschließlich neuer Fortsetzungs-/Zoomregressionen ist bestanden. Nach Anpassung der Speicheraufteilung der Zoomauswertung wurden die sechs gezielten neuen Prüfungen nochmals bestanden. Alle vier JavaScript-Dateien bestehen die Syntaxprüfung.
 

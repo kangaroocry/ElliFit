@@ -1,6 +1,15 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 17. November 2026. Quellstand 1.4.0; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 17. November 2026. Quellstand 1.4.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Konsistente Fit-Minima und Fehlerdarstellung in 1.4.1
+
+- **Ursache nachgerechnet:** Die automatische Kovarianzgewichtung kann ein anderes Minimum als der ungewichtete Winkel-RMS liefern. 1.4.0 minimierte korrekt die gewichtete Zielfunktion, zeichnete aber den ungewichteten RMS. Das führte zu scheinbar falsch liegenden Markierungen.
+- **Gleiche Größe für Suche und Darstellung:** Standardmäßig tatsächlich minimierte Fit-Abweichung in 1D, Kontur, 3D und Talprofil. Monotone Darstellung √(Q/K), mit ausdrücklich benannter Einheit. Optimierung und Gewichtung bleiben unverändert.
+- **RMS bleibt verfügbar:** Eigene Kontrollansicht mit sichtbarer Erklärung; feste RMS-Farben für Punkte/Liste erhalten. Neutrale relative Landschaftsfarben für abweichende Fitgrößen, keine Winkelfarbgrenzen auf dimensionslosen Achsen. Passender Kennzahlen- und Sortierungstext.
+- **Zoom-Anker erhalten:** Eindimensionale Nachberechnung enthält exakte bestätigte Minima zusätzlich zum regulären Raster. Q und RMS in lokalen/3D-Netzen, Marker, Probelösungen und Exporte verwenden passende Werte.
+- **Weitere Fälle abgedeckt:** Stokes-Fit und ungewichtete Winkelmittelwertauswertung mit ungleichen Wiederholungszahlen ebenfalls korrekt bezeichnet und dargestellt. Anzeigewechsel verändert keine Sucheinstellung; bewusstes ungewichtetes Neufitten bleibt verfügbar.
+- **Prüfung:** 85 Tests bestanden, ein privater Importtest erwartungsgemäß übersprungen, zehn tatsächliche Chromium-Prüfungen einschließlich des vorgelegten privaten Falls. Keine privaten Eingangsdaten oder Ergebnisse im Repository. Keine neuen Laufzeitabhängigkeiten; gemeinsamer Windows-Starter unverändert.
 
 ## Integrierter Schichteditor und untersuchbare Fehlerlandschaft in 1.4.0
 

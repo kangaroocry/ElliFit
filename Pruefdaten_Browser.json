@@ -598,5 +598,55 @@
     "version": "1.4.0",
     "check": "Frischer endgültiger Rechenkern: alle bestätigten Wurzeln auf demselben Talast bleiben als tiefe Profilminima und anklickbare Familien-/Aliasmarker erhalten; Talprofil-CSV mit Astkennung, optionale Konfidenzansicht vollständig ausgeschaltet",
     "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Ungewichteter Referenzfit unverändert bei 118 nm; Fitgröße = Winkel-RMS, bisheriger Farbhintergrund, logarithmische Fehlerachse und Versions-/Cache-Schutz erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Privater Screenshot-Fall mit vier Messungen unabhängig nachgerechnet: gewichtete Lösung unverändert, Marker nun exakt im Minimum der tatsächlich minimierten Kurve; Gewichtung/Korrelation und dimensionslose Einheit ausdrücklich sichtbar",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Umschaltung zur ausdrücklich gekennzeichneten ungewichteten RMS-Kontrollansicht zeigt das andere Minimum; Rückkehr zur Fitgröße erhält x-Zoom und Ergebnisliste, Rohwert-Farben bleiben getrennt",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Zoom-Nachrechnung behält den exakten bestätigten Minimumpunkt; manuelle Probelösung mit kleinerem Winkel-RMS, aber schlechterer Fitgröße wird korrekt höher geplottet; JSON exportiert Definition und Ansichtsart",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Bewusst ausgeschaltete Gewichtung findet unabhängig bestätigtes Winkel-RMS-Minimum; Plot und Marker stimmen auch hier überein, Umschalten der Anzeige allein ändert nie den Fit",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Gewichteter Zweiparameterfit: Kontur und Talprofil zeigen dieselbe Zielfunktion wie Optimierung und Marker; Flächenskala klar von festen Winkel-RMS-Farben der Punkte/Liste getrennt",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "3D-Höhen und nachgerechnetes Netz verwenden die echte Fitgröße; Kameralage bleibt erhalten, Fehlerlandschaft-CSV enthält Fit-Abweichung mit Einheit und Winkel-RMS getrennt",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Stokes-Fit erhält seine eigene korrekt benannte Zielfunktion statt einer Winkel-RMS-Landschaft; Ergebnis-CSV führt Fitgröße, Einheit und absoluten Winkel-RMS getrennt",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Ungewichteter Mittelwertfit mit ungleichen Wiederholungszahlen zeigt die tatsächlich minimierte Mittelwertabweichung mit Gradeinheit, nicht den anders gewichteten Rohwert-RMS",
+    "passed": true
+  },
+  {
+    "version": "1.4.1",
+    "check": "Neue Größenwahl, Hinweise und Fehlerachsen von 1680 bis 390 px ohne bleibenden horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

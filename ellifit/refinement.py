@@ -15,24 +15,29 @@ def evaluate_view(request, bounds, scales, size=161, anchors=()):
         elif scale=='log':axis=parameter.positive_min*np.expm1(np.linspace(np.log1p(lo/parameter.positive_min),np.log1p(hi/parameter.positive_min),size))
         else:axis=np.linspace(lo,hi,size)
         axes.append(axis);clipped.append([lo,hi])
+    if len(axes)==1:
+        extra=[v[0] for v in anchors if clipped[0][0]<=v[0]<=clipped[0][1]]
+        if extra:axes[0]=np.unique(np.r_[axes[0],extra])
     values=axes[0][:,None] if len(axes)==1 else np.column_stack([g.ravel() for g in np.meshgrid(*axes,indexing='xy')])
     obj=Objective(request);q=[];rms=[]
     chunk=max(1,min(4000,250000//max(1,len(obj.obs.angles))))
     for start in range(0,len(values),chunk):
         q.extend(obj.batch(obj.encode(values[start:start+chunk])));rms.extend(obj.last_rms)
-    shape=(size,) if len(axes)==1 else (size,size)
+    shape=(len(axes[0]),) if len(axes)==1 else (size,size)
     out=dict(axes=[a.tolist() for a in axes],rms=safe_list(np.array(rms).reshape(shape)),q=safe_list(np.array(q).reshape(shape)),bounds=clipped,
         scales=scales,zero_floors=[p.positive_min if p.lower==0 and p.scale=='log' else None for p in request.parameters],evaluations=len(values),optimized=False,
         note='Nachgerechnete Darstellung des abgeschlossenen Fits; die Lösungsliste wurde nicht neu optimiert.')
+    from .fit_metric import definition
+    out['fit_objective']=definition(obj)
     if len(axes)==2:
         # Evaluated minima and valley anchors remain vertices in the local mesh.
         extra=np.asarray([v for v in anchors if all(lo<=x<=hi for x,(lo,hi) in zip(v,clipped))],float)
         mesh_values=values
-        mesh_rms=np.array(rms)
+        mesh_rms=np.array(rms);mesh_q=np.array(q)
         if len(extra):
-            obj.batch(obj.encode(extra));mesh_rms=np.r_[mesh_rms,obj.last_rms];mesh_values=np.vstack((values,extra))
+            extra_q=obj.batch(obj.encode(extra));mesh_q=np.r_[mesh_q,extra_q];mesh_rms=np.r_[mesh_rms,obj.last_rms];mesh_values=np.vstack((values,extra))
         encoded=obj.encode(mesh_values)
         from .landscape import _triangles
         _,indices=np.unique(np.round(encoded,12),axis=0,return_index=True);indices=np.sort(indices)
-        out['mesh']=dict(values=mesh_values[indices].tolist(),rms=safe_list(mesh_rms[indices]),triangles=_triangles(encoded[indices]).tolist())
+        out['mesh']=dict(values=mesh_values[indices].tolist(),rms=safe_list(mesh_rms[indices]),q=safe_list(mesh_q[indices]),triangles=_triangles(encoded[indices]).tolist())
     return out

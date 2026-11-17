@@ -187,6 +187,8 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     for row in obj.rows:
         key=(row['source'],row['comment'])
         labels[key]=labels.get(key,0)+1
+    from .fit_metric import definition
+    result['fit_objective']=definition(obj)
     result['measurement_context']=dict(count=len(obj.rows),label_count=len(labels),
         labels=[dict(source=s,comment=c,count=n) for (s,c),n in list(labels.items())[:200]],
         omitted_labels=max(0,len(labels)-200))

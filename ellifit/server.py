@@ -59,7 +59,7 @@ async def bad_file(request, exc):
 @app.get('/')
 def home():
     html = (STATIC / 'index.html').read_text(encoding='utf-8')
-    assets = ('app.js', 'documents.js', 'workspace.js', 'interactions.js', 'style.css')
+    assets = ('app.js', 'documents.js', 'workspace.js', 'interactions.js', 'objective.js', 'style.css')
     bundle = hashlib.sha256(b''.join((STATIC / name).read_bytes() for name in assets)).hexdigest()[:16]
     for asset in ('/static/' + name for name in assets):
         html = html.replace('"' + asset + '"', '"' + asset + '?v=' + __version__ + '&amp;build=' + bundle + '"')

@@ -341,7 +341,8 @@ def build_landscape(obj,grids,solutions,diagnostics,progress):
             regions['levels'].append(dict(confidence=level,polygons=polygons,
                 unclosed_boundaries=unclosed,approximate=True,
                 broad=any(max(p['normalized_width'])>.05 for p in polygons)))
-    mesh=dict(values=values.tolist(),rms=safe_list(rms),triangles=tri.tolist(),
+    from .fit_metric import mesh_scores
+    mesh=dict(values=values.tolist(),rms=safe_list(rms),q=mesh_scores(obj,vertices),triangles=tri.tolist(),
         compatibility_p=safe_list(p) if compatibility.available else None,
         anchors=len(anchor_z),adaptive_points=added,base_points=len(base),
         vertices=len(vertices),refinement_rounds=2,

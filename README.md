@@ -1,8 +1,8 @@
-# ElliFit 1.4.0
+# ElliFit 1.4.1
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.4.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.4.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows
 
@@ -32,6 +32,30 @@ Start_Windows.bat --port 8766
 
 Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
 
+## Fit-Zielfunktion und Winkel-RMS in 1.4.1
+
+**Die Fehlerlandschaft zeigt standardmäßig genau die minimierte Größe.** In 1.4.0 konnte ein korrekt gewichteter Fitpunkt neben dem Minimum der gezeichneten Kurve liegen: Die Suche minimierte die Wiederholkovarianz-gewichtete Abweichung, der Plot zeigte den ungewichteten Winkel-RMS. Das sind unterschiedliche Kriterien. Eine kleinere Ψ-Streuung führt beispielsweise zu stärkerer Gewichtung von Ψ; die Δ/Ψ-Korrelation wird ebenfalls berücksichtigt.
+
+Bei ungewichtetem gemeinsamem Winkelresiduen-Fit bleibt die bisherige RMS-Darstellung erhalten. Bei anderen Kriterien erscheint die Auswahl **„Fehlerlandschaft zeigt“**:
+
+- **Tatsächlich minimierte Fit-Abweichung:** Kurve, Kontur, 3D-Höhe, Talprofil, Minima und Probelösungen verwenden dieselbe Zielfunktion. Dargestellt wird √(Q/K), also die Wurzel der mittleren quadrierten Fitresiduen. Da K konstant und die Wurzel monoton ist, ändert diese Darstellung kein Minimum und keine Rangfolge.
+- **Ungewichteter Winkel-RMS (°):** Kontrollansicht der absoluten Winkelabweichung aller Rohwerte, mit dem bisherigen Farbhintergrund. Ein sichtbarer Hinweis erklärt, dass gewichtete beziehungsweise Stokes-/Mittelwert-Minima nicht im Minimum dieser anderen Kurve liegen müssen. Die Anzeigeauswahl ändert weder Fitparameter noch Gewichtung.
+
+| Aktive Suche | Fit-Abweichung | Einheit |
+|---|---|---|
+| Gemeinsamer ungewichteter Winkelresiduen-Fit | √(Q / 2N), identisch zum Winkel-RMS | Grad |
+| Gewichtung mit geeigneten Wiederholkovarianzen | √(Q / 2N), Q = Σ rᵀ C⁻¹ r über alle Rohwerte | dimensionslos |
+| Stokes-Fit | √(Q / 3M), Q = Summe der quadrierten Stokes-Vektor-Abstände | dimensionslos |
+| Ungewichteter Winkelmittelwertfit | √(Q / 2M) über die verwendeten Winkelmittelwerte | Grad |
+
+N bezeichnet die Anzahl ausgewählter Rohwertpaare, M die Anzahl tatsächlich verwendeter Beobachtungen beziehungsweise Winkelmittelwerte. Bei einer gewichteten Mittelwertauswertung bleibt die gemeinsame GLS-Zielfunktion über die Rohwerte erhalten. Die genauen Definitionen und der Normalisierungsfaktor stehen unter `fit_objective` im JSON-Bericht. Ein kleiner Fitfehler allein bestätigt das Schichtmodell nicht.
+
+**Farben und Rangfolge klar unterscheiden:** Punkt- und Tabellenfarben beziehen sich weiterhin auf den ungewichteten Winkel-RMS mit der festen Farbskala. Die gewichtete/Stokes-/Mittelwert-Landschaft erhält eine eigene neutrale relative Farbskala für die tatsächliche Fitgröße. Der Winkel-RMS bleibt als zusätzliche absolute Winkelabweichung in der Liste und im Hover verfügbar. Die Kennzahlenleiste nennt jetzt den „Winkel-RMS des besten Fits“ und bei abweichender Zielfunktion zusätzlich dessen Fit-Abweichung. Die Liste ist nach der Fit-Zielfunktion geordnet; der RMS-Spaltenkopf behauptet dabei keine RMS-Sortierung mehr.
+
+**Wenn ausdrücklich der Winkel-RMS minimiert werden soll:** Im Schichtmodell „Suchoptionen und Unsicherheiten“ → „Fitverfahren und Unsicherheiten“ öffnen, Zielfunktion Δ/Ψ, gleiche Winkel als gemeinsamer Fit aller Einzelwerte und Messunsicherheiten **„Ungewichtet fitten“** wählen. Anschließend neu fitten. „Im Ausschnitt neu suchen“ berücksichtigt die aktuellen Fit-Einstellungen; ein Umschalten der Plotansicht allein ändert diese Einstellungen nicht.
+
+Die Zoom-Nachberechnung behält bestätigte eindimensionale Minimum-Anker zusätzlich zum regulären Raster exakt bei. Zweidimensionale Netze enthalten neben Winkel-RMS nun auch die tatsächlich berechnete Zielfunktion für jeden Stützpunkt. CSV-Ausgaben führen Fit-Abweichung, Einheit und Winkel-RMS getrennt; JSON speichert zusätzlich die gewählte Fehleransicht. Optionale Konfidenzgrenzen bleiben standardmäßig aus; in einer 3D-Fitgrößenansicht werden keine Linien mit fremden RMS-Höhen eingeblendet, die 2D-Parametergrenzen bleiben optional verfügbar.
+
 ## Schichteditor und Auswertung in 1.4.0
 
 **Ein Schichteditor für Modell und Suche.** Die zusätzliche Vorschau und der getrennte Parameterraum entfallen. Jede Karte zeigt ihre Nummer, Rolle, Materialname sowie n/k/d. Einfallsmedium und Substrat sind als halbunendlich gekennzeichnet. Unter einem als **X** oder **Y** gewählten Feld erscheinen dessen Suchgrenzen und lineares/logarithmisches Raster; bei fixierten Feldern entfallen diese zusätzlichen Eingaben. Die übrigen Optionen stehen unter „Suchoptionen und Unsicherheiten“. Grenzen und Fitrollen werden mit einer Sitzung gespeichert, Modellwerte mit der Modelldatei. Reine Suchänderungen verändern den Speicherstatus der Modelldatei nicht.
@@ -50,7 +74,7 @@ Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pi
 
 Die Astwahl nennt **Familie und Wiederholung**. Gleichungen gelten lokal an dieser Lösung; von verschiedenen Lösungen aus fortgesetzte Pfade können sich überlagern. Andere bestätigte Wurzeln auf demselben Pfad werden exakt aufgenommen und im Profil nummeriert. Talpunkte sind direkt nachgerechnete Modellwerte, keine zusätzlichen lokalen Minima. Bei anderen Datenlagen erklärt die Diagnose, weshalb kein Profil berechnet wird. Der Export nennt Ast, Familie und Wiederholung. **95-/99-%-Darstellung ist standardmäßig ausgeschaltet** und befindet sich bei den optionalen Diagnosen; RMS-Farben und Talspannen sind keine Konfidenzgrenzen.
 
-**Im Zoom weiterarbeiten.** Nach einer kurzen Zoompause wird der sichtbare Ausschnitt standardmäßig dichter mit dem Modell des angezeigten Fits nachgerechnet: 241 Stützstellen im Einparameterfall beziehungsweise 161 × 161 beim Konturplot. Dies optimiert keine Lösungen und verändert die Liste nicht. Die Nachrechnung überlappt den ursprünglichen Suchbereich; außerhalb davon wird nicht extrapoliert. Veraltete Antworten nach weiterem Zoom werden verworfen. Automatik abschaltbar, „Ansicht nachrechnen“ bleibt verfügbar. In 3D bezieht sich die manuelle Nachrechnung auf die Parameterachsenbereiche, nicht auf die Kameraperspektive.
+**Im Zoom weiterarbeiten.** Nach einer kurzen Zoompause wird der sichtbare Ausschnitt standardmäßig dichter mit dem Modell des angezeigten Fits nachgerechnet: 241 reguläre Stützstellen plus exakte Minimum-Anker im Einparameterfall beziehungsweise 161 × 161 beim Konturplot. Dies optimiert keine Lösungen und verändert die Liste nicht. Die Nachrechnung überlappt den ursprünglichen Suchbereich; außerhalb davon wird nicht extrapoliert. Veraltete Antworten nach weiterem Zoom werden verworfen. Automatik abschaltbar, „Ansicht nachrechnen“ bleibt verfügbar. In 3D bezieht sich die manuelle Nachrechnung auf die Parameterachsenbereiche, nicht auf die Kameraperspektive.
 
 **„Im Ausschnitt neu suchen“** setzt die Suchgrenzen auf die sichtbaren physikalischen Parametergrenzen und startet ausdrücklich eine neue globale und lokale Suche. Das kann auch einen zuvor nicht untersuchten Bereich einschließen. Voraussetzung ist ein Fit zu den aktuellen Eingaben; bei verändertem Modell oder anderer Messauswahl zuerst neu fitten. Die Änderung der Suchgrenzen ist rückgängig machbar. Zoom/Ansichtsnachrechnung selbst ändern weder Eingaben noch Speicherstatus. Tick-/Beschriftungsupdates und Nachrechnung behalten die gewählten Achsenbereiche; explizite Auswahl einer außerhalb liegenden Lösung darf weiterhin dorthin verschieben.
 
