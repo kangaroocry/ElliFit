@@ -96,7 +96,7 @@ def test_browser_assets_are_versioned_and_never_heuristically_cached():
     client=TestClient(server.app)
     page=client.get('/')
     assets=[html.unescape(path) for path in re.findall(r'(?:src|href)="([^"]+)"',page.text) if path.startswith(('/static/','/plotly.js'))]
-    assert len(assets)==5
+    assert len(assets)==6
     assert all('?v=' in path for path in assets)
     assert all('&build=' in path for path in assets if path.startswith('/static/'))
     for path in ['/', '/api/info', *assets]:
@@ -107,7 +107,7 @@ def test_browser_assets_are_versioned_and_never_heuristically_cached():
 
 
 def test_asset_addresses_change_when_contents_change_without_version_bump(tmp_path,monkeypatch):
-    for name in ['index.html','app.js','documents.js','workspace.js','style.css']:
+    for name in ['index.html','app.js','documents.js','workspace.js','interactions.js','style.css']:
         shutil.copy2(server.STATIC/name,tmp_path/name)
     monkeypatch.setattr(server,'STATIC',tmp_path)
     client=TestClient(server.app)
@@ -124,4 +124,7 @@ def test_asset_addresses_change_when_contents_change_without_version_bump(tmp_pa
     fourth=bundle()
     workspace=tmp_path/'workspace.js'
     workspace.write_text(workspace.read_text()+'\n// changed plot controls\n')
-    assert len({first,second,third,fourth,bundle()})==5
+    fifth=bundle()
+    interactions=tmp_path/'interactions.js'
+    interactions.write_text(interactions.read_text()+'\n// changed editor controls\n')
+    assert len({first,second,third,fourth,fifth,bundle()})==6

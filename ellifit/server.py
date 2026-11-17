@@ -59,7 +59,7 @@ async def bad_file(request, exc):
 @app.get('/')
 def home():
     html = (STATIC / 'index.html').read_text(encoding='utf-8')
-    assets = ('app.js', 'documents.js', 'workspace.js', 'style.css')
+    assets = ('app.js', 'documents.js', 'workspace.js', 'interactions.js', 'style.css')
     bundle = hashlib.sha256(b''.join((STATIC / name).read_bytes() for name in assets)).hexdigest()[:16]
     for asset in ('/static/' + name for name in assets):
         html = html.replace('"' + asset + '"', '"' + asset + '?v=' + __version__ + '&amp;build=' + bundle + '"')
@@ -321,6 +321,24 @@ def other_solution(key: str, index: int, alias: int | None = None):
         result['uncertainty']=parameter_uncertainty(job['objective'],values)
     result['selected_alias']=alias
     return result
+
+
+class ViewInput(BaseModel):
+    bounds:list[list[float]]=Field(min_length=1,max_length=2)
+    scales:list[Literal['linear','log']]=Field(min_length=1,max_length=2)
+    size:int=Field(default=161,ge=41,le=241)
+
+
+@app.post('/api/jobs/{key}/view')
+def refine_view(key:str,body:ViewInput):
+    job=job_by_id(key)
+    if job['status']!='completed':raise HTTPException(409,'Zuerst den Fit abschließen.')
+    from .refinement import evaluate_view
+    result=job['result']
+    anchors=[a['values'] for s in result['solutions'] for a in s['aliases']]
+    profile=result.get('identifiability',{}).get('profile')
+    if profile:anchors.extend(p['values'] for p in profile['overlay'])
+    return evaluate_view(job['request'],body.bounds,body.scales,body.size,anchors)
 
 
 @app.post('/api/validate-session')

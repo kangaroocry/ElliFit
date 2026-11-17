@@ -164,3 +164,12 @@ def test_thin_confidence_regions_remain_connected_and_preserve_periods(coupled_r
             assert np.min(p)>.05-2e-5
     wider=region['levels'][1]
     assert any(len({m['family'] for m in p['members']})>1 for p in wider['polygons'])
+
+
+def test_profile_keeps_other_confirmed_roots_on_the_same_valley(coupled_result):
+    branches=coupled_result['identifiability']['profile']['branches']
+    assert any(len({p['minimum_family'] for p in b['points'] if 'minimum_family' in p})>=2 for b in branches)
+    for branch in branches:
+        for p in branch['points']:
+            if 'minimum_family' in p:
+                assert p['mean_rmse_deg']<1e-6

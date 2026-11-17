@@ -143,14 +143,20 @@ def _profile_regions(obj,grids,solutions,profile,compatibility):
             rms,p=compatibility.evaluate(z[None,:])
             cache[key]=(z,float(rms[0]),float(p[0]),period,flat)
         return cache[key]
-    for point in profile['points']:
-        if point['rmse_deg'] is None:continue
-        value=point['values'][fixed];z=obj.encode(point['values'])[0]
-        model=copy.deepcopy(obj.model)
-        for path,v in zip(obj.paths,point['values']):put(model,path,v)
-        cycle=period(model,obj.paths[free],float(obj.obs.angles[0]))
-        rms,p=compatibility.evaluate(z[None,:])
-        cache[value]=(z,float(rms[0]),float(p[0]),cycle,point['flat_in_profiled_parameter'])
+    if profile.get('branches'):
+        # Do not overwrite a conditional minimum with a different phase alias.
+        physical=obj.decode(np.c_[np.linspace(0,1,181),np.linspace(0,1,181)])[:,fixed]
+        seeds=[s['values'][fixed] for s in solutions]
+        for value in np.unique(np.r_[physical,seeds]):minimum(value)
+    else:
+        for point in profile['points']:
+            if point['rmse_deg'] is None:continue
+            value=point['values'][fixed];z=obj.encode(point['values'])[0]
+            model=copy.deepcopy(obj.model)
+            for path,v in zip(obj.paths,point['values']):put(model,path,v)
+            cycle=period(model,obj.paths[free],float(obj.obs.angles[0]))
+            rms,p=compatibility.evaluate(z[None,:])
+            cache[value]=(z,float(rms[0]),float(p[0]),cycle,point['flat_in_profiled_parameter'])
     axis=np.array(sorted(cache));levels=[];anchors=[]
     span=obj.req.parameters[fixed].upper-obj.req.parameters[fixed].lower
     for level in (.95,.99):

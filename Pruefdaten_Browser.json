@@ -543,5 +543,60 @@
     "version": "1.3.2",
     "check": "Version/Cache und anschließender synthetischer Referenzfit mit 118 nm; logarithmische RMS-Achse, vollständige Freigabe und mobile Ansicht ohne Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Integrierter Stack ohne Vorschau/zweiten Parameterraum; lokale Grenzen und Raster direkt bei X/Y, Suchoptionen darunter, Modell-Speicherstatus bei reinen Suchänderungen unverändert",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Plus an oberer und innerer Grenzfläche, Null-Dicke, Zuordnung der Fitparameter beim Einfügen/Löschen und Rückgängig; Material per Schicht-Dropdown nur auf das eindeutige Ziel angewendet, Dicke erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Kommentarspalte nutzt freien Platz; Zahlenkolumnen kompakt, lange Kommentare vollständig mehrzeilig ohne Ellipse, Quelle darunter",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Periodenfamilie prominent gewarnt; eingeklappt ohne bevorzugten Einzelwert, echte ausklappbare Tabelle gleichwertiger Wiederholungen, Auswahl und zentrierte Spalten geprüft",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Gezoomter 1D-Ausschnitt automatisch und per Knopf physikalisch nachgerechnet; Zoom auch bei außerhalb liegender aktiver Lösung erhalten, keine Änderung der Minima, automatische Nachrechnung abschaltbar",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Eigene neue globale Suche im Zoomfenster setzt lokale Grenzen und findet 118 nm; Periodizitätswarnung bleibt auch bei nur einer Wiederholung im verengten Suchbereich sichtbar",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Gekoppelter Zweiparameterfit: getrennte Taläste ohne Randfortsetzung, prominent sichtbare Warnungen zu Sättigung/Kopplung/guten Regionen; Astwahl, d[2]/n[2] und lokal zugeordnete Gleichungen eindeutig, 95/99-%-Darstellung aus",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Sechs echte Mausrad-Zooms im gekoppelten Konturplot: Ausschnitt bleibt nach Tick-/Beschriftungsupdate und automatischer 161×161-Nachrechnung stabil, kein Rücksprung zur aktiven Lösung",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "3D-Nachrechnung bleibt am berechneten Modell und erhält die gedrehte Kamera; Wechsel zurück zur Kontur funktioniert",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Integrierter Editor, Grenzen, Familien und Diagramme von 1920 bis 390 px in ein- und ausgeklapptem Zustand ohne bleibenden horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "version": "1.4.0",
+    "check": "Frischer endgültiger Rechenkern: alle bestätigten Wurzeln auf demselben Talast bleiben als tiefe Profilminima und anklickbare Familien-/Aliasmarker erhalten; Talprofil-CSV mit Astkennung, optionale Konfidenzansicht vollständig ausgeschaltet",
+    "passed": true
   }
 ]

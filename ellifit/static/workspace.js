@@ -118,6 +118,7 @@ function decorateWorkspacePlot(el){
  const patch=axisTickPatch(el,options);
  if(!options.scene&&options.labels){const labels=minimumAnnotations(el,options.labels);if(JSON.stringify(el.layout.annotations||[])!==JSON.stringify(labels))patch.annotations=labels;}
  if(!Object.keys(patch).length)return;
+ for(const name of Object.keys(options.axes||{})){const prefix=options.scene?'scene.':'',axis=(options.scene?el._fullLayout.scene:el._fullLayout)[name];if(axis?.range){patch[prefix+name+'.range']=[...axis.range];patch[prefix+name+'.autorange']=false;}}
  el._elliDecorating=true;
  return el._elliDecorationTask=Promise.resolve(Plotly.relayout(el,patch)).finally(()=>{el._elliDecorating=false;});
 }
@@ -131,6 +132,7 @@ function renderWorkspacePlot(id,traces,layout,options){
   if(el._elliSerial!==serial)return;
   if(!el._elliViewEvents){el.on('plotly_clickannotation',event=>selectPlotTarget(el._elliLabelTargets?.[event.index]));el.on('plotly_relayout',change=>{
    if(el._elliDecorating||Object.keys(change).every(k=>/^(annotations|shapes)|tick(mode|vals|text)$/.test(k)))return;
+   if(id==='errorPlot'&&Object.keys(change).some(k=>/range|autorange/.test(k)))scheduleViewport();
    queuePlotDecoration(el);if(id==='errorPlot'&&!el._elliPlotOptions?.scene)syncRmsBackground(el);
   });el._elliViewEvents=true;}
   await nextPaint();
@@ -163,8 +165,8 @@ function restoreTableView(){
 }
 function bindWorkspace(){
  restoreTableView();renderResultContext();$('inputDetails').addEventListener('toggle',()=>{state.view.inputsOpen=$('inputDetails').open;});
- document.addEventListener('input',e=>{const input=e.target;if(input.matches('#fitFields input,#fitFields select'))pendingSearchInputs.add(input);if(inputDocument(input)==='model'||input.matches('#fitFields input,#fitFields select')){renderResultContext(true);if(state.result)renderNotices();}});
- document.addEventListener('change',e=>{const input=e.target;if(!input.matches('#fitFields input,#fitFields select')&&inputDocument(input)!=='model')return;const optional=input.id.startsWith('sigma');if(!input.dataset.num||Number.isFinite(parseNumber(input.value,optional))||optional&&parseNumber(input.value,true)===null)pendingSearchInputs.delete(input);renderResultContext(true);if(state.result)renderNotices();});
+ document.addEventListener('input',e=>{const input=e.target;if(input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]'))pendingSearchInputs.add(input);if(inputDocument(input)==='model'||input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]')){renderResultContext(true);if(state.result)renderNotices();}});
+ document.addEventListener('change',e=>{const input=e.target;if(!input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]')&&inputDocument(input)!=='model')return;const optional=input.id.startsWith('sigma');if(!input.dataset.num||Number.isFinite(parseNumber(input.value,optional))||optional&&parseNumber(input.value,true)===null)pendingSearchInputs.delete(input);renderResultContext(true);if(state.result)renderNotices();});
  $('pageSize').onchange=()=>{const n=parseNumber($('pageSize').value);if(!Number.isSafeInteger(n)||n<1){$('pageSize').value=int(state.pageSize);return toast('Bitte eine positive ganze Anzahl an Einträgen je Seite eingeben.','warning');}const first=state.page*state.pageSize;state.pageSize=n;state.view.pageSize=n;state.page=Math.floor(first/n);dataTable();};
  $('reverseRows').onclick=()=>{state.view.reverse=!state.view.reverse;state.page=0;state.jumpRow=null;lastRow=null;restoreTableView();dataTable();};
 }

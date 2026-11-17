@@ -1,8 +1,37 @@
-# Prüfprotokoll – ElliFit 1.3.2
+# Prüfprotokoll – ElliFit 1.4.0
 
 Stand: 17. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.3.2
+## Aktuelle Prüfung von 1.4.0
+
+**80 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Der übersprungene Test benötigt die ursprünglichen privaten Beispieldateien über eine ausdrücklich gesetzte Umgebungsvariable; diese werden nicht ausgeliefert. Die gesamte öffentliche Rechen-/API-/Startsuite einschließlich neuer Fortsetzungs-/Zoomregressionen ist bestanden. Nach Anpassung der Speicheraufteilung der Zoomauswertung wurden die sechs gezielten neuen Prüfungen nochmals bestanden. Alle vier JavaScript-Dateien bestehen die Syntaxprüfung.
+
+Neue Prüfungen kontrollieren:
+
+- Analytisches künstliches Tal endet beim ersten freien Parameterrand, ohne entlang der Begrenzung weiterzulaufen. Ein bereits auf dem Rand liegender Startpunkt erzeugt keinen Randpfad.
+- Physikalischer Film mit 2 nm Dicke und logarithmischem Dickenbereich: nachgerechnete Talpunkte sind tatsächlich bedingte Minima gegenüber unabhängigen kleinen Nachbarstörungen.
+- Andere bestätigte Wurzeln auf demselben Talast bleiben mit ihrem tatsächlichen Fehlerwert erhalten und werden nicht von der normalen Abtastung übersprungen.
+- Sichtbare Ausschnitte werden mit dem optischen Modell nachgerechnet: logarithmische und lineare Koordinaten, direkte Winkel-RMS-Vergleiche, exaktes k = 0 auf der Hybridachse sowie Minimum-Anker im lokalen Netz.
+- Die Ansichts-API verändert weder ursprüngliche Suchparameter noch Ergebnisliste. Unbekannte/laufende Jobs, ungültige Grenzen und fehlende Überschneidung werden abgewiesen.
+- Der Cache-Schlüssel bezieht auch das neue Editor-/Interaktionsmodul ein.
+
+**Elf tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Integrierter Schichteditor ohne Vorschau und doppelte Parameterauswahl; lokale Suchgrenzen/Raster direkt unter X/Y. Reine Suchänderungen verändern die Modelldatei nicht.
+2. Schichten an oberer und innerer Grenzfläche eingefügt, 0 nm Anfangsdicke, Fitpfade beim Einfügen/Löschen erhalten, Rückgängig. Material per Dropdown auf das benannte Ziel angewendet; übrige Schichten und Dicke erhalten.
+3. Lange Kommentare nutzen die breite Restspalte und umbrechen vollständig, kompakte Zahlenkolumnen und Quelle unter dem Kommentar.
+4. Periodenfamilien ohne bevorzugten Einzelwert in eingeklappter Ansicht; echte gleichwertige Untertabelle, Aliaswahl, zentrierte Parameter und sichtbare Warnung.
+5. Automatische und manuelle 1D-Nachrechnung im Zoom: 241 Modellpunkte, Lösungsliste unverändert, Zoom trotz außerhalb liegender aktiver Lösung erhalten. Automatik abschaltbar.
+6. Ausdrückliche neue globale Suche im Zoom übernimmt die Grenzen und findet die synthetische Referenz 118 nm. Die Periodizitätswarnung bleibt bei engerem Suchbereich erhalten.
+7. Echter gekoppelter Zweiparameterfit mit fünf getrennten Fortsetzungen: keine inneren Randpfade; Warnungen zu Sättigung/Kopplung/guten Bereichen sichtbar. Astwahl, lokale Gleichungen und d[2]/n[2] eindeutig. Konfidenzansicht standardmäßig ausgeschaltet.
+8. Sechs echte Mausrad-Zooms im gekoppelten Konturplot; kein Rücksprung nach Tick-/Beschriftungsupdates oder automatischer 161×161-Nachrechnung.
+9. Manuelle 3D-Nachrechnung erhält die gedrehte Kamera, Rückkehr zur Kontur funktioniert.
+10. Editor und Ergebnisansichten von 1 920 bis 390 px, jeweils ein- und ausgeklappte Eingaben, ohne bleibenden horizontalen Überlauf. Keine JavaScript-Laufzeitfehler. Nach Größenänderungen wurde die asynchrone Plotly-Größenanpassung abgewartet.
+11. Mit frisch erzeugtem Ergebnis des endgültigen Talalgorithmus: weitere bestätigte Wurzeln auf demselben Ast erscheinen als tiefe Minima und auswählbare Familien-/Aliasmarker. Talprofil-CSV enthält Ast, Familie und Wiederholung; die optionale Konfidenzansicht ist ausgeschaltet.
+
+Bei der GUI-Prüfung wurden ausschließlich synthetische Messungen und separate Bibliotheksordner verwendet. Browser-/Analysedateien und Screenshots werden nicht veröffentlicht. Die 18 Materialien und elf Schichtmodelle, optischen Formeln, globale Optimierung, Laufzeitabhängigkeiten und der gemeinsame Windows-Starter bleiben unverändert. Ein tatsächlicher Windows-Lauf wurde weiterhin nicht durchgeführt. Frühere Prüfungen sind unten und in `Pruefdaten_Browser.json` nach Version getrennt dokumentiert.
+
+## Basisprüfung von 1.3.2
 
 **26 gezielte Rechen-/API-/Starttests bestanden**, mit zwei unveränderten AnyIO-/Starlette-Bibliothekswarnungen. Enthalten sind sämtliche Wiederholungs-/Unsicherheitsprüfungen aus `test_statistics12.py`, API-/Cache- und Startprüfungen. Zwei neue synthetische Fälle führen Import und Wiederholungsanalyse bis zur HTTP-Antwort: weit verteilte Δ-Werte ohne geeignete Kovarianz und gültige Wiederholungen am 0°-/360°-Übergang. Zusätzlich werden native Wahrheitswerte und strikte JSON-Serialisierbarkeit kontrolliert. Alle drei JavaScript-Dateien bestehen die Syntaxprüfung.
 

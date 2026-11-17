@@ -129,12 +129,15 @@ def fit_diagnostics(obj, solutions, grids, progress=None):
         note='Wiederholungen verbessern Mittelwerte und Streuungsschätzung, liefern aber keine weitere Messgeometrie.')
     for solution in solutions:
         solution['mean_fit']=mean_deviation(obj,solution['values'])
+    out['profile_reason']='Ein Talprofil benötigt zwei freie Parameter.'
     if parameters!=2:return out
     best=solutions[0];uncertainty=best['uncertainty']
-    out['strongly_correlated']=uncertainty.get('strongly_correlated',False)
+    out['strongly_correlated']=any(s['uncertainty'].get('strongly_correlated',False) for s in solutions)
     out['sensitivity_rank']=uncertainty.get('sensitivity_rank')
     out['condition_number']=uncertainty.get('condition_number')
-    if angles!=1 or not (out['strongly_correlated'] or uncertainty.get('weak')):return out
+    out['profile_reason']='Talprofile werden für einen Messwinkel und starke lokale Kopplung oder schwachen Rang berechnet.'
+    if angles!=1 or not (out['strongly_correlated'] or any(s['uncertainty'].get('weak') for s in solutions)):return out
+    out['profile_reason']='Für den gesättigten, stark gekoppelten Einwinkelfit wurden getrennte Taläste berechnet.'
     dcol=next((i for i,p in enumerate(obj.paths) if p.endswith('thickness_nm')),None)
     fixed_col=1-dcol if dcol is not None else 1
     free_col=1-fixed_col
@@ -150,46 +153,12 @@ def fit_diagnostics(obj, solutions, grids, progress=None):
     m=int(obj.analysis.raw.counts[0])
     if obj.analysis.active and m>2:
         threshold=float(2*(m-1)/(m-2)*f_distribution.ppf(.95,2,m-2))
-    profile=[];overlay=[]
-    for step,fixed in enumerate(axis):
-        if obj.cancel.is_set():
-            from .core import Cancelled
-            raise Cancelled()
-        values,q,t,flat=_profile_minimum(obj,fixed_col,float(fixed),grids)
-        # Include independently refined roots at their exact profile abscissa.
-        # A scalar bounded search alone has a sqrt(machine epsilon) position
-        # floor and need not reproduce a two-parameter root as accurately.
-        for solution in solutions:
-            anchor=np.asarray(solution['values'],float)
-            if fixed!=anchor[fixed_col]:continue
-            if t:
-                lower=obj.req.parameters[free_col].lower
-                anchor[free_col]=lower+(anchor[free_col]-lower)%t
-            score=obj.scalar(obj.encode(anchor)[0])
-            if score<=q+1e-12*max(1.,q):values,q=anchor,score
-        mean=mean_deviation(obj,values)
-        if mean['rmse_deg'] is None or q>=1e90:
-            profile.append(dict(values=values.tolist(),q=None,rmse_deg=None,mean_rmse_deg=None,statistic=None,compatible95=None,flat_in_profiled_parameter=flat))
-            continue
-        obj.batch(obj.encode(values));raw=float(obj.last_rms[0])
-        point=dict(values=values.tolist(),q=q,rmse_deg=raw,mean_rmse_deg=mean['rmse_deg'],statistic=mean['statistic'],
-            compatible95=mean['statistic']<=threshold if threshold is not None else None,flat_in_profiled_parameter=flat)
-        profile.append(point)
-        variants=[values]
-        if t and not flat:
-            free=obj.req.parameters[free_col]
-            first=math.ceil((free.lower-values[free_col])/t-1e-9);last=math.floor((free.upper-values[free_col])/t+1e-9)
-            variants=[]
-            for order in range(first,min(last+1,first+100)):
-                alias=values.copy();alias[free_col]+=order*t;variants.append(alias)
-        if not flat:
-            overlay.extend(dict(values=v.tolist(),rmse_deg=raw,mean_rmse_deg=mean['rmse_deg']) for v in variants)
-        if progress is not None and step%12==0:
-            progress(90+2*(step+1)/len(axis),f'Talprofil: {step+1} / {len(axis)}')
-    out['profile']=dict(fixed_index=fixed_col,profiled_index=free_col,points=profile,overlay=overlay,
-        compatible95_threshold=threshold,compatible95_method='Hotelling-T² für den gemeinsamen Δ/Ψ-Mittelwert' if threshold is not None else None,
-        repetitions=m,assumptions='Unabhängige normalverteilte lokale Winkelabweichungen; nur Messstreuung, feste Modell-/Kalibrierwerte. Bei wenigen Wiederholungen sind die Bereiche breit.',
-        note='Numerisch minimierter Profilwert des anderen Parameters, mit analytischen Dickenwiederholungen. Talpunkte sind keine zusätzlichen lokalen Minima; ein endliches Raster kann Äste übersehen.')
+    from .profiles import build_profiles
+    out['profile']=build_profiles(obj,solutions,fixed_col,threshold,progress)
+    out['profile'].update(compatible95_threshold=threshold,
+        compatible95_method='Hotelling-T² für den gemeinsamen Δ/Ψ-Mittelwert' if threshold is not None else None,
+        repetitions=m,assumptions='Unabhängige normalverteilte lokale Winkelabweichungen; nur Messstreuung, feste Modell-/Kalibrierwerte.',
+        note='Getrennte Taläste werden von den bestätigten Lösungen aus lokal fortgesetzt. Die Abtastung berücksichtigt beide Suchrasterskalen. Am Rand endet der jeweilige Ast. Talpunkte sind keine zusätzlichen Minima; weitere Äste können fehlen.')
     if dcol is not None:
         ncol=1-dcol;path=obj.paths[dcol];npath=obj.paths[ncol]
         if npath==path.rsplit('.',1)[0]+'.n':

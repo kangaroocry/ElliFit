@@ -1,6 +1,18 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 17. November 2026. Quellstand 1.3.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 17. November 2026. Quellstand 1.4.0; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Integrierter Schichteditor und untersuchbare Fehlerlandschaft in 1.4.0
+
+- Modell- und Suchparameter verschmolzen: lokale X/Y/fix-Rollen, Grenzen und Raster am betreffenden Zahlenfeld; übrige Optionen gesammelt ausklappbar. Doppelte Auswahl und zusätzliche Stack-Vorschau entfernt, Rollen/Nummern/n/k/d bleiben im Editor.
+- Plus-Schaltflächen an jeder Grenzfläche, neue Filme bei 0 nm, Parametermapping und Rückgängig erhalten. Materialauswahl direkt je Zielkarte, Quelle/Kommentar erhält mehr Platz und vollständigen Umbruch.
+- Sichtbare Übernahmewarnungen für Periodizität, mehrere gute Familien, gesättigte oder schwache Fits, starke Kopplung, gute Talspannen und Rand-/schlechte beste Fits. Hinweise gehören ausdrücklich zum datierten Fit.
+- Periodische Familien als ausklappbare gleichwertige Tabellen; eingeklappt keine bevorzugten Einzelwerte. Parameter- und Aliaswerte zentriert unter ihren Überschriften.
+- Getrennte, adaptive Talfortsetzung in normierten linearen/logarithmischen Suchkoordinaten. Ende an der ersten Grenze, keine Randfortsetzung. Weitere bestätigte Wurzeln auf demselben Ast exakt aufgenommen. Astwahl und lokale Gleichungen nennen Familie/Wiederholung; CSV enthält Astkennungen.
+- Zoom automatisch oder manuell nachrechnen, ohne Minima neu zu optimieren. Neuer expliziter Suchknopf übernimmt den Ausschnitt als Suchgrenzen. Geänderte Eingaben verhindern die Vermischung mit einem alten Fit. Veraltete Antworten werden verworfen.
+- Achsenticks und Beschriftungen schreiben die aktuellen Ansichtsgrenzen bei ihrer Aktualisierung mit. Rein darstellende Neuzeichnungen verschieben nicht mehr zur aktiven Lösung; nur ausdrückliche Lösungswahl darf dies. Echte Mausrad-Zooms geprüft.
+- 95-/99-%-Darstellung standardmäßig aus und bei den optionalen Diagnosen; keine erfundene Konfidenzaussage aus kleinen RMS-Werten.
+- Optische Formeln, globale Optimierung, 18 Materialien, elf Modelle und gemeinsamer Windows-Starter aus 1.3.2 bleiben erhalten. Keine neuen Laufzeitabhängigkeiten.
 
 ## DAT-Import und gemeinsamer Windows-Start in 1.3.2
 
