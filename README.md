@@ -1,33 +1,43 @@
-# ElliFit 1.4.0
+# ElliFit 1.4.1
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.4.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313.zip)**
+**[ElliFit 1.4.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/48b493f855f4650876051472f7da96f2cb083c7d.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
-- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/MATERIALIEN.md)
-- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/PRUEFPROTOKOLL.md)
+- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/MATERIALIEN.md)
+- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/PRUEFPROTOKOLL.md)
 
-## Neu in 1.4.0
+## Korrektur in 1.4.1: Fitpunkte und Fehlerlandschaft
 
-**Modell und Suche in einem Editor:** Jede Schichtkarte zeigt Nummer, Rolle, Material und n/k/d. Unter aktiven X-/Y-Feldern stehen die Suchgrenzen und das lineare/logarithmische Raster. Die zusätzliche Stack-Vorschau und doppelte Parameterauswahl entfallen. Allgemeine Suchoptionen stehen ausklappbar darunter. Kleine Plus-Schaltflächen fügen Filme genau an der gewählten Grenzfläche ein; Anfangsdicke 0 nm, Parametermapping und Rückgängig bleiben erhalten.
+Bei automatischer Kovarianzgewichtung konnte eine korrekt gefundene Lösung neben dem Minimum der gezeichneten Kurve erscheinen: Die Suche minimierte eine gewichtete Abweichung, der Plot zeigte den ungewichteten Winkel-RMS. Diese Kriterien können unterschiedliche Minima besitzen. Auch Stokes- und Winkelmittelwertauswertungen benötigen ihre passende Fehlerdarstellung.
 
-**Material direkt je Schicht übernehmen:** Das Dropdown am Schichtnamen überträgt Materialwerte auf genau diese Karte und erhält die Dicke. Die Materialbibliothek bleibt zum Bearbeiten und Speichern verfügbar. Die Messliste nutzt mehr Platz für vollständig umbrechende Kommentare; Zahlenkolumnen sind kompakter.
+Standardmäßig zeigen jetzt **Kurve, Kontur, 3D-Höhe, Talprofil und Marker die tatsächlich minimierte Fit-Abweichung**. Die Gewichtung und Optimierung bleiben unverändert. Dargestellt wird die monotone Größe √(Q/K), mit im Bericht definierter Normierung und ausdrücklich benannter Einheit. Bei einem gemeinsamen ungewichteten Winkelresiduen-Fit ist sie identisch zum Winkel-RMS.
 
-**Mehrdeutigkeit sichtbar machen:** Ein prominenter Hinweisblock warnt vor periodischen Lösungen, mehreren guten Familien, gesättigten/schwachen Fits, starker Parameterkopplung und gut passenden Talspannen. Auch Randminima und schlechte beste Fits werden hervorgehoben. Kleine RMS-Werte allein belegen keine eindeutige oder physikalisch richtige Lösung.
+Der **ungewichtete Winkel-RMS bleibt als eigene Kontrollansicht** verfügbar. Ein sichtbarer Hinweis erklärt, weshalb gewichtete Fitpunkte nicht im Minimum dieser anderen Kurve liegen müssen. Der Anzeigewechsel verändert keine Fit-Einstellung. Wer ausdrücklich den Winkel-RMS aller Rohwerte minimieren möchte, wählt Δ/Ψ als Zielfunktion, gemeinsamen Fit aller Einzelwerte und „Ungewichtet fitten“ bei den Messunsicherheiten und berechnet neu.
 
-**Gleichwertige Periodenfamilien:** Eingeklappt erscheinen Anzahl und gemeinsamer RMS, kein bevorzugter einzelner Parameterwert. Aufklappen öffnet eine zentrierte Tabelle der gleichwertigen Wiederholungen. Die für die Diagramme gewählte Wiederholung ist ausdrücklich benannt.
+Punkt- und Tabellenfarben bleiben bei der festen absoluten Winkel-RMS-Skala. Für eine abweichende Fitgröße verwendet die Landschaft eine eigene neutrale relative Farbskala. Die Kennzahlenleiste und Sortierungsbeschreibung unterscheiden Fit-Zielfunktion und Winkel-RMS. Exporte enthalten Fit-Abweichung, Einheit und Winkel-RMS getrennt; JSON nennt Definition und gewählte Ansicht.
 
-**Taläste gezielt ansehen:** Von bestätigten Lösungen aus werden getrennte lokale Verläufe in den linearen/logarithmischen Suchkoordinaten fortgesetzt. Sie stoppen an der Grenze eines der beiden Parameter und laufen nicht am Rand weiter. Andere bestätigte Wurzeln auf demselben Ast bleiben exakt erhalten. Astwahl, lokale Näherungsgleichungen und CSV nennen Familie und Wiederholung. Verschiedene Fortsetzungen können sich überlagern. Die 95-/99-%-Darstellung ist standardmäßig ausgeschaltet und bei den optionalen Diagnosen.
+Die Zoom-Nachberechnung behält bestätigte eindimensionale Minima zusätzlich zum regulären Raster exakt bei. Zweidimensionale Netze übertragen die tatsächliche Zielfunktion für jeden Stützpunkt. Auch manuelle Probelösungen verwenden die richtige dargestellte Höhe.
 
-**Im Zoom nachrechnen und suchen:** Nach einer Zoompause wird die Darstellung dichter mit dem Modell des angezeigten Fits berechnet, ohne die Lösungsliste zu optimieren. Automatik abschaltbar; manuelle Nachrechnung verfügbar. Veraltete Antworten werden verworfen. Tick-/Beschriftungsupdates und Neuzeichnungen behalten den Ausschnitt; nur eine ausdrückliche Auswahl einer außerhalb liegenden Lösung darf dorthin verschieben. „Im Ausschnitt neu suchen“ übernimmt die sichtbaren Parametergrenzen und startet ausdrücklich eine neue globale Suche. Bei geänderten Eingaben zuerst einen aktuellen Fit berechnen.
+## Enthaltene Funktionen aus 1.4.0
+
+- Integrierter Schichteditor: X/Y/fix, Suchgrenzen und Raster direkt am Parameter; übrige Optionen ausklappbar. Keine doppelte Vorschau/Parameterauswahl.
+- Schichten mit Plus an jeder Grenzfläche einfügen, 0 nm Anfangsdicke, Rückgängig und eindeutige Materialübernahme je Zielkarte.
+- Vollständig umbrechende Kommentare mit breiter Restspalte und kompakten Zahlenkolumnen.
+- Prominente Warnungen vor Periodizität, mehreren guten Familien, Sättigung, schwachem Rang und starker Kopplung.
+- Ausklappbare gleichwertige Periodenfamilien ohne bevorzugten Einzelwert im geschlossenen Zustand.
+- Adaptive getrennte Talfortsetzungen in linearen/logarithmischen Suchkoordinaten, Ende am Rand, exakte bestätigte Wurzeln und klare Familien-/Aliaszuordnung.
+- Automatische oder manuelle Nachrechnung im Zoom; eigene neue Suche im sichtbaren Ausschnitt. Zoom und Kamera bleiben bei Darstellungsupdates erhalten.
+- 95-/99-%-Darstellung standardmäßig ausgeschaltet und bei den optionalen Diagnosen.
+- 18 Materialien und elf Schichtvorlagen bei editierbarer Standardwellenlänge 632,8 nm.
 
 ## Prüfung
 
-**80 Tests bestanden, ein erwarteter privater Importtest übersprungen; elf tatsächliche Chromium-Prüfungen bestanden.** Geprüft wurden unter anderem Randabbruch und dünne logarithmische Talverläufe, direkte optische Vergleichswerte, unveränderte Fit-Ergebnisse bei Ansichtsnachrechnung, echtes Mausrad-Zoom, Familienwahl, tiefe Profilminima, CSV, 3D-Kamera und Ansichten von 1 920 bis 390 px. Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt.
+**85 Tests bestanden, ein erwarteter privater Importtest übersprungen; zehn tatsächliche Chromium-Prüfungen bestanden.** Der gemeldete Fall wurde lokal unabhängig nachgerechnet. Synthetische Regressionen vergleichen direkte Kovarianzverluste und getrennte gewichtete/ungewichtete Minima. Zusätzlich geprüft: exakte Zoom-Anker, Probelösungen, bewusst ungewichtetes Neufitten, Kontur/Talprofil/3D, Stokes, ungleiche Wiederholungszahlen, Exporte und Ansichten bis 390 px.
 
-Das verlinkte ZIP wurde heruntergeladen und mit allen **65 Quelldateien bytegenau** abgeglichen. Optische Formeln, globale Optimierung, Laufzeitabhängigkeiten, 18 Materialien, elf Modelle und der gemeinsame Windows-Starter bleiben unverändert. Private Dateien und QA-Artefakte werden nicht veröffentlicht.
+Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt. Das verlinkte ZIP wurde heruntergeladen und mit allen **68 Quelldateien bytegenau** abgeglichen. Optische Formeln, Optimierung, Kovarianzgewichtung, Material-/Modellwerte, Abhängigkeiten und gemeinsamer Windows-Starter bleiben unverändert. Private Eingangsdaten, Zahlenresultate und QA-Artefakte werden nicht veröffentlicht.
 
 ## Start und Update
 
@@ -35,6 +45,6 @@ Alte ElliFit-Instanz beenden, ZIP vollständig in einen **neuen beschreibbaren O
 
 Pakete werden beim ersten Start aus dem Internet nur in der lokalen `.venv` eingerichtet. Adminrechte sind bei beschreibbarem Programmordner und erlaubter Programmausführung nicht erforderlich. Eigene Modell-, Material- und Sitzungsdateien können übernommen werden. Der separate WinPython-Starter bleibt entfallen.
 
-Der Browser wartet auf Serverbereitschaft und eine weitere Sekunde. Während des Fits bleibt die Oberfläche bis zur fertig gezeichneten Ergebnisansicht ausgegraut. Einparameterfits starten mit logarithmischer RMS-Achse; danach ist manuelles Umschalten möglich. Der NumPy-/JSON-Fehler nach DAT-Import aus älteren Versionen bleibt behoben.
+Der Browser wartet auf Serverbereitschaft und eine weitere Sekunde. Während des Fits bleibt die Oberfläche bis zur fertig gezeichneten Ergebnisansicht ausgegraut. Einparameterfits starten mit logarithmischer Fehlerachse; danach ist manuelles Umschalten möglich. Der NumPy-/JSON-Fehler nach DAT-Import bleibt behoben.
 
-Standardwellenlänge 632,8 nm, editierbar; Elli-kompatibles Delta voreingestellt. Materialien und Dicken sind typische editierbare Startwerte. Messdaten bleiben auf dem eigenen Rechner. Das Paket enthält Python-/JavaScript-Quellcode mit Startdateien, keine kompilierte EXE; Windows 7 ist nicht unterstützt. Frühere Stände bleiben in der Versionshistorie und auf [ellifit-1.1](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.1) verfügbar.
+Messdaten bleiben auf dem eigenen Rechner. Das Paket enthält Python-/JavaScript-Quellcode mit Startdateien, keine kompilierte EXE; Windows 7 ist nicht unterstützt. Frühere Stände bleiben in der Versionshistorie und auf [ellifit-1.1](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.1) verfügbar.
