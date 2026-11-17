@@ -1,38 +1,40 @@
-# ElliFit 1.3.2
+# ElliFit 1.4.0
 
-Lokale Auswertung monochromatischer Ellipsometrie: Schichtmodelle und Materialien speichern und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein.
+Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.3.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/9fee7c96e9c23b66a0bd66717fc5f4bb97e5169f.zip)**
+**[ElliFit 1.4.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
-- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/9fee7c96e9c23b66a0bd66717fc5f4bb97e5169f/MATERIALIEN.md)
-- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/9fee7c96e9c23b66a0bd66717fc5f4bb97e5169f/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/9fee7c96e9c23b66a0bd66717fc5f4bb97e5169f/PRUEFPROTOKOLL.md)
+- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/MATERIALIEN.md)
+- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/e2b04a6f63063d2b4da4f9a47ae3e4d099f38313/PRUEFPROTOKOLL.md)
 
-## Neu in 1.3.2
+## Neu in 1.4.0
 
-Ein Fehler nach erfolgreichem DAT-Import ist behoben: Bei stark verteilten Delta-Werten konnte die automatische Wiederholungsanalyse einen NumPy-Wahrheitswert erzeugen, den die Browser-Schnittstelle nicht als JSON übertragen konnte. Die Meldung enthielt `'numpy.bool' object is not iterable` und `vars() argument must have __dict__ attribute`. Jetzt wird ausdrücklich ein normaler Python-Wahrheitswert verwendet. Messwerte, Kriterien für geeignete Wiederholungen und Unsicherheitsrechnung bleiben gleich; fehlende Unsicherheit wird nicht durch null ersetzt.
+**Modell und Suche in einem Editor:** Jede Schichtkarte zeigt Nummer, Rolle, Material und n/k/d. Unter aktiven X-/Y-Feldern stehen die Suchgrenzen und das lineare/logarithmische Raster. Die zusätzliche Stack-Vorschau und doppelte Parameterauswahl entfallen. Allgemeine Suchoptionen stehen ausklappbar darunter. Kleine Plus-Schaltflächen fügen Filme genau an der gewählten Grenzfläche ein; Anfangsdicke 0 nm, Parametermapping und Rückgängig bleiben erhalten.
 
-Der Fehler wurde mit der aktuell hochgeladenen privaten DAT mit 16 434 Messungen exakt reproduziert und nach der Korrektur durch Import, automatische Analyse und einen ausgewählten Fit geprüft. Ein unabhängiger synthetischer Auslöser ist als Regressionstest enthalten. Private Dateien, Messwerte, Kommentare und Ergebnisse werden nicht veröffentlicht.
+**Material direkt je Schicht übernehmen:** Das Dropdown am Schichtnamen überträgt Materialwerte auf genau diese Karte und erhält die Dicke. Die Materialbibliothek bleibt zum Bearbeiten und Speichern verfügbar. Die Messliste nutzt mehr Platz für vollständig umbrechende Kommentare; Zahlenkolumnen sind kompakter.
 
-Es gibt jetzt **einen gemeinsamen Windows-Starter: `Start_Windows.bat`**. Er bevorzugt funktionierendes Python aus PATH, prüft Python 3.11 oder neuer in 64 Bit und verwendet sonst `py -3`. Pakete werden ausschließlich in der lokalen `.venv` installiert. Der separate `Start_WinPython.bat` entfällt.
+**Mehrdeutigkeit sichtbar machen:** Ein prominenter Hinweisblock warnt vor periodischen Lösungen, mehreren guten Familien, gesättigten/schwachen Fits, starker Parameterkopplung und gut passenden Talspannen. Auch Randminima und schlechte beste Fits werden hervorgehoben. Kleine RMS-Werte allein belegen keine eindeutige oder physikalisch richtige Lösung.
 
-Geprüft mit **26 gezielten Rechen-/API-/Starttests und vier tatsächlichen Chromium-Prüfungen** unter Linux, einschließlich vollständigem DAT-Import, Wiederholungsanalyse, Fits und Referenzdicke 118 nm. Der Windows-Starter wurde statisch geprüft; ein tatsächlicher Windows-/WinPython-Lauf wurde hier nicht durchgeführt. Das verlinkte ZIP wurde heruntergeladen und mit allen **61 Quelldateien bytegenau** abgeglichen.
+**Gleichwertige Periodenfamilien:** Eingeklappt erscheinen Anzahl und gemeinsamer RMS, kein bevorzugter einzelner Parameterwert. Aufklappen öffnet eine zentrierte Tabelle der gleichwertigen Wiederholungen. Die für die Diagramme gewählte Wiederholung ist ausdrücklich benannt.
+
+**Taläste gezielt ansehen:** Von bestätigten Lösungen aus werden getrennte lokale Verläufe in den linearen/logarithmischen Suchkoordinaten fortgesetzt. Sie stoppen an der Grenze eines der beiden Parameter und laufen nicht am Rand weiter. Andere bestätigte Wurzeln auf demselben Ast bleiben exakt erhalten. Astwahl, lokale Näherungsgleichungen und CSV nennen Familie und Wiederholung. Verschiedene Fortsetzungen können sich überlagern. Die 95-/99-%-Darstellung ist standardmäßig ausgeschaltet und bei den optionalen Diagnosen.
+
+**Im Zoom nachrechnen und suchen:** Nach einer Zoompause wird die Darstellung dichter mit dem Modell des angezeigten Fits berechnet, ohne die Lösungsliste zu optimieren. Automatik abschaltbar; manuelle Nachrechnung verfügbar. Veraltete Antworten werden verworfen. Tick-/Beschriftungsupdates und Neuzeichnungen behalten den Ausschnitt; nur eine ausdrückliche Auswahl einer außerhalb liegenden Lösung darf dorthin verschieben. „Im Ausschnitt neu suchen“ übernimmt die sichtbaren Parametergrenzen und startet ausdrücklich eine neue globale Suche. Bei geänderten Eingaben zuerst einen aktuellen Fit berechnen.
+
+## Prüfung
+
+**80 Tests bestanden, ein erwarteter privater Importtest übersprungen; elf tatsächliche Chromium-Prüfungen bestanden.** Geprüft wurden unter anderem Randabbruch und dünne logarithmische Talverläufe, direkte optische Vergleichswerte, unveränderte Fit-Ergebnisse bei Ansichtsnachrechnung, echtes Mausrad-Zoom, Familienwahl, tiefe Profilminima, CSV, 3D-Kamera und Ansichten von 1 920 bis 390 px. Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt.
+
+Das verlinkte ZIP wurde heruntergeladen und mit allen **65 Quelldateien bytegenau** abgeglichen. Optische Formeln, globale Optimierung, Laufzeitabhängigkeiten, 18 Materialien, elf Modelle und der gemeinsame Windows-Starter bleiben unverändert. Private Dateien und QA-Artefakte werden nicht veröffentlicht.
 
 ## Start und Update
 
-ZIP vollständig in einen **neuen beschreibbaren Ordner** entpacken und **`Start_Windows.bat`** doppelklicken. Python muss dauerhaft verfügbar sein; auch portables WinPython funktioniert über den Benutzer-PATH. Der Ordner mit `python.exe` muss dort vor `Microsoft\WindowsApps` stehen. Mit `where.exe python` und `python --version` in einer neu geöffneten Eingabeaufforderung prüfen.
+Alte ElliFit-Instanz beenden, ZIP vollständig in einen **neuen beschreibbaren Ordner** entpacken und **`Start_Windows.bat`** doppelklicken. Python 3.11 oder neuer in 64 Bit muss dauerhaft verfügbar sein; auch portables WinPython funktioniert über den Benutzer-PATH. Der Ordner mit `python.exe` sollte vor `Microsoft\WindowsApps` stehen. Prüfen mit `where.exe python` und `python --version` in einer neu geöffneten Eingabeaufforderung.
 
-Beim ersten Start werden die Pakete aus dem Internet in `.venv` eingerichtet. Eine frühere `.venv-winpython` wird nicht automatisch übernommen. Eigene Modell-, Material- und Sitzungsdateien können gezielt in die neue Version übernommen werden; bestehende eigene Bibliotheksordner werden nicht automatisch verändert. Adminrechte sind bei beschreibbarem Programmordner und erlaubter Programmausführung nicht erforderlich.
+Pakete werden beim ersten Start aus dem Internet nur in der lokalen `.venv` eingerichtet. Adminrechte sind bei beschreibbarem Programmordner und erlaubter Programmausführung nicht erforderlich. Eigene Modell-, Material- und Sitzungsdateien können übernommen werden. Der separate WinPython-Starter bleibt entfallen.
 
-Der Browser öffnet sich erst nach Serverbereitschaft und einer zusätzlichen Sekunde. Während Suche und Ergebnisdarstellung ist die Oberfläche ausgegraut und gesperrt; Fortschritt und Abbruch bleiben erreichbar. Erst nach fertig gezeichneten Ergebnissen wird sie wieder freigegeben. Einparameterfits beginnen mit logarithmischer RMS-Achse; anschließendes manuelles Umschalten bleibt möglich.
+Der Browser wartet auf Serverbereitschaft und eine weitere Sekunde. Während des Fits bleibt die Oberfläche bis zur fertig gezeichneten Ergebnisansicht ausgegraut. Einparameterfits starten mit logarithmischer RMS-Achse; danach ist manuelles Umschalten möglich. Der NumPy-/JSON-Fehler nach DAT-Import aus älteren Versionen bleibt behoben.
 
-## Enthaltene Auswertung
-
-Modell, Suche und Messdaten stehen oben über die volle Breite. Ab 1 240 px erscheinen Lösungsliste, Fehlerlandschaft und Fit-Kurven nebeneinander. Zoom bleibt beim Wechsel sichtbarer Lösungen erhalten; Achsenticks passen sich an. Frühere Ergebnisse und Hinweise nennen den zugehörigen Eingabestand. Lange Messlisten bieten freie Seitenlänge, standardmäßig 100 Einträge ohne Gruppen, umkehrbare Dateireihenfolge und direkte Sprünge.
-
-18 Materialien und elf Schichtvorlagen bei 632,8 nm sind enthalten. Identische SiO2-Materialwerte sind zusammengefasst; native Oxidmodelle behalten ihre typische Anfangsdicke 1,5 nm. Materialwerte und Dicken sind editierbare Startwerte. Wellenlänge und Delta-Konvention bleiben einstellbar.
-
-Optische Formeln, globale Suche, Material-/Modellwerte und Laufzeitabhängigkeiten bleiben unverändert. Die numerische Basisprüfung und frühere Browserprüfungen sind im Prüfprotokoll nach Version getrennt dokumentiert.
-
-Das Programm läuft lokal mit Python und Browseroberfläche; Windows 7 ist nicht unterstützt. Das Paket enthält Quellcode mit Startdateien, keine kompilierte EXE. Frühere Stände bleiben in der Versionshistorie und auf [ellifit-1.1](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.1) verfügbar.
+Standardwellenlänge 632,8 nm, editierbar; Elli-kompatibles Delta voreingestellt. Materialien und Dicken sind typische editierbare Startwerte. Messdaten bleiben auf dem eigenen Rechner. Das Paket enthält Python-/JavaScript-Quellcode mit Startdateien, keine kompilierte EXE; Windows 7 ist nicht unterstützt. Frühere Stände bleiben in der Versionshistorie und auf [ellifit-1.1](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.1) verfügbar.
