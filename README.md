@@ -1,15 +1,25 @@
-# ElliFit 1.4.1
+# ElliFit 1.4.2
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.4.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/48b493f855f4650876051472f7da96f2cb083c7d.zip)**
+**[ElliFit 1.4.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/95b954531f60e8fc52db93ada33de5e56d6bf638.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
-- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/MATERIALIEN.md)
-- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/48b493f855f4650876051472f7da96f2cb083c7d/PRUEFPROTOKOLL.md)
+- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/MATERIALIEN.md)
+- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/PRUEFPROTOKOLL.md)
 
-## Korrektur in 1.4.1: Fitpunkte und Fehlerlandschaft
+## Neu in 1.4.2
+
+- **Ungewichtet fitten als Standard** in Oberfläche und API. Automatische Kovarianzgewichtung bleibt wählbar; ausdrücklich gespeicherte Sitzungseinstellungen bleiben erhalten. Bei einer Sitzung ohne Gewichtungsangabe gilt der neue ungewichtete Standard.
+- Die Zoom-Option heißt jetzt **„Ausschnitt automatisch nachberechnen“**.
+- **Mausrad-Zoom bei Konturplots ausgeschaltet**, sowohl für Winkel-RMS als auch für die tatsächliche gewichtete Fitgröße. Rechteck-Zoom und Werkzeugleiste bleiben nutzbar; andere Plotarten behalten ihre Bedienung.
+- Nach einer erfolgreichen globalen Suche springt die Seite **automatisch zur Auswertung**, sobald die Ergebnisansichten fertig gezeichnet und wieder freigegeben sind.
+- **„Fit relativ schlecht – Winkel-RMS über 1°“** benennt schlechte Passung und Warnschwelle ausdrücklich. Die Warnung erscheint erst bei > 1°; die separate Orientierung für sehr gute beziehungsweise mehrdeutige Lösungen bei ≤ 0,1° bleibt erhalten.
+
+Ein zusätzlicher numerischer Fix verhindert vorzeitige lokale Bootstrap-Abbrüche bei extrem engen Parametergrenzen im ungewichteten Fit. Bei erreichten Grenzen werden beschnittene Intervalle weiterhin unterdrückt.
+
+## Korrektur seit 1.4.1: Fitpunkte und Fehlerlandschaft
 
 Bei automatischer Kovarianzgewichtung konnte eine korrekt gefundene Lösung neben dem Minimum der gezeichneten Kurve erscheinen: Die Suche minimierte eine gewichtete Abweichung, der Plot zeigte den ungewichteten Winkel-RMS. Diese Kriterien können unterschiedliche Minima besitzen. Auch Stokes- und Winkelmittelwertauswertungen benötigen ihre passende Fehlerdarstellung.
 
@@ -35,9 +45,9 @@ Die Zoom-Nachberechnung behält bestätigte eindimensionale Minima zusätzlich z
 
 ## Prüfung
 
-**85 Tests bestanden, ein erwarteter privater Importtest übersprungen; zehn tatsächliche Chromium-Prüfungen bestanden.** Der gemeldete Fall wurde lokal unabhängig nachgerechnet. Synthetische Regressionen vergleichen direkte Kovarianzverluste und getrennte gewichtete/ungewichtete Minima. Zusätzlich geprüft: exakte Zoom-Anker, Probelösungen, bewusst ungewichtetes Neufitten, Kontur/Talprofil/3D, Stokes, ungleiche Wiederholungszahlen, Exporte und Ansichten bis 390 px.
+**86 Tests bestanden, ein erwarteter privater Importtest übersprungen; zehn tatsächliche Chromium-Prüfungen für 1.4.2 bestanden.** Zusätzlich zu den bisherigen wissenschaftlichen Regressionen geprüft: ungewichteter Standard trotz geeigneter Wiederholkovarianz, gespeicherte Gewichtungsoptionen, Warnschwelle bei exakt beziehungsweise über 1°, automatischer Sprung nach fertiger Darstellung, echte Mausradereignisse ohne Kontur-Zoom/Nachberechnung, Rechteck-Zoom, Wechsel zwischen Kontur/3D und RMS-/Fitgrößenansichten sowie Darstellung bis 390 px. Die Bootstrap-Grenzprüfung ist sowohl gewichtet als auch ungewichtet bestanden.
 
-Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt. Das verlinkte ZIP wurde heruntergeladen und mit allen **68 Quelldateien bytegenau** abgeglichen. Optische Formeln, Optimierung, Kovarianzgewichtung, Material-/Modellwerte, Abhängigkeiten und gemeinsamer Windows-Starter bleiben unverändert. Private Eingangsdaten, Zahlenresultate und QA-Artefakte werden nicht veröffentlicht.
+Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt. Das verlinkte ZIP wurde heruntergeladen und mit allen **68 Quelldateien bytegenau** abgeglichen. Optische Formeln, globale Optimierung, Material-/Modellwerte, Abhängigkeiten und gemeinsamer Windows-Starter bleiben unverändert. Private Eingangsdaten, Zahlenresultate und QA-Artefakte werden nicht veröffentlicht.
 
 ## Start und Update
 
