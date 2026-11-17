@@ -648,5 +648,55 @@
     "version": "1.4.1",
     "check": "Neue Größenwahl, Hinweise und Fehlerachsen von 1680 bis 390 px ohne bleibenden horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Frischer Start ungewichtet, neue Beschriftung und Version korrekt; Referenzfit bei 118 nm, automatischer Sprung zur fertig gezeichneten Auswertung mit Abstand zum festen Kopf; 1D-Mausrad bleibt aktiv",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Sitzung ohne ausdrückliche Gewichtungsoption bleibt auch bei vollständiger geeigneter Wiederholkovarianz ungewichtet; Winkel-RMS wird tatsächlich minimiert",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Ausdrücklich gespeicherte automatische Gewichtung bleibt erhalten und findet weiterhin ihr anderes, korrekt dargestelltes Minimum",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Warnung vor relativ schlechter Passung erst bei Winkel-RMS > 1°: Grenzfälle einschließlich exakt 1°, expliziter Schwellentext und kritische Farbe ab 10° geprüft; andere Mehrdeutigkeitswarnungen bleiben unabhängig",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Ungültiger Suchstart ohne Messauswahl gibt die Oberfläche frei und löst keinen automatischen Sprung aus",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Ungewichteter Konturplot: echte Mausradereignisse nach Verweilzeit und mit Alt verändern weder Achsen noch Nachberechnungszahl; Mausrad-Zoom ist tatsächlich abgeschaltet",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Aufgezogenes Zoomrechteck bleibt im Konturplot nutzbar und löst die automatische Ausschnitt-Nachberechnung mit erhaltenem Zoom aus",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Wechsel Kontur → 3D → Kontur setzt die Mausrad-Konfiguration passend um; 3D-Bedienung bleibt erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Mausrad-Zoom auch bei gewichteten Konturen und beim Wechsel zur RMS-Kontrollansicht zuverlässig ausgeschaltet; richtige Zielfunktion bleibt erhalten",
+    "passed": true
+  },
+  {
+    "version": "1.4.2",
+    "check": "Neue Beschriftungen und Warnungen bis 390 px ohne horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

@@ -44,7 +44,7 @@ def test_average_and_joint_gls_have_identical_objective_and_estimate():
     repeat=RepeatAnalysis(rows,'repeat');average=RepeatAnalysis(rows,'average')
     d,p=simulate(model,repeat.angles)
     np.testing.assert_allclose(repeat.sse(d,p),average.sse(d,p),rtol=1e-12)
-    args=dict(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=80,upper=150)],quality='quick',bootstrap_samples=0)
+    args=dict(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=80,upper=150)],quality='quick',bootstrap_samples=0,uncertainty_mode='auto')
     joint=solve(FitRequest(**args,duplicate_policy='repeat'))
     means=solve(FitRequest(**args,duplicate_policy='average'))
     np.testing.assert_allclose(joint['solutions'][0]['values'],means['solutions'][0]['values'],atol=1e-7)
@@ -86,7 +86,7 @@ def test_statistical_and_calibration_contributions_are_separate():
 
 def test_propagated_gls_covariance_matches_independent_fisher_matrix():
     model,rows=repeated_data()
-    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=80,upper=150),dict(path='layers.0.n',lower=1.3,upper=1.7)],bootstrap_samples=0)
+    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=80,upper=150),dict(path='layers.0.n',lower=1.3,upper=1.7)],bootstrap_samples=0,uncertainty_mode='auto')
     obj=Objective(req);values=np.array([118,1.46]);columns=[]
     for i,h in enumerate([1e-4,1e-6]):
         a,b=values.copy(),values.copy();a[i]-=h;b[i]+=h
@@ -136,7 +136,7 @@ def test_hybrid_k_includes_exact_zero_and_resolves_small_positive_values():
 
 def test_k_zero_has_measured_profile_limit_instead_of_arbitrary_floor():
     model,rows=repeated_data(symmetric=True,m=20)
-    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.k',lower=0,upper=10)],quality='quick',bootstrap_samples=0)
+    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.k',lower=0,upper=10)],quality='quick',bootstrap_samples=0,uncertainty_mode='auto')
     result=solve(req);zero=result['zero_tests'][0]
     assert zero['available'] and zero['not_distinguishable']
     assert 0<zero['upper_limit']<.1
@@ -172,8 +172,9 @@ def test_physical_zero_does_not_hide_another_artificial_boundary():
 
 def test_bootstrap_intervals_at_artificial_bounds_are_not_reported_as_precision():
     model,rows=repeated_data(m=24)
-    req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=117.99999,upper=118.00001)],bootstrap_samples=60)
-    result=parameter_uncertainty(Objective(req),[118],bootstrap=60)
-    assert result['bootstrap_boundary_hits']>0
-    assert result['bootstrap95'] is None
-    assert 'beschnitten' in result['bootstrap_note']
+    for mode in ['none','auto']:
+        req=FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=117.99999,upper=118.00001)],bootstrap_samples=60,uncertainty_mode=mode)
+        result=parameter_uncertainty(Objective(req),[118],bootstrap=60)
+        assert result['bootstrap_boundary_hits']>0
+        assert result['bootstrap95'] is None
+        assert 'beschnitten' in result['bootstrap_note']

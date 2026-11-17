@@ -107,7 +107,7 @@ class FitRequest(Validated):
     sigma_psi: float = Field(default=0.05, gt=0, le=90)
     equivalence_deg: float = Field(default=0.01, ge=0, le=10)
     quality: Literal['quick', 'balanced', 'thorough'] = 'balanced'
-    uncertainty_mode: Literal['auto', 'none'] = 'auto'
+    uncertainty_mode: Literal['auto', 'none'] = 'none'
     bootstrap_samples: Literal[0, 60, 120] = 60
     calibration: Calibration = Field(default_factory=Calibration)
 

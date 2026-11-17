@@ -255,7 +255,10 @@ def parameter_uncertainty(obj, values, bootstrap=0):
                 diff = pred-target
                 if metric == 'angular': diff[:, 0] = wrap(diff[:, 0])
                 return np.concatenate([diff[j] @ roots[j] for j in range(len(diff))])
-            fit = least_squares(residual, np.clip(center_z, lower+1e-12, upper-1e-12), bounds=(lower, upper), max_nfev=160)
+            # In a narrow parameter interval, unweighted angular gradients can
+            # already be below the default gtol at the starting point. Finish
+            # the local minimization using step/cost convergence instead.
+            fit = least_squares(residual, np.clip(center_z, lower+1e-12, upper-1e-12), bounds=(lower, upper), max_nfev=160, gtol=None)
             if fit.success and np.isfinite(fit.fun).all():
                 samples.append(obj.decode(fit.x)[0])
                 boundary_count += int(np.any(np.minimum(fit.x-lower, upper-fit.x) <= 1e-5*(upper-lower)))

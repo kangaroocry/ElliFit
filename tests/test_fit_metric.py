@@ -13,7 +13,7 @@ def discrepant_request(metric='angular',policy='repeat'):
     d,p=simulate(model,[70],[[20]],['layers.0.thickness_nm'])
     noise=[(-.3,-.02),(.2,.015),(.4,-.01),(-.3,.015)]
     rows=[dict(id=str(i),angle=70,delta=float(d[0,0]+3+dd),psi=float(p[0,0]+pp)) for i,(dd,pp) in enumerate(noise)]
-    return FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=.05,upper=50,scale='linear')],metric=metric,duplicate_policy=policy,quality='quick',bootstrap_samples=0)
+    return FitRequest(model=model,measurements=rows,parameters=[dict(path='layers.0.thickness_nm',lower=.05,upper=50,scale='linear')],metric=metric,duplicate_policy=policy,quality='quick',bootstrap_samples=0,uncertainty_mode='auto')
 
 
 def test_weighted_minimum_differs_from_raw_rms_but_matches_displayed_fit_quantity():
@@ -47,6 +47,25 @@ def test_unweighted_repeat_fit_quantity_remains_the_original_angular_rms():
     req=discrepant_request();req.uncertainty_mode='none';obj=Objective(req);meta=definition(obj)
     assert meta['kind']=='angular' and not meta['differs_from_angular_rms']
     q=obj.batch(obj.encode([[10],[15],[20]]));np.testing.assert_allclose(values(q,meta),obj.last_rms,rtol=1e-12)
+
+
+def test_default_fit_stays_unweighted_even_with_usable_repeat_covariance():
+    payload=discrepant_request().model_dump()
+    payload.pop('uncertainty_mode')
+    req=FitRequest.model_validate(payload)
+    observed=np.array([[r.delta,r.psi] for r in req.measurements])
+    def rms(x):
+        d,p=simulate(req.model.model_dump(),[70],[[x]],['layers.0.thickness_nm'])
+        residual=np.c_[wrap(d[0,0]-observed[:,0]),p[0,0]-observed[:,1]]
+        return float(np.sqrt(np.mean(residual**2)))
+    expected=minimize_scalar(rms,bounds=(.05,50),method='bounded',options={'xatol':1e-11})
+    result=solve(req)
+    assert req.uncertainty_mode=='none'
+    assert result['measurement_uncertainty']['complete']
+    assert not result['measurement_uncertainty']['weighted']
+    assert result['fit_objective']['kind']=='angular'
+    np.testing.assert_allclose(result['solutions'][0]['values'][0],expected.x,atol=2e-5)
+    np.testing.assert_allclose(result['solutions'][0]['rmse_deg'],expected.fun,rtol=1e-10)
 
 
 def test_stokes_display_is_the_minimized_stokes_distance_not_angle_rms():

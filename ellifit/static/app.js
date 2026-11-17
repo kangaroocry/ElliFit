@@ -1,5 +1,5 @@
 'use strict';
-const UI_VERSION='1.4.1';
+const UI_VERSION='1.4.2';
 const $=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,7 +9,7 @@ const int=n=>Number(n).toLocaleString('de-DE',{maximumFractionDigits:0}).replace
 const rmsText=x=>x!=null&&x<1e-6?'< 0,000001':numericText(x,'angle');
 function numericInput(id,value){const el=$(id);el.value=value==null?'':numericText(value,el.dataset.num||'n');el.title=value==null?'Keine Angabe':el.value;}
 function prettyMessage(text){return String(text).replace(/(?<![\w.])[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?(?![\w.])/gi,s=>fmt(Number(s),6));}
-const DEFAULT_SETTINGS={duplicate_policy:'repeat',angle_tolerance:.001,metric:'angular',uncertainty_mode:'auto',bootstrap_samples:60,quality:'balanced',equivalence_deg:.01,calibration:{angle_deg:null,wavelength_nm:null}};
+const DEFAULT_SETTINGS={duplicate_policy:'repeat',angle_tolerance:.001,metric:'angular',uncertainty_mode:'none',bootstrap_samples:60,quality:'balanced',equivalence_deg:.01,calibration:{angle_deg:null,wavelength_nm:null}};
 const state={model:null,modelFile:null,modelBaseline:null,modelOrigin:'',parameters:[{path:'layers.0.thickness_nm',lower:.1,upper:1000,scale:'log',positive_min:1e-8},{path:'',lower:1,upper:4,scale:'linear',positive_min:1e-8}],settings:clone(DEFAULT_SETTINGS),rows:[],selected:new Set(),page:0,pageSize:100,table:{entries:[],indices:[],pages:1},jumpRow:null,collapsed:new Set(),groups:[],measurementStats:null,view:{logX:true,logY:true,comparisonLog:null,groupBy:'none',pageSize:100,reverse:false},history:[],future:[],trials:[],activeTrial:null,trialSequence:0,trialDraft:[],noticeJob:null,result:null,fittedInputKey:null,fittedSettings:null,fitCompletedAt:null,resultStale:false,comparison:null,active:0,activeAlias:0,job:null,resultJob:null,busy:false,material:null,materialFile:null,materialBaseline:null,materialOrigin:'',materials:[],provenance:''};
 let toastTimer,statisticsTimer,statisticsTicket=0,comparisonTicket=0,lastRow=null,fitFocus=null;
 async function api(url,options={}){const request={...options};if(request.body&&!(request.body instanceof FormData)){request.headers={'Content-Type':'application/json'};request.body=JSON.stringify(request.body);}const response=await fetch(url,request),data=await response.json();if(!response.ok){const d=data.detail??data,e=new Error(typeof d==='string'?d:Array.isArray(d)?d.map(x=>x.loc?.slice(1).join('.')+': '+x.msg).join('\n'):d.message||'Anfrage fehlgeschlagen.');e.status=response.status;e.detail=d;throw e;}return data;}
@@ -179,6 +179,7 @@ function migratedSettings(s={}){const v=clone(DEFAULT_SETTINGS);for(const key of
 function duplicateQuestion(groups){$('duplicateGroups').innerHTML=groups.map(g=>`${numericText(g.angle,'angle')}° · ${int(g.indices.length)} Messungen`).join('<br>');return new Promise(resolve=>{const dialog=$('duplicateDialog');dialog.returnValue='cancel';dialog.addEventListener('close',()=>resolve(dialog.returnValue),{once:true});dialog.showModal();});}
 async function run(){
  if(state.busy||!flushFitInputs())return;
+ let completed=false;
  try{
   const rows=selectedRows();if(!rows.length)throw new Error('Bitte mindestens eine Messung auswählen.');
   if(!state.parameters.some(p=>p.path))throw new Error('Bitte mindestens einen Fitparameter mit X oder Y auswählen.');
@@ -198,12 +199,13 @@ async function run(){
     comparisonTicket++;state.active=0;state.view.errorQuantity='fit';$('errorQuantity').value='fit';state.trials=[];state.activeTrial=null;state.trialSequence=0;
     state.activeAlias=state.result.solutions[0].representative_alias;state.comparison=state.result.comparison;
     state.comparison.uncertainty=state.result.solutions[0].uncertainty;state.measurementStats=state.result.measurement_uncertainty;$('stale').hidden=true;
-    await results();status('Fit abgeschlossen',100);$('status').hidden=true;break;
+    await results();status('Fit abgeschlossen',100);$('status').hidden=true;completed=true;break;
    }
    status(s.message,s.progress);
   }
  }catch(e){status(e.message,0,true);toast(e.message,'critical');}
  finally{busy(false);historyButtons();}
+ if(completed){await nextPaint();scrollToEvaluation();}
 }
 async function selectSolution(index,alias=null){if(!state.result)return;alias??=state.result.solutions[index].representative_alias;if(!state.activeTrial&&index===state.active&&alias===state.activeAlias)return;const ticket=++comparisonTicket;try{const c=index===0&&alias===state.result.solutions[0].representative_alias?state.result.comparison:await api(`/api/jobs/${state.resultJob}/comparison/${index}?alias=${alias}`);if(ticket!==comparisonTicket)return;state.activeTrial=null;state.active=index;state.activeAlias=alias;state.comparison=c;expandedFamilies.add(index);solutionTable();renderTrialTable();errorPlot(true);comparisonPlot();parameterUncertainty();identifiability();solutionRegions();renderNotices();datasetContext();}catch(e){toast(e.message,'critical');}}
 // Colors describe physical angular RMS in degrees. Interpolate within decades.

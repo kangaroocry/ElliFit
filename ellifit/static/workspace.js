@@ -124,11 +124,17 @@ function decorateWorkspacePlot(el){
 }
 function queuePlotDecoration(el){cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=requestAnimationFrame(()=>{el._elliDecorationFrame=null;decorateWorkspacePlot(el);});}
 function nextPaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
+function scrollToEvaluation(){
+ const target=$('evaluation'),header=document.querySelector('header');
+ const top=Math.max(0,window.scrollY+target.getBoundingClientRect().top-(header?.getBoundingClientRect().height||0)-12);
+ window.scrollTo({top,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
 function renderWorkspacePlot(id,traces,layout,options){
  const el=$(id),key=plotKey(id,options),serial=(el._elliSerial||0)+1;el._elliSerial=serial;
  preservePlotView(el,layout,key,options);layout.uirevision=key;
  el._elliViewKey=key;el._elliPlotOptions=options;
- return Plotly.react(el,traces,layout,plotOptions).then(async()=>{
+ const config={...plotOptions,scrollZoom:plotOptions.scrollZoom&&!['contour','fit-contour'].includes(options.mode)};
+ return Plotly.react(el,traces,layout,config).then(async()=>{
   if(el._elliSerial!==serial)return;
   if(!el._elliViewEvents){el.on('plotly_clickannotation',event=>selectPlotTarget(el._elliLabelTargets?.[event.index]));el.on('plotly_relayout',change=>{
    if(el._elliDecorating||Object.keys(change).every(k=>/^(annotations|shapes)|tick(mode|vals|text)$/.test(k)))return;

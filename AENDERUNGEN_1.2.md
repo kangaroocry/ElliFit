@@ -1,6 +1,17 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 17. November 2026. Quellstand 1.4.1; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 17. November 2026. Quellstand 1.4.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Ungewichteter Standard und Bedienung in 1.4.2
+
+- Ungewichtet fitten als Vorgabe in Oberfläche und API; ausdrückliche Sitzungsoptionen erhalten. Automatische Kovarianzgewichtung bleibt wählbar und setzt passende Wiederholungen voraus.
+- Beschriftung „Ausschnitt automatisch nachberechnen“.
+- Mausrad-Zoom bei RMS- und Fitgrößen-Konturplots ausgeschaltet; Rechteck und Werkzeugleisten-Zoom bleiben erhalten, andere Plotarten unverändert.
+- Automatischer Sprung zur Auswertung nach erfolgreicher Suche und fertiger Darstellung; kein Sprung bei Abbruch oder Fehler.
+- Klare Warnung „Fit relativ schlecht – Winkel-RMS über 1°“, erst oberhalb von 1°. Die gesonderte Orientierung für sehr gute Lösungen bei ≤ 0,1° bleibt erhalten.
+- Lokale Bootstrap-Fits bei extrem engen Grenzen stoppen auch ungewichtet nicht vorzeitig an der kleinen Anfangsgradientennorm; beschnittene Intervalle werden unterdrückt.
+
+- **Prüfung:** 86 Tests bestanden, ein erwarteter privater Importtest übersprungen und zehn echte Chromium-Prüfungen bestanden.
 
 ## Konsistente Fit-Minima und Fehlerdarstellung in 1.4.1
 

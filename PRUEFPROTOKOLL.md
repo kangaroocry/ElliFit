@@ -1,8 +1,31 @@
-# Prüfprotokoll – ElliFit 1.4.1
+# Prüfprotokoll – ElliFit 1.4.2
 
 Stand: 17. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.4.1
+## Aktuelle Prüfung von 1.4.2
+
+**86 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte Bibliothekswarnungen. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Prüfung unter Linux/Chromium; kein tatsächlicher Windows-Lauf.
+
+- Neuer unabhängiger Vergleich mit direkt berechneten Winkelresiduen: Ohne ausdrücklich gewählte Gewichtung findet die globale Suche das ungewichtete Minimum, obwohl geeignete Wiederholkovarianzen vorhanden sind. Die bestehende GLS-Regression aktiviert Gewichtung nun ausdrücklich und bleibt bestanden.
+- Bootstrap-Grenzprüfung sowohl gewichtet als auch ungewichtet bestanden. Bei extrem engen Suchgrenzen konnte der ungewichtete lokale Bootstrap zuvor bereits wegen eines kleinen Anfangsgradienten stoppen. Der lokale Bootstrap verwendet jetzt Schritt-/Kostenkonvergenz statt dieses absoluten Gradienten-Abbruchs und unterdrückt bei erreichten Grenzen das beschnittene Intervall.
+- Optische Formeln und globale Optimierung sind unverändert. Material-/Modellbibliotheken, Laufzeitabhängigkeiten und Windows-Starter sind bytegleich zur Vorversion.
+
+**Zehn tatsächliche Chromium-Prüfungen bestanden:**
+
+1. Frischer Start mit „Ungewichtet fitten“, Versionskennung und neuer Beschriftung „Ausschnitt automatisch nachberechnen“. Referenzfit bei 118 nm; 1D-Mausrad bleibt verfügbar.
+2. Sitzung ohne Gewichtungsfeld bleibt trotz geeigneter vollständiger Wiederholkovarianz ungewichtet und minimiert den Winkel-RMS.
+3. Ausdrücklich gespeicherte automatische Gewichtung bleibt erhalten und liefert weiterhin das korrekt dargestellte gewichtete Minimum.
+4. Warnung „Fit relativ schlecht – Winkel-RMS über 1°“ bei > 1°; bei exakt 1° noch nicht. Schwelle und Bedeutung stehen im Text, kritische Einstufung ab 10° erhalten.
+5. Ungültiger Start ohne Auswahl: Freigabe ohne automatischen Sprung. Erfolgreiche Fits springen dagegen nach fertiger Darstellung zur Auswertung, unterhalb des festen Kopfbereichs.
+6. Echte Mausradereignisse im Konturplot nach Verweilzeit sowie mit Alt: unveränderte Achsen, keine dadurch ausgelöste Ausschnitt-Nachberechnung.
+7. Aufgezogenes Zoomrechteck und anschließende automatische Nachberechnung bleiben nutzbar; Zoom erhalten.
+8. Kontur → 3D → Kontur schaltet Mausrad-Zoom passend aus/ein/aus.
+9. Gewichtete Konturen und RMS-Kontrollansicht: Mausrad-Zoom in beiden Darstellungen ausgeschaltet, richtige Zielfunktion erhalten.
+10. Ansichten bis 390 px ohne horizontalen Überlauf oder JavaScript-Laufzeitfehler.
+
+Ausschließlich synthetische Browser-Prüfdaten; keine privaten Dateien oder Zahlenresultate hinzugefügt. Die Zusammenfassung der Prüfungen steht zusätzlich in `Pruefdaten_Browser.json`.
+
+## Basisprüfung von 1.4.1
 
 **85 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte AnyIO-/Starlette-Bibliothekswarnungen. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Die optische Berechnung, Optimierung und Kovarianzgewichtung sind unverändert; ergänzt wurden Definition/Übertragung der tatsächlichen Zielfunktion und konsistente Darstellungen.
 

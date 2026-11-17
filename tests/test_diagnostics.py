@@ -23,7 +23,7 @@ def coupled_request():
     return FitRequest(model=model,measurements=rows,
         parameters=[dict(path='layers.0.thickness_nm',lower=110,upper=980,scale='log'),
                     dict(path='layers.0.n',lower=1.01,upper=2,scale='linear')],
-        quality='quick',bootstrap_samples=0)
+        quality='quick',bootstrap_samples=0,uncertainty_mode='auto')
 
 
 @pytest.fixture(scope='module')
