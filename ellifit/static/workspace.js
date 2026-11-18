@@ -151,10 +151,10 @@ function renderResultContext(recheck=false){
  const r=state.result,box=$('resultScope');if(!box)return;
  if(!r){box.dataset.state='empty';$('resultScopeTitle').textContent='Noch kein Fit berechnet';$('resultScopeDetail').textContent='Eingaben und Messdaten oben vorbereiten, dann die globale Suche starten.';$('resultScopeBadge').textContent='Bereit';return;}
  if(recheck)state.resultStale=pendingFitEdits()||state.fittedInputKey!==currentFitKey();
- const stamp=state.fitCompletedAt?new Date(state.fitCompletedAt).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'letzter Berechnung';
- const old=state.resultStale;$('openFittedModel').hidden=!old;box.dataset.state=old?'stale':state.busy?'running':'current';
- $('resultScopeTitle').textContent='Ergebnisse des Fits vom '+stamp;
- $('resultScopeDetail').textContent=`${r.model.name} · ${int(r.measurement_context.count)} Messungen · ${int(r.counts.angles)} Winkel. Lösungsliste, Diagramme und Diagnosen gehören zu diesem Eingabestand.`;
+ const stamp=state.fitCompletedAt?new Date(state.fitCompletedAt).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'letzter Berechnung';
+ const old=state.resultStale;renderFinding();$('openFittedModel').hidden=!old;box.dataset.state=old?'stale':state.busy?'running':'current';
+ $('resultScopeTitle').textContent=(old?'Früherer Fit vom ':'Fit vom ')+stamp;
+ $('resultScopeDetail').textContent=`${r.model.name} · ${int(r.measurement_context.count)} Messungen · ${int(r.counts.angles)} Winkel. `;
  $('resultScopeBadge').textContent=old?'Früherer Eingabestand':state.busy?'Neue Berechnung läuft':'Eingaben stimmen überein';
  $('stale').hidden=!old;$('stale').textContent='Aktuelle Eingaben wurden geändert. Für diesen neuen Stand bitte erneut fitten; die bisherigen Ergebnisse bleiben zum Vergleich sichtbar.';
  $('noticesScope').textContent='Hinweise zu diesem '+(old?'früheren ':'')+'Fit vom '+stamp;
@@ -165,12 +165,12 @@ function renderResultContext(recheck=false){
 function restoreTableView(){
  const value=Number(state.view.pageSize);state.pageSize=Number.isSafeInteger(value)&&value>0?value:100;state.view.pageSize=state.pageSize;
  state.view.groupBy=['none','auto','angle','source','context'].includes(state.view.groupBy)?state.view.groupBy:'none';state.view.reverse=state.view.reverse===true;
- $('pageSize').value=int(state.pageSize);$('groupBy').value=state.view.groupBy;$('inputDetails').open=state.view.inputsOpen!==false;
+ $('pageSize').value=int(state.pageSize);$('groupBy').value=state.view.groupBy;
  $('reverseRows').setAttribute('aria-pressed',String(state.view.reverse));$('reverseRows').textContent=state.view.reverse?'↓ Dateiende zuerst':'↑ Dateianfang zuerst';
  $('reverseRows').title='Nur die Anzeige umkehren; Originaldaten und Fit-Auswahl bleiben erhalten.';
 }
 function bindWorkspace(){
- restoreTableView();renderResultContext();$('inputDetails').addEventListener('toggle',()=>{state.view.inputsOpen=$('inputDetails').open;});
+ restoreTableView();renderResultContext();
  document.addEventListener('input',e=>{const input=e.target;if(input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]'))pendingSearchInputs.add(input);if(inputDocument(input)==='model'||input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]')){renderResultContext(true);if(state.result)renderNotices();}});
  document.addEventListener('change',e=>{const input=e.target;if(!input.matches('#fitFields input,#fitFields select,#layerEditor [data-prop]')&&inputDocument(input)!=='model')return;const optional=input.id.startsWith('sigma');if(!input.dataset.num||Number.isFinite(parseNumber(input.value,optional))||optional&&parseNumber(input.value,true)===null)pendingSearchInputs.delete(input);renderResultContext(true);if(state.result)renderNotices();});
  $('pageSize').onchange=()=>{const n=parseNumber($('pageSize').value);if(!Number.isSafeInteger(n)||n<1){$('pageSize').value=int(state.pageSize);return toast('Bitte eine positive ganze Anzahl an Einträgen je Seite eingeben.','warning');}const first=state.page*state.pageSize;state.pageSize=n;state.view.pageSize=n;state.page=Math.floor(first/n);dataTable();};

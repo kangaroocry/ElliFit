@@ -68,7 +68,7 @@ def build_profiles(obj, solutions, fixed, threshold, progress=None):
         points=[]
         for i,value in enumerate(values):
             mean=mean_deviation(obj,value)
-            point=dict(values=value.tolist(),q=float(scores[i]),rmse_deg=float(rms[i]),mean_rmse_deg=mean['rmse_deg'],statistic=mean['statistic'],
+            point=dict(values=value.tolist(),q=float(scores[i]),rmse_deg=float(rms[i]) if np.isfinite(rms[i]) else None,mean_rmse_deg=mean['rmse_deg'],statistic=mean['statistic'],
                 compatible95=mean['statistic']<=threshold if threshold is not None and mean['statistic'] is not None else None,
                 flat_in_profiled_parameter=False,branch=branch_id,family=family,alias=alias,
                 at_boundary=bool(np.any(zz[i]<2e-6)|np.any(zz[i]>1-2e-6)))

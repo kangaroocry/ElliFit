@@ -6,8 +6,17 @@ function metricUnit(){return fitMetric().unit==='degree'?'°':'dimensionslos';}
 function fitAxisLabel(){return fitMetric().label+(fitMetric().unit==='degree'?' (°)':' (dimensionslos)');}
 function useFitObjective(){return !!state.result&&fitMetric().differs_from_angular_rms&&$('errorQuantity').value!=='rms';}
 function metricHover(q,rms){return `${esc(fitMetric().label)} ${fmt(fitValue(q),5)}${fitMetric().unit==='degree'?'°':' (dimensionslos)'}<br>Ungewichteter Winkel-RMS ${angleValue(rms)}°`;}
+let rmsAvailabilityResult=null, rmsAvailable=true;
 function renderObjectiveContext(){
- const r=state.result,meta=fitMetric(),distinct=!!r&&meta.differs_from_angular_rms,fit=$('errorQuantity').value!=='rms';
+ const r=state.result,meta=fitMetric(),distinct=!!r&&meta.differs_from_angular_rms,quantity=$('errorQuantity');
+ if(r!==rmsAvailabilityResult){
+  rmsAvailabilityResult=r;
+  rmsAvailable=!r||r.surface.rms.some(item=>Array.isArray(item)?item.some(Number.isFinite):Number.isFinite(item));
+ }
+ quantity.options[1].disabled=!rmsAvailable;
+ quantity.options[1].textContent=rmsAvailable?'Ungewichteter Winkel-RMS (°)':'Winkel-RMS unbestimmt';
+ if(!rmsAvailable){quantity.value='fit';state.view.errorQuantity='fit';}
+ const fit=quantity.value!=='rms';
  $('errorQuantity').closest('.objective-controls').hidden=!distinct;$('objectiveNotice').hidden=!distinct;
  if(distinct){
   $('errorQuantity').options[0].textContent=meta.label+' (tatsächlich minimiert)';
@@ -60,7 +69,8 @@ async function objectiveErrorPlot(ensureSelected=false){
   const field={colorscale:FIT_COLORS,zmin:limits.lo,zmax:limits.hi,autocontour:false,contours:{start:limits.lo,end:limits.hi,size:(limits.hi-limits.lo)/60,coloring:'heatmap',showlines:true},line:{width:.3,color:'#ffffff65'}};
   if(surface){
    l.margin={l:0,r:0,t:0,b:0};l.scene={xaxis:ax.axis,yaxis:ay.axis,zaxis:{type:'log',title:{text:fitAxisLabel()}},camera:{eye:{x:1.7,y:1.5,z:1.2}}};
-   traces=[{type:'mesh3d',x:s.mesh.values.map(v=>ax.map(v[0])),y:s.mesh.values.map(v=>ay.map(v[1])),z:s.mesh.q.map(fitHeight),i:s.mesh.triangles.map(t=>t[0]),j:s.mesh.triangles.map(t=>t[1]),k:s.mesh.triangles.map(t=>t[2]),intensity:s.mesh.q.map(fitLog),colorscale:FIT_COLORS,cmin:limits.lo,cmax:limits.hi,colorbar:objectiveColorbar(limits),lighting:{ambient:1,diffuse:0,specular:0},customdata:s.mesh.values.map((v,i)=>parameterHover(v)+'<br>'+metricHover(s.mesh.q[i],s.mesh.rms[i])),hovertemplate:'%{customdata}<extra>Fit-Abweichung</extra>'},
+   const triangles=s.mesh.fit_triangles||s.mesh.triangles;
+   traces=[{type:'mesh3d',x:s.mesh.values.map(v=>ax.map(v[0])),y:s.mesh.values.map(v=>ay.map(v[1])),z:s.mesh.q.map(fitHeight),i:triangles.map(t=>t[0]),j:triangles.map(t=>t[1]),k:triangles.map(t=>t[2]),intensity:s.mesh.q.map(fitLog),colorscale:FIT_COLORS,cmin:limits.lo,cmax:limits.hi,colorbar:objectiveColorbar(limits),lighting:{ambient:1,diffuse:0,specular:0},customdata:s.mesh.values.map((v,i)=>parameterHover(v)+'<br>'+metricHover(s.mesh.q[i],s.mesh.rms[i])),hovertemplate:'%{customdata}<extra>Fit-Abweichung</extra>'},
     {type:'scatter3d',x:markers.map(m=>ax.map(m.values[0])),y:markers.map(m=>ay.map(m.values[1])),z:markers.map(m=>Math.max(fitValue(m.q),1e-12)),mode:'markers+text',text:markers.map(m=>String(m.rank)),marker:{color:colors,size:5,line:{color:'#fff',width:1}},customdata:hover,hovertemplate:'%{customdata[2]}<extra>Fitminimum</extra>'}];
   }else{
    l.margin.r=90;l.xaxis=ax.axis;l.yaxis=ay.axis;
@@ -71,7 +81,7 @@ async function objectiveErrorPlot(ensureSelected=false){
   if(r.identifiability?.profile&&$('showValley').checked){const points=selectedProfileBranch()?.points||[];traces.push({type:surface?'scatter3d':'scatter',x:points.map(p=>ax.map(p.values[0])),y:points.map(p=>ay.map(p.values[1])),...(surface?{z:points.map(p=>Math.max(fitValue(p.q),1e-12))}:{}),mode:'markers',marker:{size:surface?2.5:4,color:points.map(p=>rmsColor(p.rmse_deg)),line:{color:'#46666c',width:.6}},customdata:points.map(p=>parameterHover(p.values)+'<br>'+metricHover(p.q,p.rmse_deg)),hovertemplate:'%{customdata}<extra>Talpunkt</extra>',...(!surface?{zorder:5}:{})});}
   // Optional confidence curves carry raw-RMS heights; do not mix them into a
   // fit-objective z axis. Their 2D parameter boundaries remain meaningful.
-  if(!surface)traces.push(...regionTraces(ax,ay,false));
+  if(!surface){traces.push(...regionTraces(ax,ay,false));plotMeasurementLines(traces,ax,ay);}
  }
  traces.push(...metricTrialTrace(ax,two?ay:null,surface));keepParameterView(l,surface);
  const chosen=activeTrial()||selectedMember(),value=fitValue(chosen.q),selected=ensureSelected===true?{xaxis:ax.map(chosen.values[0]),yaxis:two?ay.map(chosen.values[1]):state.view.logY?Math.max(value,1e-12):value,...(surface?{zaxis:Math.max(value,1e-12)}:{})}:{};

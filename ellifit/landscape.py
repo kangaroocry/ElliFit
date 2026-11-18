@@ -347,4 +347,10 @@ def build_landscape(obj,grids,solutions,diagnostics,progress):
         anchors=len(anchor_z),adaptive_points=added,base_points=len(base),
         vertices=len(vertices),refinement_rounds=2,
         note='Jeder Stützpunkt ist mit dem Schichtmodell berechnet; dazwischen ist die Fläche interpoliert. Talpunkte und Minima sind Teil des Netzes. Ein endliches Netz kann Details übersehen.')
+    if obj.req.metric=='stokes' and not np.isfinite(rms).all():
+        # A vanishing p or s component still has a defined Stokes vector.
+        # Keep triangles of that objective even where the angular RMS has holes.
+        all_triangles=_triangles(vertices)
+        usable=np.isfinite(np.asarray(mesh['q'],float))
+        mesh['fit_triangles']=all_triangles[np.all(usable[all_triangles],axis=1)].tolist()
     return mesh,regions

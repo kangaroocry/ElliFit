@@ -783,5 +783,55 @@
     "version": "1.5.0",
     "check": "Desktop- und schmale Ansichten ohne horizontalen Seitenüberlauf oder JavaScript-Laufzeitfehler.",
     "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Leerer Einstieg, kompakte Schichten, Y mit lokalen Suchgrenzen am Feld gewählt und rückgängig gemacht.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Drei Originaldateien importiert und in Listen mit 16 377 und 16 434 Zeilen direkt zur letzten Messung gesprungen.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Eigene Auswertevorlage gespeichert und mit bestehender Messauswahl geladen.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Vier gleichwertige Dicken im 70°-Referenzfit, sichtbare Familiengleichung und druckbarer PDF-Bericht.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Geänderter Eingabestand sowie A/B-Vergleich mit anderer und mit identisch neu geladener Auswahl.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Unklare Spalte probeweise geöffnet und Import abgebrochen. Zwei Zeitpunkte im Millisekundenmaßstab bestätigt, separat gefittet und als CSV ausgegeben. Nach einem simulierten Gruppenfehler lief die übrige Serie weiter, und nur die fehlgeschlagene Gruppe wurde erneut berechnet.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "d = 100 nm, n = 1,5 im Mehrwinkelfit. Δ und Ψ getrennt dargestellt, beide Messlinien, Parameterprofil und optische Empfindlichkeit geöffnet.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Zwei Dateien mit derselben Zweiparametervorlage separat gefittet und beide Parameterspalten im CSV geprüft.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Vorbereitung und Auswertung bei 390 px ohne horizontalen Überlauf. Fehlerlandschaft und Modellvergleich einzeln umgeschaltet.",
+    "passed": true
+  },
+  {
+    "version": "1.6.0",
+    "check": "Echter Stokes-Fit am analytischen Brewsterwinkel im schmalen Browserfenster. n = 1,5 und Winkel-RMS unbestimmt.",
+    "passed": true
   }
 ]

@@ -1,6 +1,14 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 18. November 2026. Quellstand 1.5.0.
+Stand: 18. November 2026. Quellstand 1.6.0.
+
+## Änderungen in 1.6.0
+
+- Die getrennten Arbeitsflächen Vorbereitung und Auswertung ersetzen die lange gemeinsame Seite. Kompakte Schichtzeilen, vollständige Auswertevorlagen, aufklappbare Diagnosen und ein Befund für den tatsächlich gezeigten Fit unterstützen den Laborablauf.
+- Ein gemerkter Fit kann mit der aktuellen Auswahl verglichen werden. Der druckbare Laborbericht umfasst Modell, Messungen, Winkel, Suchbereich, Kriterium, ausgewählte Parameter, Perioden und Warnungen.
+- Der Import unterscheidet Winkel- und Zeitspalten und fragt bei unklaren Dateien nach. Zeitangaben begleiten Messwerte, Sitzung, CSV und Serienfits. Serien lassen sich nach Messkontext oder Quelldatei auswerten.
+- Die eindimensionale Suche verwirft Scheinminima auf Flanken. Bei zwei freien Parametern ergänzen Δ/Ψ-Messlinien und ein Profil mit festem oder neu optimiertem zweiten Parameter die Fehlerlandschaft.
+- Polarisationsnullstellen, Stokes-Residuen und Winkel-RMS werden konsistent behandelt. Eine lokale optische Diagnose zeigt die Wirkung von +1 nm auf Δ/Ψ und das p-Reflexionsminimum des vollständigen Stapels.
 
 ## Änderungen in 1.5.0
 

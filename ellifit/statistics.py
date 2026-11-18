@@ -16,7 +16,8 @@ from .core import Observations, get, mean_delta, parameter_label, periodic_axes,
 class RepeatAnalysis:
     def __init__(self, rows, policy='repeat', tolerance=.001, metric='angular', automatic=True):
         self.raw = Observations(rows, 'repeat', tolerance)
-        self.display = Observations(rows, policy, tolerance)
+        self.measured_pole = any(row['psi'] in (0, 90) for row in rows)
+        self.display = Observations(rows, policy, tolerance, metric)
         self.angles, self.groups = self.raw.angles, self.raw.groups
         self.records, self.covariances, self.precisions = [], [], []
         self.stokes_covariances = []
@@ -40,7 +41,8 @@ class RepeatAnalysis:
                         r = np.corrcoef(col[:-1], col[1:])[0, 1]
                         drift |= bool(abs(r) > .65)
             # A failed NumPy comparison can short-circuit to np.bool_, not bool.
-            valid = bool(m >= 3 and unique >= 3 and abs(z) > .95 and not drift)
+            pole = np.any((p == 0) | (p == 90))
+            valid = bool(m >= 3 and unique >= 3 and abs(z) > .95 and not drift and not pole)
             if valid:
                 eig = np.linalg.eigvalsh(covariance)
                 valid = bool(eig.min() > max(1e-16, eig.max() * 1e-10))
@@ -49,6 +51,8 @@ class RepeatAnalysis:
                 reason = 'mögliche Drift / zeitliche Korrelation'
             elif m >= 3 and not valid:
                 reason = 'Streuung fehlt, ist singulär oder Δ ist nicht lokal eindeutig'
+            if pole:
+                reason = 'Δ an der Polarisationsnullstelle unbestimmt'
             if unique < m:
                 self.warnings.append(f'Bei {self.angles[j]:g}° sind Werte exakt doppelt; die Unabhängigkeit der Wiederholungen prüfen.')
             if drift:
@@ -77,7 +81,9 @@ class RepeatAnalysis:
             self.warnings.append('Wenige Wiederholungen: geschätzte Kovarianzen und statistische Intervalle sind unsicher; χ²-Angaben sind Näherungen.')
 
     def public(self):
-        return dict(groups=self.records, angle_count=len(self.raw.geometry_angles), complete=self.complete, weighted=self.active,
+        groups = [r | dict(mean_delta=None, std_delta=None, correlation=None, covariance=None) if np.any((p==0)|(p==90)) else r
+                  for r,p in zip(self.records,self.raw.ps)]
+        return dict(groups=groups, angle_count=len(self.raw.geometry_angles), complete=self.complete, weighted=self.active,
             mode='repeat_covariance' if self.active else 'unweighted', warnings=list(dict.fromkeys(self.warnings)),
             assumptions='Unabhängige Wiederholungen derselben stabilen Probe. Systematische Fehler sind nicht aus der Streuung bestimmbar.')
 
@@ -101,6 +107,8 @@ class RepeatAnalysis:
         return np.sum(self.residuals(delta, psi)**2, axis=1)
 
     def raw_rms(self, delta, psi):
+        if self.measured_pole:
+            return np.full(len(np.atleast_2d(psi)), np.nan)
         return np.sqrt(self.raw.sse(delta, psi) / (2 * self.raw.count))
 
 
@@ -147,11 +155,15 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     weighted_blocks = np.asarray(weights) @ blocks
     jtw = weighted_blocks.reshape(J.shape).T
     information = jtw @ J
-    singular = np.linalg.svd(information, compute_uv=False)
+    finite = np.isfinite(information).all()
+    singular = np.linalg.svd(information, compute_uv=False) if finite else np.zeros(len(values))
     weak = bool(singular[-1] <= max(1e-15, singular[0] * 1e-12))
     result = dict(available=False, method='Lokale Kovarianzfortpflanzung', statistical=None, calibration=None,
         combined=None, covariance_statistical=None, correlation=None, bootstrap95=None,
         calibration_sources=[], calibration_warnings=[], calibration_complete=True, weak=weak, note='Messstreuung wird durch den Fit fortgepflanzt; kein zusätzlicher pauschaler Fitfehler.')
+    if not finite:
+        return result | dict(note='Lokale Winkelableitung an einer Polarisationsnullstelle unbestimmt.', sensitivity_rank=0,
+                             sensitivity_singular_values=[],condition_number=None,strongly_correlated=False,local_relation=None)
     weighted_jac=np.vstack([np.linalg.cholesky(w).T@J[j*width:(j+1)*width] for j,w in enumerate(weights)])
     sj=np.linalg.svd(weighted_jac,compute_uv=False)
     rank=int(np.sum(sj>max(1e-13,sj[0]*1e-10)))

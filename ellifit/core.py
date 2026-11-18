@@ -71,6 +71,7 @@ class Row(Validated):
     measurement_kind: Literal['repeat', 'location', 'azimuth'] = 'repeat'
     site: str = Field(default='', max_length=120)
     azimuth_deg: float | None = Field(default=None, ge=0, le=360)
+    time_s: float | None = None
 
     @model_validator(mode='after')
     def measurement_context(self):
@@ -187,8 +188,22 @@ def wrap(value):
 
 
 def stokes(delta, psi):
-    d, p = np.deg2rad(delta), 2 * np.deg2rad(psi)
-    return np.stack((np.cos(p), np.sin(p) * np.cos(d), np.sin(p) * np.sin(d)), axis=-1)
+    delta, psi = np.broadcast_arrays(delta, psi)
+    pole = (psi == 0) | (psi == 90)
+    d, p = np.deg2rad(np.where(pole, 0., delta)), 2 * np.deg2rad(psi)
+    radius = np.where(pole, 0., np.sin(p))
+    return np.stack((np.cos(p), radius * np.cos(d), radius * np.sin(d)), axis=-1)
+
+
+def stokes_direction(vector):
+    """Ellipsometric angles of the net polarization direction, where defined."""
+    axial, x, y = vector
+    radius = np.hypot(x, y)
+    tolerance = 32 * np.finfo(float).eps
+    if np.hypot(axial, radius) <= tolerance:
+        return None, None
+    delta = float(np.rad2deg(np.arctan2(y, x)) % 360) if radius > tolerance else None
+    return delta, float(.5 * np.rad2deg(np.arctan2(radius, axial)))
 
 
 def longitudinal(index, tangent):
@@ -264,15 +279,32 @@ def simulate(model, angles, values=None, paths=()):
     if model.get('delta_convention', 'reversed') == 'reversed':
         delta = -delta
     psi = np.rad2deg(np.arctan2(abs(rp), abs(rs)))
-    invalid = abs(rp) + abs(rs) < 1e-15
-    return np.where(invalid, np.nan, delta % 360), np.where(invalid, np.nan, psi)
+    ap, ass = abs(rp), abs(rs)
+    invalid = ap + ass < 1e-15
+    tol = 32 * np.finfo(float).eps
+    p_zero, s_zero = ap <= tol * ass, ass <= tol * ap
+    psi = np.where(p_zero, 0., np.where(s_zero, 90., psi))
+    return np.where(invalid | p_zero | s_zero, np.nan, delta % 360), np.where(invalid, np.nan, psi)
 
 
-def parse_data(content: bytes, name: str):
+def parse_data(content: bytes, name: str, first_column=None, incidence=None, time_unit=None, inspect_columns=False):
     try:
         text = content.decode('utf-8-sig')
     except UnicodeDecodeError:
         text = content.decode('cp1252', errors='replace')
+    from .import_columns import column_metadata, UNITS
+    meta = column_metadata(text)
+    if meta['kind'] == 'time' and first_column == 'angle':
+        raise ValueError('Der Dateikopf kennzeichnet eine Zeitspalte.')
+    kind = first_column or meta['kind']
+    incidence = incidence if incidence is not None else meta['angle']
+    unit = time_unit or meta['unit']
+    if (kind == 'time' and (incidence is None or unit not in UNITS)) or (kind == 'unknown' and inspect_columns):
+        if not inspect_columns:
+            raise ValueError('Zeitreihe erkannt. Einfallswinkel und Zeiteinheit angeben.')
+        return dict(requires_columns=True, filename=name, **meta)
+    if kind == 'time' and not 0 < incidence < 90:
+        raise ValueError('Der Einfallswinkel muss zwischen 0° und 90° liegen.')
     number = r'[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eEdD][+-]?\d+)?'
     pattern = re.compile(rf'^\s*({number})[\s;]+({number})[\s;]+({number})(?:[\s;]+(.*))?\s*$')
     rows, skipped = [], []
@@ -288,7 +320,8 @@ def parse_data(content: bytes, name: str):
                 row = Row(id=f'{token}-{line}', angle=a, delta=d % 360, psi=p,
                     source=record.get('Quelle') or name, line=int(record.get('Originalzeile') or line),
                     comment=record.get('Kommentar') or '', measurement_kind=record['Messart'] or 'repeat',
-                    site=record['Messort'] or '', azimuth_deg=float(azimuth.replace(',', '.')) if azimuth else None)
+                    site=record['Messort'] or '', azimuth_deg=float(azimuth.replace(',', '.')) if azimuth else None,
+                    time_s=float(record['Zeit_s'].replace(',', '.')) if record.get('Zeit_s') else None)
                 rows.append(row.model_dump())
             except (ValueError, TypeError, AttributeError):
                 skipped.append(line)
@@ -312,7 +345,9 @@ def parse_data(content: bytes, name: str):
             continue
         try:
             a, d, p = [float(v.replace(',', '.').replace('D', 'e').replace('d', 'e')) for v in parts[:3]]
-            row = Row(id=f'{token}-{line}', angle=a, delta=d % 360, psi=p, source=name, line=line, comment=(parts[3] or '').strip().removeprefix('>>').strip()[:2000])
+            row = Row(id=f'{token}-{line}', angle=incidence if kind == 'time' else a,
+                time_s=a * UNITS[unit] if kind == 'time' else None, delta=d % 360, psi=p, source=name, line=line,
+                comment=(parts[3] or '').strip().removeprefix('>>').strip()[:2000])
             rows.append(row.model_dump())
         except ValueError:
             skipped.append(line)
@@ -320,7 +355,7 @@ def parse_data(content: bytes, name: str):
         raise ValueError('Keine Daten erkannt. Erwartet: Winkel, Delta, Psi in Grad.')
     if len(rows) > 200000:
         raise ValueError('Maximal 200.000 Messungen pro Datei.')
-    return dict(rows=rows, count=len(rows), skipped=skipped, filename=name)
+    return dict(rows=rows, count=len(rows), skipped=skipped, filename=name, first_column=kind)
 
 
 def mean_delta(values):
@@ -332,12 +367,13 @@ def mean_delta(values):
 
 def context_fields(row):
     return dict(measurement_kind=row.get('measurement_kind', 'repeat'), site=row.get('site', ''),
-                azimuth_deg=row.get('azimuth_deg'))
+                azimuth_deg=row.get('azimuth_deg'), **({'time_s': row['time_s'], 'time_source': row.get('time_source', row.get('source', ''))}
+                if row.get('time_s') is not None else {}))
 
 
 class Observations:
     """Exact circular SSE statistics; repeat weighting retains within-group spread."""
-    def __init__(self, rows, policy='repeat', tolerance=0.001):
+    def __init__(self, rows, policy='repeat', tolerance=0.001, metric='angular'):
         self.rows, self.groups, self.warnings = rows, [], []
         incidence = []
         for idx in np.argsort([r['angle'] for r in rows], kind='stable'):
@@ -354,7 +390,7 @@ class Observations:
             contexts = {}
             for i in indices:
                 fields = context_fields(rows[i])
-                key = (fields['site'], fields['azimuth_deg'])
+                key = (fields['site'], fields['azimuth_deg'], fields.get('time_s'), fields.get('time_source'))
                 contexts.setdefault(key, []).append(i)
             for members in contexts.values():
                 self.groups.append(members)
@@ -365,12 +401,16 @@ class Observations:
                            zip(angles, self.groups, self.contexts) if len(g)>1]
         self.ds, self.ps = [], []
         self.centers, self.centered, self.deviations = [], [], []
-        for a, group in zip(self.angles, self.groups):
+        pole_means = {}
+        for j, (a, group) in enumerate(zip(self.angles, self.groups)):
             d = np.array([rows[i]['delta'] % 360 for i in group])
             p = np.array([rows[i]['psi'] for i in group])
             if policy == 'average' and len(group) > 1:
                 mean, concentration = mean_delta(d)
-                if concentration < 1e-8:
+                pole = np.any((p == 0) | (p == 90))
+                if metric == 'stokes' and pole:
+                    pole_means[j] = stokes(d,p).mean(axis=0)
+                if concentration < 1e-8 and not pole:
                     raise ValueError(f'Kein eindeutiges Δ-Kreismittel bei {a:g}°. Auswahl eingrenzen.')
                 if concentration < 0.95 or np.ptp(p) > 1:
                     self.warnings.append(f'Große Streuung bei {a:g}°: nur dieselbe unveränderte Probe mitteln.')
@@ -391,6 +431,8 @@ class Observations:
         vectors = [stokes(d, p) for d, p in zip(self.ds, self.ps)]
         self.sm = np.array([v.mean(axis=0) for v in vectors])
         self.sv = np.array([np.sum((v - v.mean(axis=0)) ** 2) for v in vectors])
+        for j, vec in pole_means.items():
+            self.sm[j] = vec
 
     def angular_statistics(self, delta):
         """Exact wrapped residual statistics about a numerically stable center."""
@@ -429,6 +471,8 @@ class Cancelled(Exception):
 
 class Objective:
     def __init__(self, request, cancel=None):
+        if request.metric == 'angular' and any(r.psi in (0, 90) for r in request.measurements):
+            raise ValueError('Bei gemessenem Ψ = 0° oder 90° ist Δ unbestimmt. Für diese Messung den Stokes-Abstand wählen.')
         self.req = request
         self.model = request.model.model_dump()
         self.rows = [r.model_dump() for r in request.measurements]
@@ -519,7 +563,11 @@ def phase_grid(obj, col, base, cap):
     else:
         zextra = []
     baseline = np.r_[0, np.linspace(math.log(2) / (obj.b[col]-obj.a[col]), 1, base-1)] if obj.hybrid[col] else np.linspace(0,1,base)
-    grid = np.unique(np.clip(np.r_[baseline, zextra], 0, 1))
+    grid = np.sort(np.clip(np.r_[baseline, zextra], 0, 1))
+    # The phase grid and the search grid can describe the same point after
+    # different floating-point transformations. Such pairs cannot bracket a minimum.
+    grid = grid[np.r_[True, np.diff(grid) > 32 * np.finfo(float).eps]]
+    grid[0], grid[-1] = 0., 1.
     limited = len(grid) > cap or needed > cap
     if len(grid) > cap:
         grid = grid[np.rint(np.linspace(0, len(grid) - 1, cap)).astype(int)]
@@ -531,6 +579,10 @@ def safe_list(values):
     out = a.astype(object)
     out[~np.isfinite(a) | (a >= 1e90)] = None
     return out.tolist()
+
+
+def finite_number(value):
+    return float(value) if np.isfinite(value) else None
 
 
 def unique_candidates(candidates):
@@ -622,7 +674,7 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         progress(3 + 44 * stop / len(points), f'Globales Raster: {stop} / {len(points)}')
     valid = scores[scores < 1e90]
     if not len(valid):
-        raise ValueError('Keine definierten ellipsometrischen Werte im Suchraum. Modell prüfen.')
+        raise ValueError('Keine definierten Werte für die gewählte Zielfunktion. Modell prüfen. Bei einer Polarisationsnullstelle den Stokes-Abstand wählen.')
     scale = max(1, float(abs(valid).max()))
     flat = float(np.ptp(valid)) < 1e-9 * scale
     if flat:
@@ -672,6 +724,9 @@ def solve(request, progress=lambda p, m: None, cancel=None):
     candidates = unique_candidates(candidates)
     if not candidates:
         raise ValueError('Keine endliche Lösung gefunden.')
+    if ndim == 1 and not flat:
+        from .diagnostics import verify_scalar_candidates
+        candidates = verify_scalar_candidates(obj, candidates, grids[0])
     if ndim==2:
         from .diagnostics import verify_candidates
         progress(86,'Minima numerisch bestätigen')
@@ -752,11 +807,22 @@ def comparison(request, values):
     for j, group in enumerate(obs.groups):
         for i in group:
             r = rows[i]
-            residuals.append(r | dict(model_angle=float(obs.angles[j]), fit_delta=float(fd[0, j]), fit_psi=float(fp[0, j]), delta_residual=float(wrap(fd[0, j] - r['delta'])), psi_residual=float(fp[0, j] - r['psi'])))
-        display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=analysis.records[j]['mean_delta'], psi=analysis.records[j]['mean_psi'], source=f'Mittelwert aus {len(group)} Messungen', **obs.contexts[j])]
+            residuals.append(r | dict(model_angle=float(obs.angles[j]), fit_delta=finite_number(fd[0, j]),
+                fit_psi=finite_number(fp[0, j]), delta_residual=finite_number(wrap(fd[0, j] - r['delta'])) if r['psi'] not in (0,90) else None,
+                psi_residual=finite_number(fp[0, j] - r['psi'])))
+        if request.duplicate_policy == 'average':
+            if request.metric == 'stokes' and any(rows[i]['psi'] in (0,90) for i in group):
+                mean_d, mean_p = stokes_direction(obs.sm[j])
+            else:
+                mean_d, mean_p = analysis.records[j]['mean_delta'], analysis.records[j]['mean_psi']
+            display = [dict(delta=mean_d, psi=mean_p, source=f'Mittelwert aus {len(group)} Messungen', **obs.contexts[j])]
+        else:
+            display = [rows[i] for i in group]
         for r in display:
-            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source'],comment=r.get('comment',''),line=r.get('line',0), **context_fields(r)))
+            phase = r['delta'] % 360 if r['delta'] is not None and r['psi'] not in (None,0,90) else None
+            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=phase, psi=r['psi'], source=r['source'],comment=r.get('comment',''),line=r.get('line',0), **context_fields(r)))
     phase_sensitive_angles = sorted({r['model_angle'] for r in residuals
-        if min(r['psi'], 90-r['psi'], r['fit_psi'], 90-r['fit_psi']) <= 1})
+        if r['fit_psi'] is not None and min(r['psi'], 90-r['psi'], r['fit_psi'], 90-r['fit_psi']) <= 1})
     fixed_label = parameter_label(m, request.parameters[1 - col].path) if not multi and len(request.parameters) == 2 else None
-    return dict(phase_warning_angles=phase_sensitive_angles, mode='angle' if multi else 'parameter', xlabel=xlabel, parameter_path=None if multi else request.parameters[col].path, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)
+    from .optical_diagnostics import residual_summary
+    return dict(residual_summary=residual_summary(residuals), phase_warning_angles=phase_sensitive_angles, mode='angle' if multi else 'parameter', xlabel=xlabel, parameter_path=None if multi else request.parameters[col].path, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)

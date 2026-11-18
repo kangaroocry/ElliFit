@@ -1,7 +1,7 @@
 """Choose an additional incidence angle that separates the displayed hypotheses."""
 import numpy as np
 
-from .core import simulate, stokes
+from .core import finite_number, simulate, stokes
 
 
 def family_values(params, family, index):
@@ -21,8 +21,10 @@ def family_values(params, family, index):
 
 
 def next_angle(obj, solutions, maximum_candidates=12):
-    limit = max(.1, solutions[0]['rmse_deg'] + obj.req.equivalence_deg)
-    families = [s for s in solutions if s['rmse_deg'] <= limit + 1e-9]
+    rms = solutions[0]['rmse_deg']
+    limit = max(.1, rms + obj.req.equivalence_deg) if rms is not None else None
+    families = [s for s in solutions if s['equivalent']] if limit is None else [
+        s for s in solutions if s['rmse_deg'] is not None and s['rmse_deg'] <= limit + 1e-9]
     total = sum(s['alias_count'] for s in families)
     if total < 2:
         return None
@@ -58,5 +60,5 @@ def next_angle(obj, solutions, maximum_candidates=12):
     return dict(angle_deg=float(grid[best]), smallest_stokes_distance=float(minimum[best]),
                 informative=bool(minimum[best]>1e-6), candidates_total=total, candidates_used=len(candidates),
                 rms_cutoff_deg=limit, range_deg=[45,80], step_deg=.5,
-                predictions=[dict(family=f, alias=a, values=v, delta=float(delta[i,best]), psi=float(psi[i,best]))
+                predictions=[dict(family=f, alias=a, values=v, delta=finite_number(delta[i,best]), psi=finite_number(psi[i,best]))
                              for i,(f,a,v) in enumerate(candidates)])

@@ -56,10 +56,11 @@ function calibrationDetails(u, params) {
 
 const measurementKinds = {repeat:'Wiederholung',location:'Anderer Ort',azimuth:'Anderer Azimut'};
 function contextKey(r) {
- return JSON.stringify([r.site||'', r.azimuth_deg??null]);
+ return JSON.stringify([r.site||'', r.azimuth_deg??null,r.time_s??null,r.time_s==null?'':r.time_source||r.source||'']);
 }
 function contextLabel(r) {
  const parts = [];
+ if(r.time_s!=null)parts.push('t = '+fmt(r.time_s,6)+' s');
  if (r.site) parts.push('Ort '+r.site);
  if (r.azimuth_deg != null) parts.push('Azimut '+numericText(r.azimuth_deg,'angle')+'°');
  return parts.length ? parts.join(' · ') : measurementKinds[r.measurement_kind||'repeat'];
@@ -126,40 +127,85 @@ function renderResiduals() {
  renderGroupResults();
 }
 
-function visibleMeasurementGroups() {
- const start=residualPage*25, groups=new Map();
- for(const r of state.comparison.residuals.slice(start,start+25))groups.set(contextKey(r),r);
+let stopGroups=false;
+function visibleMeasurementGroups(all=false) {
+ const start=residualPage*25, groups=new Map(), mode=$('batchGrouping').value;
+ const rows=state.comparison.residuals;
+ for(const r of (all?rows:rows.slice(start,start+25)))groups.set(mode+':'+(mode==='source'?r.source:contextKey(r)),r);
  return groups;
+}
+function exportGroupResults() {
+ const params=state.result.parameters;
+ const columns=params.flatMap(p=>[p.label,'Periode '+p.symbol+' (nm)']);
+ const rows=[['Gruppe','Quelle','Zeit_s','Messort','Azimut_Grad','Familie',...columns,'Anzahl_gleichwertig','Winkel_RMS_Grad','Kriterium','Bestimmbarkeit','Suchgrenze','Fehler']];
+ for(const [key,g] of groupResults){
+  if(!key.startsWith($('batchGrouping').value+':'))continue;
+  if(g.error){
+   rows.push([g.group_by,g.source,g.time_s,g.site,g.azimuth_deg,'',...Array(columns.length).fill(''),'','','','','',g.error]);
+   continue;
+  }
+  for(const f of g.families){
+   const values=params.flatMap((p,i)=>[f.first_values[i],f.periods.find(t=>t.path===p.path)?.period_nm]);
+   const diagnosis=[g.saturated?'Keine unabhängigen Freiheitsgrade':'',f.weak?'Schwach bestimmbar':'',f.coupled?'Stark gekoppelt':''].filter(Boolean).join(' · ');
+   rows.push([g.group_by,g.source,g.time_s,g.site,g.azimuth_deg,f.rank,...values,f.alias_count,f.rmse_deg,g.criterion,diagnosis,f.at_boundary?'ja':'','']);
+  }
+ }
+ download('ElliFit_Gruppenfits.csv',csv(rows),'text/csv;charset=utf-8');
 }
 function renderGroupResults() {
  const rows=state.comparison.residuals, panel=$('groupFitPanel');
- panel.hidden=state.result.parameters.length!==1||!rows.some(r=>contextKey(r)!==contextKey(rows[0]));
+ panel.hidden=!rows.some(r=>contextKey(r)!==contextKey(rows[0])||r.source!==rows[0].source);
  if(panel.hidden)return;
- const groups=visibleMeasurementGroups(), p=state.result.parameters[0], current=[...groups.keys()].map(k=>groupResults.get(k)).filter(Boolean);
- $('groupFitButton').disabled=groupBusy===state.resultJob||current.length===groups.size;
- $('groupFitStatus').textContent=groupBusy===state.resultJob?'Einzelfits laufen …':int(current.length)+' von '+int(groups.size)+' gezeigten Gruppen berechnet · ungewichteter Winkel-RMS über die Einzelmessungen';
+ const groups=visibleMeasurementGroups(), available=visibleMeasurementGroups(true), running=groupBusy===state.resultJob;
+ const recorded=[...available.keys()].map(k=>groupResults.get(k)).filter(Boolean);
+ const failed=recorded.filter(g=>g.error).length, done=recorded.length-failed;
+ $('batchStop').hidden=!running;$('batchGrouping').disabled=running;$('batchExport').disabled=!recorded.length;
+ $('batchAll').disabled=running||available.size<2||done===available.size;
+ const params=state.result.parameters, current=[...groups.keys()].map(k=>groupResults.get(k)).filter(Boolean);
+ $('groupFitButton').disabled=running||available.size<2||current.filter(g=>!g.error).length===groups.size;
+ $('groupFitStatus').textContent=(running?'Einzelfits laufen · ':'')+int(done)+' von '+int(available.size)+' Gruppen berechnet'+(failed?' · '+int(failed)+' fehlgeschlagen, erneuter Start versucht diese Gruppen nochmals':'');
+ $('groupFitModeNote').textContent=$('batchGrouping').value==='source'?'Jede Quelldatei wird mit Modell, Suchgrenzen und Fitkriterium des angezeigten Fits ausgewertet.':'Je Messkontext werden Winkel- oder Stokes-Residuen aus den ungewichteten Einzelmessungen separat gefittet.';
  if(!current.length){$('groupFitTable').replaceChildren();return;}
- $('groupFitTable').innerHTML='<table><thead><tr><th>Messgruppe</th><th>'+parameterHeading(p)+'</th><th>Winkel-RMS (°)</th></tr></thead><tbody>'+
-  current.map(g=>'<tr><td>'+esc(contextLabel(g))+'<small>'+int(g.count)+' Messungen · '+int(g.angle_count)+' Winkel</small></td><td>'+
-    g.families.map(f=>{
-      const value=quantityValue(f.first_values[0],p), t=f.periods[0];
-      const label=t&&f.alias_count>1?'('+value+' + m · '+fmt(t.period_nm,8)+') nm, m = 0 … '+int(f.alias_count-1):value+(p.path.endsWith('thickness_nm')?' nm':'');
-      return '<span class="group-fit-value">'+label+'<small>'+ (f.weak?'schwach bestimmbar · ':'')+(f.at_boundary?'Grenzwert · ':'')+'RMS '+rmsText(f.rmse_deg)+'°</small></span>';
-    }).join('')+'<small>'+int(g.good_values)+' Werte mit RMS ≤ '+rmsText(g.cutoff)+'°</small></td><td>'+rmsText(g.best_rms)+'</td></tr>').join('')+'</tbody></table>';
+ const rowsHtml=[];
+ for(const g of current){
+  const name=g.group_by==='source'?g.source:contextLabel(g);
+  if(g.error){
+   rowsHtml.push('<tr><td>'+esc(name)+'</td><td colspan="'+(params.length+3)+'">Fit fehlgeschlagen · '+esc(g.error)+'</td></tr>');
+   continue;
+  }
+  for(const [index,f] of g.families.entries()){
+   const cells=params.map((p,i)=>{
+    const v=quantityValue(f.first_values[i],p), t=f.periods.find(item=>item.path===p.path);
+    const m=f.periods.length>1?['m₁','m₂'][i]:'m';
+    const value=t&&f.alias_count>1?'('+v+' + '+m+' · '+fmt(t.period_nm,6)+') nm':v+(p.path.endsWith('thickness_nm')?' nm':'');
+    return '<td>'+value+'</td>';
+   });
+   const notes=[f.alias_count>1?int(f.alias_count)+' gleichwertige Werte im Suchbereich':'',g.saturated?'Keine unabhängigen Freiheitsgrade':'',f.weak?'Schwach bestimmbar':'',f.coupled?'Stark gekoppelt':'',f.at_boundary?'Suchgrenze':''].filter(Boolean);
+   rowsHtml.push('<tr>'+(index===0?'<td rowspan="'+g.families.length+'">'+esc(name)+'<small>'+int(g.count)+' Messungen · '+int(g.angle_count)+' Winkel</small><small>'+esc(g.criterion)+'</small></td>':'')+
+    '<td>'+int(f.rank)+'</td>'+cells.join('')+'<td>'+rmsText(f.rmse_deg)+'</td><td>'+notes.join(' · ')+'</td></tr>');
+  }
+ }
+ $('groupFitTable').innerHTML='<table><thead><tr><th>Messgruppe</th><th>Familie</th>'+params.map(p=>'<th>'+parameterHeading(p)+'</th>').join('')+'<th>Winkel-RMS (°)</th><th>Hinweise</th></tr></thead><tbody>'+rowsHtml.join('')+'</tbody></table>';
+
 }
-async function fitVisibleGroups() {
+async function fitVisibleGroups(all=false) {
  const job=state.resultJob;
  if(groupBusy===job)return;
- const groups=visibleMeasurementGroups();
- groupBusy=job;renderGroupResults();
+ const groups=visibleMeasurementGroups(all),mode=$('batchGrouping').value;
+ stopGroups=false;groupBusy=job;renderGroupResults();
  try{
   for(const [key,r] of groups){
-   if(state.resultJob!==job||state.busy)break;
-   if(!groupResults.has(key)){
-    const result=await api('/api/jobs/'+job+'/group-fit',{method:'POST',body:{row_id:r.id}});
-    if(state.resultJob!==job)break;
-    groupResults.set(key,result);
+   if(stopGroups||state.resultJob!==job||state.busy)break;
+   if(groupResults.has(key)&&!groupResults.get(key).error)continue;
+   let result;
+   try{
+    result=await api('/api/jobs/'+job+'/group-fit',{method:'POST',body:{row_id:r.id,group_by:mode}});
+   }catch(e){
+    result={source:r.source,group_by:mode,error:e.message,...(mode==='context'?{site:r.site,azimuth_deg:r.azimuth_deg,time_s:r.time_s}:{})};
    }
+   if(state.resultJob!==job)break;
+   groupResults.set(key,result);
+   $('groupFitStatus').textContent=int([...groups.keys()].filter(k=>groupResults.has(k)).length)+' von '+int(groups.size)+' Gruppen bearbeitet …';
   }
  }catch(e){toast(e.message,'warning');}finally{if(groupBusy===job)groupBusy=null;if(state.resultJob===job)renderGroupResults();}
 }
@@ -170,7 +216,7 @@ function renderAngleSuggestion() {
  if (!d) return;
  const angle=fmt(d.angle_deg,4)+'°', params=state.result.parameters;
  const msg=d.informative?'Zusätzlicher Messwinkel · '+angle:'Ein zusätzlicher Winkel trennt im geprüften Bereich nicht alle Kandidaten';
- box.innerHTML='<strong>'+msg+'</strong><details><summary>Modellvorhersagen und Auswahl des Winkels</summary><p>Verglichen wurden '+int(d.candidates_used)+' von '+int(d.candidates_total)+' Kandidaten mit Winkel-RMS ≤ '+rmsText(d.rms_cutoff_deg)+'° bei 45° bis 80° in Schritten von 0,5°. Bei '+angle+' ist der kleinste Abstand ihrer normierten Stokes-Vektoren am größten ('+fmt(d.smallest_stokes_distance,3)+'). Die experimentelle Auflösung und die erreichbaren Gerätewinkel sind zusätzlich zu berücksichtigen.</p><div class="scroll"><table><thead><tr><th>Familie / Lösung</th>'+
+ box.innerHTML='<strong>'+msg+'</strong><details><summary>Modellvorhersagen und Auswahl des Winkels</summary><p>Verglichen wurden '+int(d.candidates_used)+' von '+int(d.candidates_total)+(d.rms_cutoff_deg==null?' nach dem Fitkriterium gleichwertige Kandidaten':' Kandidaten mit Winkel-RMS ≤ '+rmsText(d.rms_cutoff_deg)+'°')+' bei 45° bis 80° in Schritten von 0,5°. Bei '+angle+' ist der kleinste Abstand ihrer normierten Stokes-Vektoren am größten ('+fmt(d.smallest_stokes_distance,3)+'). Die experimentelle Auflösung und die erreichbaren Gerätewinkel sind zusätzlich zu berücksichtigen.</p><div class="scroll"><table><thead><tr><th>Familie / Lösung</th>'+
   params.map(p=>'<th>'+parameterHeading(p)+'</th>').join('')+'<th class="red">Δ (°)</th><th class="blue">Ψ (°)</th></tr></thead><tbody>'+
   d.predictions.map(p=>'<tr><td>'+int(p.family)+' / '+int(p.alias)+'</td>'+p.values.map((v,i)=>'<td>'+quantityValue(v,params[i])+'</td>').join('')+'<td class="red">'+fixedNumber(p.delta,3)+'</td><td class="blue">'+fixedNumber(p.psi,3)+'</td></tr>').join('')+'</tbody></table></div></details>';
 }
@@ -178,7 +224,8 @@ function renderAngleSuggestion() {
 function bindMeasurements() {
  $('contextEditor').addEventListener('toggle',()=>{if(!$('contextEditor').open){state.editContextId=null;updateContextTarget();}});
  $('applyContext').onclick=assignContext;
- $('groupFitButton').onclick=fitVisibleGroups;
+ $('groupFitButton').onclick=()=>fitVisibleGroups();$('batchAll').onclick=()=>fitVisibleGroups(true);
+ $('batchGrouping').onchange=renderGroupResults;$('batchStop').onclick=()=>{stopGroups=true;};$('batchExport').onclick=exportGroupResults;
  $('cancelContext').onclick=()=>{state.editContextId=null;updateContextTarget();};
  $('residualPrev').onclick=()=>{if(residualPage>0)residualPage--;renderResiduals();};
  $('residualNext').onclick=()=>{residualPage++;renderResiduals();};

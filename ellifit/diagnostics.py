@@ -10,6 +10,24 @@ from scipy.stats import f as f_distribution
 from .core import period, put, safe_list, simulate, wrap
 
 
+def verify_scalar_candidates(obj, candidates, grid):
+    """Check both feasible sides of every reported 1D optimum on the actual objective."""
+    accepted = []
+    for z, score in candidates:
+        x = float(z[0])
+        j = min(max(int(np.searchsorted(grid, x)), 1), len(grid)-1)
+        radius = min(1e-4, (grid[j] - grid[j-1]) / 4)
+        neighbors = np.unique(np.clip(x + radius * np.array([-1, -.1, .1, 1]), 0., 1.))
+        tolerance = 128 * np.finfo(float).eps * max(1., abs(score))
+        if np.all(obj.batch(neighbors[:, None]) >= score - tolerance):
+            accepted.append((z, score))
+    obj.minimum_checks = dict(checked=len(candidates), rejected=len(candidates)-len(accepted),
+        repaired=0, method='Beidseitiger Vergleich der Zielfunktion in zwei Schrittweiten, am Rand einseitig')
+    if not accepted:
+        raise ValueError('Kein lokales Minimum bestätigt. Suchbereich oder Suchdichte prüfen.')
+    return accepted
+
+
 def check_minimum(obj, z):
     """Check feasible stationarity and nearby descent in normalized coordinates."""
     z = np.asarray(z, float)
@@ -76,6 +94,9 @@ def mean_deviation(obj, values):
     d,p = simulate(obj.model,obj.analysis.angles,np.asarray(values)[None,:],obj.paths)
     targets = obj.analysis.records
     residual = np.column_stack((wrap(d[0]-[r['mean_delta'] for r in targets]),p[0]-[r['mean_psi'] for r in targets]))
+    for i, ps in enumerate(obj.analysis.raw.ps):
+        if np.any((ps == 0) | (ps == 90)):
+            residual[i, 0] = np.nan
     rms = float(np.sqrt(np.mean(residual**2))) if np.isfinite(residual).all() else None
     statistic = None
     if rms is not None and len(targets)==1 and obj.analysis.active:
@@ -124,7 +145,7 @@ def fit_diagnostics(obj, solutions, grids, progress=None):
     floor=float(np.sqrt(sum(np.sum(wrap(d-r['mean_delta'])**2)+np.sum((p-r['mean_psi'])**2)
         for d,p,r in zip(obj.analysis.raw.ds,obj.analysis.raw.ps,obj.analysis.records))/(2*obj.analysis.raw.count)))
     out=dict(unique_angles=angles, independent_mean_components=2*angles, free_parameters=parameters,
-        lack_of_fit_dof=2*angles-parameters, saturated=2*angles==parameters, repeated_rms_floor_deg=floor,
+        lack_of_fit_dof=2*angles-parameters, saturated=2*angles==parameters, repeated_rms_floor_deg=None if obj.analysis.measured_pole else floor,
         mean_match_tolerance_deg=1e-6, profile=None, phase_relation=None,
         note='Wiederholungen verbessern Mittelwerte und Streuungsschätzung, liefern aber keine weitere Messgeometrie.')
     for solution in solutions:

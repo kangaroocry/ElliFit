@@ -49,7 +49,7 @@ function renderBranchControl(){
 }
 function renderFitCautions(){
  const box=$('fitCautions'),r=state.result;if(!r){box.hidden=true;return;}
- const items=[],d=r.identifiability||{},periodic=r.solutions.filter(s=>s.periodic),good=r.solutions.filter(s=>s.rmse_deg<=.1),relevant=[r.solutions[0],r.solutions[state.active],...good],coupled=relevant.some(s=>s.uncertainty?.strongly_correlated||s.uncertainty?.weak);
+ const items=[],d=r.identifiability||{},periodic=r.solutions.filter(s=>s.periodic),good=r.solutions.filter(s=>s.rmse_deg!=null&&s.rmse_deg<=.1),relevant=[r.solutions[0],r.solutions[state.active],...good],coupled=relevant.some(s=>s.uncertainty?.strongly_correlated||s.uncertainty?.weak);
  const flag=(title,text,critical=false,info=false)=>items.push({title,text,critical,info});
  if(periodic.length)flag('Periodische Mehrdeutigkeit',`${int(periodic.reduce((n,s)=>n+s.alias_count,0))} periodische Parameterkombinationen in ${int(periodic.length)} Familien. Innerhalb einer Familie gleichwertig: die erste Wiederholung ist nicht bevorzugt. Weitere periodische Lösungen können außerhalb des Suchbereichs liegen. Zusätzliche Winkel oder unabhängige Dickeninformation nötig.`);
  if(r.solutions[0].rmse_deg>1)flag('Fit relativ schlecht – Winkel-RMS über 1°',`Winkel-RMS des besten Fits: ${rmsText(r.solutions[0].rmse_deg)}°. Die Winkelabweichung überschreitet den Warnwert von 1°. Modell, Messauswahl und Suchgrenzen prüfen, bevor Parameter übernommen werden.`,r.solutions[0].rmse_deg>=10);
@@ -58,7 +58,7 @@ function renderFitCautions(){
   !activeTrial()&&r.solutions[state.active].mean_fit?.numerical_match?'Δ und Ψ getroffen · kein Freiheitsgrad zur Modellprüfung':'Kein verbleibender Freiheitsgrad zur Modellprüfung',
   'Ein Einfallswinkel liefert höchstens zwei unabhängige Winkelgrößen für zwei freie Parameter. Für eine unabhängige Modellprüfung einen weiteren Einfallswinkel messen.',true);
  if(coupled)flag('Parameter stark gekoppelt','Viele Wertepaare können sehr ähnlich passen. Einzelne Dicken oder Indizes nicht isoliert abschreiben; gewählten Talast und zusätzliche Messwinkel prüfen.',relevant.some(s=>s.uncertainty?.weak));
- const branch=selectedProfileBranch(),points=(branch?.points||[]).filter(p=>p.rmse_deg<=.1);
+ const branch=selectedProfileBranch(),points=(branch?.points||[]).filter(p=>p.rmse_deg!=null&&p.rmse_deg<=.1);
  if(points.length>4&&r.parameters.length===2)flag('Tal mit vielen gut passenden Wertepaaren',r.parameters.map((p,i)=>`${parameterSymbol(p)}: ${quantityValue(Math.min(...points.map(q=>q.values[i])),p)} bis ${quantityValue(Math.max(...points.map(q=>q.values[i])),p)}${p.path.endsWith('thickness_nm')?' nm':''}`).join(' · ')+'. Spanne entlang des gewählten Talasts, keine Konfidenzgrenze.');
  for(const axis of r.solutions[0].boundary_axes||[]){
   if(axis.physical_zero){
@@ -70,9 +70,18 @@ function renderFitCautions(){
  const unc=activeTrial()?null:state.comparison?.uncertainty||r.solutions[state.active].uncertainty;
  for(const warning of unc?.calibration_warnings||[])flag('Kombinierte Unsicherheit offen',warning,true);
  const phase=state.comparison?.phase_warning_angles||[];
- if(phase.length)flag('Δ hier kaum bestimmbar','Bei '+phase.slice(0,5).map(a=>numericText(a,'angle')+'°').join(', ')+(phase.length>5?' und weiteren Winkeln':'')+' liegt das gemessene oder berechnete Ψ innerhalb von 1° bei 0° oder 90°. Kleine Polarisationsänderungen können große Δ-Sprünge ergeben. In den Suchoptionen steht die Stokes-Abweichung zum Vergleich bereit.');
- box.hidden=!items.length;if(!items.length)return;const infoOnly=items.every(x=>x.info);box.dataset.kind=infoOnly?'info':items.some(x=>x.critical)?'critical':'warning';
- box.innerHTML=`<div class="caution-heading"><strong>${infoOnly?'Physikalische Grenze':'Fitergebnis prüfen – keinen Einzelwert ungeprüft übernehmen'}</strong><span>${state.resultStale?'Zum früheren Fit':'Zum angezeigten Fit'}</span></div><div class="caution-grid">${items.map(x=>`<article data-kind="${x.info?'info':x.critical?'critical':'warning'}"><b>${esc(x.title)}</b><p>${esc(x.text)}</p></article>`).join('')}</div><p class="caption">Winkel-RMS ≤ 0,1° kennzeichnet hier sehr kleine Winkelabweichungen; die Warnung „Fit relativ schlecht“ erscheint bei Winkel-RMS > 1°. Beide Werte sind Orientierungen, keine statistischen Nachweise. Die Hinweise gehören zum oben datierten Fit.</p>`;
+ if(phase.length){
+  const summary=state.comparison.residual_summary||{};
+  const breakdown=summary.delta_rms==null?'Der Winkel-RMS ist unbestimmt.':('Residuen-RMS Δ '+angleValue(summary.delta_rms)+'°, Ψ '+angleValue(summary.psi_rms)+'°. ');
+  const dominant=summary.delta_rms>1&&summary.delta_rms>3*summary.psi_rms&&summary.stokes_chord_rms<.05;
+  flag(dominant?'Δ dominiert die Winkelabweichung':'Δ nahe der Polarisationsnullstelle',
+   'Bei '+phase.slice(0,5).map(a=>numericText(a,'angle')+'°').join(', ')+' liegt Ψ höchstens 1° von 0° oder 90° entfernt. '+breakdown+' Stokes-Sehnenabstand '+fmt(summary.stokes_chord_rms,4)+' (0–2).');
+ }
+ box.hidden=!items.length;if(!items.length)return;
+ const infoOnly=items.every(x=>x.info);box.dataset.kind=infoOnly?'info':items.some(x=>x.critical)?'critical':'warning';
+ box.innerHTML='<div class="caution-heading"><strong>'+(infoOnly?'Physikalische Grenze':'Vor der Übernahme prüfen')+'</strong><span>'+(state.resultStale?'Zum früheren Fit':'Zum angezeigten Fit')+'</span></div><div class="caution-grid">'+
+   items.map(x=>'<article data-kind="'+(x.info?'info':x.critical?'critical':'warning')+'"><details'+(x.critical?' open':'')+'><summary>'+esc(x.title)+'</summary><p>'+esc(x.text)+'</p></details></article>').join('')+'</div>';
+
 }
 function periodicFamilyEquations(solution){
  const params=state.result.parameters,base=solution.aliases[0].values,variables=[],equations=[];
@@ -138,7 +147,7 @@ async function refineViewport(manual=true){
   const scales=bounds.map((_,i)=>(i?state.view.logY:state.view.logX)?'log':'linear');
   const data=await api(`/api/jobs/${job}/view`,{method:'POST',body:{bounds,scales,size:state.result.parameters.length===1?241:161},signal:viewportController.signal});
   if(ticket!==viewportTicket||signature!==viewSignature()||job!==state.resultJob)return;
-  state.refinedSurface={...data,job};await errorPlot();$('viewportStatus').textContent=`${int(data.evaluations)} Modellpunkte im Ausschnitt nachgerechnet. Lösungsliste unverändert; für neue Minima „Im Ausschnitt neu suchen“.`;
+  state.refinedSurface={...data,job};refreshLines();await errorPlot();$('viewportStatus').textContent=`${int(data.evaluations)} Modellpunkte im Ausschnitt nachgerechnet. Lösungsliste unverändert; für neue Minima „Im Ausschnitt neu suchen“.`;
  }catch(e){if(e.name==='AbortError')return;$('viewportStatus').textContent=e.message;if(manual)toast(e.message,'warning');}
 }
 async function searchViewport(){

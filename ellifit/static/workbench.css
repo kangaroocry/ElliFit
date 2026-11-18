@@ -1,0 +1,133 @@
+/* Preparation and evaluation share the same navigation and reading order. */
+:root { --ink:#18373d; --ink-muted:#445f64; --rule:#cedbd9; --action:#076569; }
+body { color:var(--ink); background:#f4f7f6; font-family:Inter,"Segoe UI",Arial,sans-serif; font-size:15px; }
+body [hidden] { display:none !important; }
+body > header { display:flex; align-items:center; gap:24px; flex-wrap:wrap; padding:10px clamp(12px,3vw,48px); min-height:62px; background:white; color:var(--ink); border-bottom:1px solid var(--rule); }
+header .brand {color:var(--ink);gap:8px}
+header .brand b {color:white;background:var(--action);border:0}
+header .brand span {color:var(--ink-muted)}
+header .work-tabs, header .head-actions {display:flex;align-items:center;gap:6px}
+header .head-actions {margin-left:auto}
+header button,header .session-menu summary {color:var(--ink);background:white;border:1px solid var(--rule);font-size:14px}
+header button:hover,header .session-menu summary:hover {color:var(--action);background:#edf5f4}
+header .work-tabs button {border:0;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;font-size:15px}
+header .work-tabs button[aria-current="page"] {color:var(--action);border-bottom-color:var(--action);background:#edf5f4}
+header button:disabled {opacity:.47}
+#runFit,#importData {background:var(--action);color:white}
+.session-menu {position:relative}
+.session-menu summary {border-radius:5px;padding:7px 11px;cursor:pointer}
+.session-menu[open] > button {position:absolute;right:0;z-index:12;width:155px;box-shadow:0 2px 5px #213c3920}
+.session-menu[open] > #openSession {top:100%}.session-menu[open] > #saveSession {top:calc(100% + 36px)}
+body .workspace {display:block;max-width:1920px;margin:auto;padding:0 clamp(12px,2.6vw,42px) 26px}
+#inputDetails, body #evaluation {background:transparent;border:0;margin:0;padding:20px 0}
+.workspace h1 {font-size:clamp(23px,2vw,31px);font-weight:650;line-height:1.18;letter-spacing:-.025em}
+.workspace h2 {font-size:20px;line-height:1.2;letter-spacing:-.015em}
+.workspace h3 {font-size:16px}
+body button,body input,body select,body summary,.workspace label,.workspace th,.workspace td {font-size:14px}
+.workspace small,.workspace .caption,.workspace .metric,.workspace .provenance {font-size:13px;color:var(--ink-muted);line-height:1.45}
+.prep-bar,.finding {display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.prep-bar p,.finding p {margin:5px 0 0;color:var(--ink-muted);font-size:15px}
+.recipe-tools label,.finding-label {font-weight:600;color:var(--ink-muted);font-size:13px}
+.recipe-tools>div,.finding-actions {display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.recipe-tools select {width:auto;max-width:min(380px,82vw)}
+body .workspace #inputDetails .setup-inputs {display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;align-items:start;padding:0!important;background:transparent;gap:14px}
+body #inputDetails .setup-inputs > .data-panel, body #inputDetails .setup-inputs > #modelFields {display:block;margin:0;padding:clamp(12px,1.4vw,22px);min-width:0;border:1px solid var(--rule);border-radius:8px;background:white}
+.workspace .panel {border:1px solid var(--rule);border-radius:8px;box-shadow:none}
+.workspace .heading {gap:8px;flex-wrap:wrap}
+#modelQuickName {display:block;font-size:15px;font-weight:650;margin:8px 0}
+.model-section > #modelList {margin-top:8px}
+#inputDetails .layer-box {padding:0;margin:0;border:0;border-radius:0}
+#inputDetails .layer-box>summary {display:grid;grid-template-columns:1.4em minmax(80px,1fr) auto;align-items:center;gap:5px;cursor:pointer;list-style:none;padding:7px 4px;color:var(--ink);background:#f2f6f5;border:0;line-height:1.4}
+#inputDetails .layer-box>summary::before {content:'▸';color:var(--ink-muted)}
+#inputDetails .layer-box[open]>summary::before {content:'▾'}
+.layer-box .layer-summary-name {font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.layer-summary-values {color:var(--ink-muted);text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+.layer-summary-values b {color:var(--action)}
+#inputDetails .layer-box .layer-editor-row {display:block}
+#inputDetails .layer-box .layer-number {display:none!important}
+#inputDetails .layer-box .layer-item {padding:8px 6px;border-radius:0;border-top:0;box-shadow:none}
+#inputDetails .setup-inputs #modelFields .layer-row {grid-template-columns:minmax(95px,1.3fr) repeat(3,minmax(59px,.7fr)) auto;gap:4px}
+.minor-details {padding:6px 0;margin:5px 0;border:0;border-top:1px solid var(--rule);border-radius:0;background:transparent}
+.minor-details>summary, #analysisDetails>summary, #residualDetails>summary {font-size:14px;font-weight:550;color:var(--ink-muted);padding:5px 0;cursor:pointer}
+#inputDetails .filters {grid-template-columns:minmax(90px,1fr) minmax(110px,.4fr)}
+#dataFields.empty-data .filters,#dataFields.empty-data .selection,#dataFields.empty-data .measurement-scroll,#dataFields.empty-data .pagination,#dataFields.empty-data .row-jump,#dataFields.empty-data .data-footer,#dataFields.empty-data .minor-details {display:none}
+.empty-data #dropZone {padding:24px 10px}
+#dataFields .measurement-scroll {max-height:380px}
+.workspace .measurement-scroll table {font-variant-numeric:tabular-nums}
+.workspace .measurement-scroll td, .workspace .measurement-scroll th, .workspace #resultTable td, .workspace #resultTable th {font-size:14px}
+.workspace .measurement-scroll td.source {text-align:left}
+#resultScope {margin:0 0 10px;padding:6px 10px;background:white}
+#resultScope[data-state="stale"] {background:#fff4da}
+#resultScope .result-scope-heading {margin:0}
+#resultScopeDetail {margin:2px 0;font-size:13px}
+.finding {background:white;border-left:5px solid var(--action);border-radius:4px;padding:14px 17px}
+.finding[data-tone="warn"] {border-left-color:#aa6200}.finding[data-tone="critical"] {border-left-color:#ba3b33}
+.finding h1 {margin:4px 0}
+body .workspace #evaluation .stats {display:flex;align-items:start;gap:14px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--rule);box-shadow:none}
+body #evaluation .stats>div {flex:1 1 140px;border:0;padding:0}.stats .stat-dataset {flex:2 1 230px!important}
+body #evaluation .stats>div>strong {font-size:17px}body #evaluation .stats>div>span {font-size:13px}
+#evaluation .result-workbench {display:grid;grid-template-columns:minmax(230px,.78fr) repeat(2,minmax(0,1fr));gap:12px}
+#evaluation .result-workbench>.panel {min-width:0;padding:clamp(10px,1.2vw,18px)}
+#evaluation .result-workbench[data-expanded="error"] {grid-template-columns:minmax(215px,.45fr) minmax(0,1.55fr)}
+#evaluation .result-workbench[data-expanded="comparison"] {grid-template-columns:minmax(215px,.45fr) minmax(0,1.55fr)}
+.result-workbench[data-expanded="error"] #comparisonCard,.result-workbench[data-expanded="comparison"] #errorCard {display:none}
+#evaluation .expand-plot {font-size:13px}
+#evaluation .plot-settings .viewport-controls {margin-top:6px}
+#evaluation .fit-cautions {padding:8px 12px;margin:8px 0}
+#analysisDetails .analysis-body {min-width:0}
+#opticsContent, #fitComparison {overflow-x:auto}
+#opticsContent table,#fitComparison table {width:100%;border-collapse:collapse}
+#opticsContent td,#fitComparison td,#fitComparison th {padding:5px 8px;vertical-align:top}
+#columnPreview {white-space:pre-wrap;overflow-wrap:anywhere;background:#edf3f2;color:var(--ink);padding:8px}
+#columnDialog {max-width:min(580px,94vw)}
+#columnError {color:#96382e}
+#recipeName {width:100%}
+@media(max-width:1090px){
+ #evaluation .result-workbench {grid-template-columns:minmax(215px,.68fr) minmax(0,1.3fr)}
+ #evaluation .result-workbench:not([data-expanded]) #comparisonCard {grid-column:2}
+ #evaluation .result-workbench:not([data-expanded]) .results-panel {grid-column:1;grid-row:1 / span 2}
+}
+@media(max-width:980px){
+ body .workspace #inputDetails .setup-inputs {grid-template-columns:minmax(0,1fr)!important}
+}
+@media(max-width:700px){
+ body>header {gap:5px 10px;padding:7px 10px}
+ header .head-actions {margin-left:auto}
+ header .work-tabs {order:2;flex-basis:100%}
+ .recipe-tools {width:100%}
+ .recipe-tools>div {flex-wrap:nowrap}.recipe-tools select {min-width:0;width:100%}
+ #evaluation .result-workbench,#evaluation .result-workbench[data-expanded] {display:flex;flex-direction:column}
+ #inputDetails .setup-inputs #modelFields .layer-row {grid-template-columns:repeat(3,minmax(0,1fr))}
+ .layer-summary-values {max-width:140px}
+ .workspace #evaluation .stats>div {flex-basis:90px}
+}
+@media print {
+ @page {margin:15mm}
+ body>*:not(#printReport) {display:none!important}
+ body #printReport[hidden],body #printReport {display:block!important;color:#172b2f;font:11pt/1.4 Arial,sans-serif;background:white}
+ #printReport h1 {font-size:21pt} #printReport h2 {font-size:13pt;margin-top:15px}
+ #printReport table {border-collapse:collapse;width:100%} #printReport td,#printReport th {text-align:left;padding:4px;border-bottom:1px solid #bbb}
+}
+.finding #resultScope {flex-basis:100%;margin:0;border:0;border-top:1px solid var(--rule);padding:6px 0 0;border-radius:0;background:transparent}
+.finding #resultScopeDetail {display:none}
+.finding #stale {margin:3px 0}.finding #resultScope[data-state="stale"] {color:#804b08}
+#modelQuickName {margin-bottom:0}
+#modelFileState {margin:3px 0 8px;padding:0}
+#modelFields .layer-summary-values .summary-range {white-space:nowrap;color:var(--ink-muted)}
+body #statTime {font-size:15px}
+#datasetContext > strong,#datasetContext > small,#datasetContext > details {display:block}
+#datasetContext > details {margin:0}
+
+.chart-switch {display:none}
+#groupFitTable {overflow-x:auto}
+#evaluation .caution-grid article details {background:transparent;border:0;margin:0;padding:0}
+#evaluation .caution-grid article summary {color:var(--ink);font-weight:550}
+@media(max-width:1090px) {
+ #evaluation .result-workbench .chart-switch {display:flex;gap:5px;grid-column:2;grid-row:1;align-self:start}
+ #evaluation .chart-switch button[aria-pressed="true"] {background:#e4f1ef;border-color:var(--action);color:var(--action)}
+ #evaluation .result-workbench .expand-plot {display:none}
+ #evaluation .result-workbench>.plot-panel {grid-column:2;grid-row:2}
+ #evaluation .result-workbench .results-panel {grid-column:1;grid-row:1 / span 2}
+ #evaluation .result-workbench[data-chart="error"] #errorCard,#evaluation .result-workbench[data-chart="comparison"] #comparisonCard {display:block}
+ #evaluation .result-workbench[data-chart="error"] #comparisonCard,#evaluation .result-workbench[data-chart="comparison"] #errorCard {display:none}
+}

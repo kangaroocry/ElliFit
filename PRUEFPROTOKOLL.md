@@ -1,6 +1,16 @@
-# Prüfprotokoll – ElliFit 1.5.0
+# Prüfprotokoll – ElliFit 1.6.0
 
 Stand: 18. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+
+## Prüfung von 1.6.0
+
+**107 automatisierte Tests bestanden** unter Python 3.12. Der Importtest lief mit den bereitgestellten Originaldateien. Die Testumgebung meldete zwei Veraltungshinweise von pytest-Erweiterung und TestClient. Die Windows-Startdatei ist dieselbe wie in 1.5.0. Die Ausführung auf einem Windows-Rechner steht aus.
+
+- Im synthetischen Dreipunkttest bei 66°, 70° und 74° lieferte 1.5.0 zusätzliche Kandidaten bei 104, 128 und 136 nm auf den Flanken. Bei allen drei Suchdichten meldet 1.6.0 im Intervall 80–160 nm dasselbe einzige Minimum bei 118,005 nm mit Winkel-RMS 0,022716°.
+- Die Δ- und Ψ-Messlinien wurden am vorhergesagten Winkel des Modells gegengeprüft. Die mitoptimierte Profilkurve liegt an allen geprüften Stellen auf oder unter dem Schnitt bei festem Partner. Die optische 1-nm-Empfindlichkeit stimmt mit der direkten Differenz der Modellvorhersagen überein.
+- Am analytischen Brewsterwinkel für Glas mit n = 1,5 liefert die Optik Ψ = 0° und unbestimmtes Δ. Stokes-Fit, optischer Winkelscan, Mittelung gemischter Messungen und 3D-Netz der Stokes-Zielfunktion wurden am Pol geprüft. Die JSON-Ausgaben enthalten gültige Nullwerte für undefinierte Größen.
+- Geprüft wurden zudem Zeitspalten, Einheiten, CSV-Rundlauf, gespeicherte Vorlagen, unabhängige Fits je Quelldatei mit zwei Parametern und die Grenzen einer Mittelung über Zeiten oder Probenorientierungen.
+- Im lokalen Chromium wurden Vorbereitung, Auswertung, Modell- und Fitvergleich, reale Dateiimporte, beide Messlinien, Parameterprofil, Serienexport und ein gedrucktes PDF über die Bedienoberfläche geprüft. Die Referenz ergab bei 70° vier gleichwertige Dicken im Suchbereich von 0,1 bis 1 000 nm und über neun Winkel d = 118,0 nm. Das Layout wurde bei 1 366 und 390 px geprüft. Im gesamten Ablauf traten keine JavaScript-Laufzeitfehler auf. [Einzelne Browserprüfungen](Pruefdaten_Browser.json)
 
 ## Prüfung von 1.5.0
 

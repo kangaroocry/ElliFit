@@ -7,7 +7,7 @@ import time
 import numpy as np
 from scipy.optimize import brentq
 
-from .core import comparison, fixed_value_minimum, medium_label, parameter_label, parameter_symbol, put, safe_list, simulate, wrap
+from .core import comparison, finite_number, fixed_value_minimum, medium_label, parameter_label, parameter_symbol, put, safe_list, simulate, wrap
 from .measurement_plan import next_angle
 from .statistics import group_periodic_candidates, parameter_uncertainty
 
@@ -36,7 +36,7 @@ def alias_list(obj, group):
     encoded=obj.encode(values)
     scores=obj.batch(encoded)
     rms=obj.last_rms.copy()
-    return [dict(index=i,values=v.tolist(),q=float(q),rmse_deg=float(r),at_boundary=boundary(z)) for i,(v,q,r,z) in enumerate(zip(values,scores,rms,encoded))],total
+    return [dict(index=i,values=v.tolist(),q=float(q),rmse_deg=finite_number(r),at_boundary=boundary(z)) for i,(v,q,r,z) in enumerate(zip(values,scores,rms,encoded))],total
 
 
 def k_profile(obj, col, values, best_q, grids, zero):
@@ -47,7 +47,7 @@ def k_profile(obj, col, values, best_q, grids, zero):
     v0=obj.decode(z0)[0]
     db,pb=simulate(obj.model,obj.obs.angles,np.asarray(values)[None,:],obj.paths)
     dz,pz=simulate(obj.model,obj.obs.angles,v0[None,:],obj.paths)
-    influence=dict(delta_max_deg=float(np.max(abs(wrap(db-dz)))),psi_max_deg=float(np.max(abs(pb-pz))))
+    influence=dict(delta_max_deg=finite_number(np.max(abs(wrap(db-dz)))),psi_max_deg=finite_number(np.max(abs(pb-pz))))
     result=dict(path=p.path,zero_values=v0.tolist(),zero_q=float(q0),influence=influence,
         available=obj.analysis.active,upper_limit=None,not_distinguishable=None,profile=None)
     if not obj.analysis.active:
@@ -136,8 +136,11 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         warnings.append('Gesättigter Fit: zwei freie Parameter bei einem Messwinkel. Die Winkelmittelwerte können interpoliert werden; es bleiben keine unabhängigen Freiheitsgrade zur Modellprüfung. χ²red aus derselben Wiederholstreuung ist hier kein Gütenachweis.')
     if diagnostics.get('strongly_correlated'):
         warnings.append('Die Parameter sind stark gekoppelt. Das numerische Talprofil zeigt Kompensationspaare; Talpunkte sind keine zusätzlichen exakten Lösungen. Lokale Unsicherheiten gelten nur innerhalb der gewählten Familie.')
-    for s in solutions:s['equivalent']=s['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
-    for alias in all_aliases:alias['equivalent']=alias['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
+    for member in [*solutions, *all_aliases]:
+        if member['rmse_deg'] is None or best['rmse_deg'] is None:
+            member['equivalent'] = bool(abs(member['q']-best['q']) <= 1e-12 * max(1., best['q']))
+        else:
+            member['equivalent'] = member['rmse_deg'] <= best['rmse_deg']+request.equivalence_deg+1e-9
     if best['at_boundary']:
         for axis in best['boundary_axes']:
             if axis['physical_zero']:
