@@ -1,13 +1,19 @@
-# ElliFit 1.4.2
+# ElliFit 1.4.3
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.4.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/95b954531f60e8fc52db93ada33de5e56d6bf638.zip)**
+**[ElliFit 1.4.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/279bf817696ffbd81cf5f9cafc64c51acd34477f.zip)**
 
 - [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
-- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/MATERIALIEN.md)
-- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/95b954531f60e8fc52db93ada33de5e56d6bf638/PRUEFPROTOKOLL.md)
+- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/MATERIALIEN.md)
+- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/PRUEFPROTOKOLL.md)
+
+## Periodische Gleichungen in 1.4.3
+
+Periodische Lösungsfamilien zeigen jetzt **schon eingeklappt** eine kompakte Gleichung, etwa **`d[1] = (45,6 + m · 206,8) nm`**, mit ganzzahligem Zählerbereich im untersuchten Suchbereich. Die Basis bleibt bei Auswahl einer anderen Wiederholung unverändert und bevorzugt keinen Einzelwert.
+
+Zwei periodische Dicken erhalten unabhängige Zähler **m₁/m₂** mit eindeutigen Schichtnummern. Andere innerhalb der Familie konstante Fitparameter bleiben sichtbar. Die Zählergrenzen berücksichtigen auch Wiederholungen jenseits des Limits von 200 einzeln dargestellten Lösungen. Gleichungen umbrechen auf schmalen Bildschirmen. Suche, Periodenerkennung und wissenschaftliche Auswertung bleiben unverändert.
 
 ## Neu in 1.4.2
 
@@ -45,9 +51,9 @@ Die Zoom-Nachberechnung behält bestätigte eindimensionale Minima zusätzlich z
 
 ## Prüfung
 
-**86 Tests bestanden, ein erwarteter privater Importtest übersprungen; zehn tatsächliche Chromium-Prüfungen für 1.4.2 bestanden.** Zusätzlich zu den bisherigen wissenschaftlichen Regressionen geprüft: ungewichteter Standard trotz geeigneter Wiederholkovarianz, gespeicherte Gewichtungsoptionen, Warnschwelle bei exakt beziehungsweise über 1°, automatischer Sprung nach fertiger Darstellung, echte Mausradereignisse ohne Kontur-Zoom/Nachberechnung, Rechteck-Zoom, Wechsel zwischen Kontur/3D und RMS-/Fitgrößenansichten sowie Darstellung bis 390 px. Die Bootstrap-Grenzprüfung ist sowohl gewichtet als auch ungewichtet bestanden.
+**Drei passende Regressionen und sechs tatsächliche Chromium-Prüfungen für 1.4.3 bestanden**, zusätzlich alle fünf JavaScript-Dateien syntaktisch geprüft. Kontrolliert wurden echte Fitabläufe mit synthetischen Daten: eingeklappte Formel, Aliaswahl, verschobene Suchgrenzen, über 200 Wiederholungen, d/n-Familien, zwei unabhängige periodische Dicken und Darstellung bis 390 px. Angezeigte Familien und Wertepaare wurden gegen die periodischen Gleichungen geprüft. Keine JavaScript-Laufzeitfehler.
 
-Prüfung unter Linux; ein tatsächlicher Windows-Lauf wurde hier nicht durchgeführt. Das verlinkte ZIP wurde heruntergeladen und mit allen **68 Quelldateien bytegenau** abgeglichen. Optische Formeln, globale Optimierung, Material-/Modellwerte, Abhängigkeiten und gemeinsamer Windows-Starter bleiben unverändert. Private Eingangsdaten, Zahlenresultate und QA-Artefakte werden nicht veröffentlicht.
+Die vollständige Basisprüfung von 1.4.2 mit 86 bestandenen Tests und einem erwarteten privaten Importtest-Skip bleibt im Prüfprotokoll dokumentiert. Rechenkern, Statistik, Materialien, Modelle, Abhängigkeiten und Starter sind gegenüber 1.4.2 bytegleich. Das verlinkte ZIP wurde heruntergeladen und mit allen **68 Quelldateien bytegenau** abgeglichen. Prüfung unter Linux/Chromium; kein tatsächlicher Windows-Lauf. Private Daten und lokale QA-Artefakte werden nicht veröffentlicht.
 
 ## Start und Update
 
