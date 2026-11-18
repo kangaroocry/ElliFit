@@ -1,13 +1,23 @@
-# ElliFit 1.4.3
+# ElliFit 1.6.0
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.4.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/279bf817696ffbd81cf5f9cafc64c51acd34477f.zip)**
+**[ElliFit 1.6.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/tags/v1.6.0.zip)** · [Versionsseite](https://github.com/kangaroocry/ElliFit/releases/tag/v1.6.0)
 
-- [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/ellifit-1.2)
-- [Materialwerte, Schichtvorlagen und Quellen](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/MATERIALIEN.md)
-- [Umgesetzte Verbesserungen](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/279bf817696ffbd81cf5f9cafc64c51acd34477f/PRUEFPROTOKOLL.md)
+Unter Windows das ZIP vollständig entpacken und **`Start_Windows.bat`** doppelklicken. Der Starter verwendet auch WinPython aus dem Benutzer-PATH.
+
+## Neu in 1.6.0
+
+In **Vorbereitung** stehen Messauswahl und Schichtmodell zusammen. Eigene Auswertevorlagen speichern freie Parameter, Suchgrenzen und Fitkriterium. Nach der globalen Suche zeigt **Auswertung** zuerst den Befund. Bei periodischen Dicken sind Anzahl und Gleichung der gleichwertigen Lösungen sofort sichtbar. Zwei Fits lassen sich vergleichen, die jeweils dargestellte Lösung als Laborbericht drucken.
+
+Die eindimensionale Suche prüft Kandidaten beidseitig. Beim reproduzierten Flankenfehler bleibt das Minimum bei **118,005 nm**. Im Zweiparameterfit zeigen optionale Δ- und Ψ-Messlinien sowie Profile, welche Kombinationen mit der Messung vereinbar sind. Zeitreihen haben eine eigene Importzuordnung. Serien können je Quelldatei, Zeitpunkt, Ort oder Azimut separat ausgewertet werden. Eine optische Diagnose berechnet die 1-nm-Empfindlichkeit und die p-Reflexionsminima des Schichtstapels.
+
+107 automatisierte Tests bestanden. Im Chromium-Browser wurden unter anderem der Originalimport mit 16 434 Messungen, periodische und Mehrwinkelfits, die Serienauswertung, der Laborbericht und die schmale Ansicht geprüft. Getestete Plattform war Linux mit Python 3.12.
+
+- [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/v1.6.0)
+- [Materialwerte und Schichtvorlagen](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/MATERIALIEN.md)
+- [Änderungsübersicht](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/PRUEFPROTOKOLL.md)
 
 ## Periodische Gleichungen in 1.4.3
 
@@ -49,7 +59,7 @@ Die Zoom-Nachberechnung behält bestätigte eindimensionale Minima zusätzlich z
 - 95-/99-%-Darstellung standardmäßig ausgeschaltet und bei den optionalen Diagnosen.
 - 18 Materialien und elf Schichtvorlagen bei editierbarer Standardwellenlänge 632,8 nm.
 
-## Prüfung
+## Prüfung von 1.4.3
 
 **Drei passende Regressionen und sechs tatsächliche Chromium-Prüfungen für 1.4.3 bestanden**, zusätzlich alle fünf JavaScript-Dateien syntaktisch geprüft. Kontrolliert wurden echte Fitabläufe mit synthetischen Daten: eingeklappte Formel, Aliaswahl, verschobene Suchgrenzen, über 200 Wiederholungen, d/n-Familien, zwei unabhängige periodische Dicken und Darstellung bis 390 px. Angezeigte Familien und Wertepaare wurden gegen die periodischen Gleichungen geprüft. Keine JavaScript-Laufzeitfehler.
 
