@@ -61,3 +61,9 @@ body.fit-busy::after{content:"";position:fixed;inset:0;z-index:60;background:rgb
 .setup-inputs .medium-name{display:block!important;width:100%;min-width:0}.setup-inputs .model-section{padding:0!important;margin:0!important;border:0!important;background:transparent!important}.layer-editor-row>.layer-number{align-self:start!important;padding-top:35px!important}.setup-inputs .medium-name input{width:100%!important;min-width:0!important;margin:0!important}.setup-inputs .quick-material{display:block;width:100%!important;max-width:none!important}
 .family-period{white-space:normal!important;overflow-wrap:anywhere!important;overflow:visible!important;max-width:100%}.periodic-family td{white-space:normal!important}
 .objective-controls{margin:10px 0;padding:10px;background:#f4f8fa;border:1px solid #cfdee5;border-radius:6px}.objective-controls[hidden]{display:none}.objective-controls label{margin:0 0 6px;font-size:13px}.objective-controls select{font-size:13px}.objective-notice{margin:9px 0 0;font-size:12px;line-height:1.55;color:#335c70}.objective-notice[data-kind=warning]{background:#fff4d9;color:#7d551e;border-left:3px solid #dfa637;padding:9px}.rms-legend[data-caption]:before{content:attr(data-caption);display:block;width:100%;font-size:11px;color:#607d72;text-align:left}.rms-legend[data-caption=""]:before{display:none}#statFitObjective{margin-top:5px;color:#315d70}
+
+/* Periodic equations remain visible in the collapsed family summary. */
+.periodic-family summary .family-equations{flex-basis:100%;display:grid;gap:2px;min-width:0;padding:4px 0 1px;font:13px/1.55 var(--mono);color:#244e53;text-align:center}
+.family-equation{white-space:normal;overflow-wrap:anywhere}
+.family-constant{font-size:12px;color:#527269}
+.family-indices{font:12px/1.5 "Segoe UI",sans-serif;color:#587969}

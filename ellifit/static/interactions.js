@@ -62,13 +62,29 @@ function renderFitCautions(){
  box.hidden=!items.length;if(!items.length)return;box.dataset.kind=items.some(x=>x.critical)?'critical':'warning';
  box.innerHTML=`<div class="caution-heading"><strong>Fitergebnis prüfen – keinen Einzelwert ungeprüft übernehmen</strong><span>${state.resultStale?'Zum früheren Fit':'Zum angezeigten Fit'}</span></div><div class="caution-grid">${items.map(x=>`<article data-kind="${x.critical?'critical':'warning'}"><b>${esc(x.title)}</b><p>${esc(x.text)}</p></article>`).join('')}</div><p class="caption">Winkel-RMS ≤ 0,1° kennzeichnet hier sehr kleine Winkelabweichungen; die Warnung „Fit relativ schlecht“ erscheint bei Winkel-RMS > 1°. Beide Werte sind Orientierungen, keine statistischen Nachweise. Die Hinweise gehören zum oben datierten Fit.</p>`;
 }
+function periodicFamilyEquations(solution){
+ const params=state.result.parameters,base=solution.aliases[0].values,variables=[],equations=[];
+ for(const [column,param]of params.entries()){
+  const periodIndex=solution.periods.findIndex(period=>period.path===param.path),period=solution.periods[periodIndex];
+  const symbol=esc(parameterSymbol(param));
+  if(period){
+   const variable=solution.periods.length===1?'m':'m'+['₁','₂'][periodIndex];
+   const last=Math.max(0,Math.floor((param.upper-base[column])/period.period_nm+1e-10));
+   equations.push(`<span class="family-equation" title="${esc(param.label)} · Gerundete Anzeige; Rechnung mit voller Präzision">${symbol} = (${quantityValue(base[column],param)} + ${variable} · ${numericText(period.period_nm,'d')}) nm</span>`);
+   variables.push(`${variable} = ${last===0?'0':last===1?'0, 1':'0, 1, …, '+int(last)}`);
+  }else{
+   equations.push(`<span class="family-equation family-constant" title="${esc(param.label)} · Innerhalb dieser Periodenfamilie gleich">${symbol} = ${quantityValue(base[column],param)}${param.path.endsWith('thickness_nm')?' nm':''}</span>`);
+  }
+ }
+ return `<span class="family-equations">${equations.join('')}<span class="family-indices">${variables.join(' · ')} (im Suchbereich)</span></span>`;
+}
 function renderFamilies(){
  const r=state.result,params=r.parameters,heading=`<tr><th>#</th>${params.map(p=>`<th>${parameterHeading(p)}</th>`).join('')}<th>RMS (°)${fitMetric().differs_from_angular_rms?'':' ↓'}</th></tr>`;
  $('resultTable').innerHTML=`<table class="families-table"><thead>${heading}</thead><tbody>${r.solutions.map((s,i)=>{
   const active=!state.activeTrial&&state.active===i,color=rmsColor(s.rmse_deg,.17);
   if(!s.periodic)return `<tr class="family-row ${active?'active':''}" data-family="${i}" title="${esc(fitMetric().label)}: ${fmt(fitValue(s.q),5)} (${metricUnit()})" style="background:${color}"><td>${s.rank}</td>${s.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}<td>${rmsText(s.rmse_deg)}</td></tr>`;
   const rows=s.aliases.map((a,j)=>`<tr data-family="${i}" data-alias="${j}" class="alias-row ${active&&state.activeAlias===j?'active':''}" tabindex="0" role="button" title="${esc(fitMetric().label)}: ${fmt(fitValue(a.q),5)} (${metricUnit()})" aria-label="Familie ${s.rank}, Lösung ${j+1} auswählen"><td>${j+1}</td>${a.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}<td>${rmsText(a.rmse_deg)}</td></tr>`).join('');
-  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b><span>RMS ${rmsText(s.rmse_deg)}°</span></summary><p class="family-period">${s.periods.map(p=>`${esc(p.label)}: T = ${numericText(p.period_nm,'d')} nm`).join(' · ')}. Aufsteigende Werte, keine Bevorzugung der ersten Lösung.</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} berechneten Wiederholungen.</p>`:''}</details></td></tr>`;
+  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b><span>RMS ${rmsText(s.rmse_deg)}°</span>${periodicFamilyEquations(s)}</summary><p class="family-period">${s.periods.map(p=>`${esc(p.label)}: T = ${numericText(p.period_nm,'d')} nm`).join(' · ')}. Aufsteigende Werte, keine Bevorzugung der ersten Lösung.</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} berechneten Wiederholungen.</p>`:''}</details></td></tr>`;
  }).join('')}</tbody></table>`;
  for(const el of $('resultTable').querySelectorAll('details[data-family-open]'))el.addEventListener('toggle',()=>el.open?expandedFamilies.add(Number(el.dataset.familyOpen)):expandedFamilies.delete(Number(el.dataset.familyOpen)));
  const s=r.solutions[state.active];$('activeLabel').textContent=activeTrial()?`Probelösung T${state.activeTrial} · nicht optimiert`:`Dargestellt: Familie ${s.rank}${s.periodic?' · Lösung '+(state.activeAlias+1)+' (gleichwertige Wiederholung)':''}`;

@@ -1,5 +1,5 @@
 'use strict';
-const UI_VERSION='1.4.2';
+const UI_VERSION='1.4.3';
 const $=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

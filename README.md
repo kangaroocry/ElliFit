@@ -1,8 +1,8 @@
-# ElliFit 1.4.2
+# ElliFit 1.4.3
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.4.2 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.4.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows
 
@@ -31,6 +31,14 @@ Start_Windows.bat --port 8766
 ```
 
 Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
+
+## Periodische Gleichungen in 1.4.3
+
+Periodenfamilien zeigen jetzt schon **im eingeklappten Listeneintrag** eine kompakte Gleichung, zum Beispiel `d[1] = (45,6 + m · 206,8) nm`. Der ganzzahlige Zählerbereich gehört ausdrücklich zum untersuchten Suchbereich. Der Ursprung ist die kleinste zugehörige Dicke in diesem Bereich und bleibt bei Auswahl einer anderen Wiederholung unverändert; er bedeutet keine physikalische Bevorzugung.
+
+Bei zwei periodischen Dicken erhält jede ihren eigenen unabhängigen Zähler `m₁` beziehungsweise `m₂`. Andere gleichzeitig gefittete Parameter, etwa ein innerhalb der Familie konstanter Brechungsindex, stehen daneben beziehungsweise darunter mit ihrer Schichtnummer. Dezimalkomma, eine Nachkommastelle für Dicken und angepasste Auflösung bei kleinen Werten bleiben erhalten; gerechnet wird mit voller Präzision.
+
+Die Zählergrenzen berücksichtigen auch Wiederholungen jenseits der maximal 200 einzeln aufgeführten Wertepaare. Aufklappen zeigt weiterhin die auswählbaren Lösungen und die vollständigen Material-/Schichtbezeichnungen. Die Formeln sind eine Anzeige der bereits analytisch festgestellten Periodizität; Suche und Familienbildung bleiben unverändert.
 
 ## Änderungen in 1.4.2
 

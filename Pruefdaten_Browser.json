@@ -698,5 +698,35 @@
     "version": "1.4.2",
     "check": "Neue Beschriftungen und Warnungen bis 390 px ohne horizontalen Überlauf; keine JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Echter Einwinkelfit: kompakte periodische Gleichung d[1] schon eingeklappt sichtbar, Dezimalkomma und nm, Zählerbereich passend zur vollständigen Aliasliste; keine Bevorzugung einer Einzelwiederholung",
+    "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Aufklappen, andere Wiederholung auswählen und Einklappen: Familiengleichung behält ihren Ursprung, Auswahl und Vergleichskurven bleiben bedienbar",
+    "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Verschobener Suchbeginn und mehr als 200 periodische Lösungen: Basis ist die erste Dicke im Suchbereich, Zähler endet bei der vollständigen analytischen Anzahl statt bei der gekürzten Liste",
+    "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Echter Zweiparameterfit d/n: Schichtnummer in beiden Symbolen, periodische Dickengleichung und innerhalb der Familie konstanter Brechungsindex sichtbar; nur der Dickenparameter erhält einen Wiederholungszähler",
+    "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Echter Fit zweier Dicken: zwei unabhängige Gleichungen mit eindeutigen d[2]/d[1] und m₁/m₂; alle ausgegebenen Wertepaare und die Familiengröße stimmen mit dem periodischen Produktgitter überein",
+    "passed": true
+  },
+  {
+    "version": "1.4.3",
+    "check": "Gleichungen und Zähler bis 390 px sichtbar und umbrechend, kein horizontaler Seitenüberlauf und keine JavaScript-Laufzeitfehler",
+    "passed": true
   }
 ]

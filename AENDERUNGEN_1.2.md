@@ -1,6 +1,16 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 17. November 2026. Quellstand 1.4.2; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 18. November 2026. Quellstand 1.4.3; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+
+## Kompakte Periodengleichungen in 1.4.3
+
+- Bereits eingeklappte Familien zeigen `d[Schicht] = (d₀ + m · T) nm`, inklusive ganzzahliger Zählergrenzen im untersuchten Suchbereich.
+- Basis ist die erste Dicke im Suchbereich; Auswahl einer anderen Wiederholung verschiebt diese Basis nicht und bevorzugt keinen Wert.
+- Zwei periodische Dicken erhalten unabhängige Zähler m₁/m₂; innerhalb der Familie konstante weitere Fitparameter bleiben sichtbar.
+- Grenzen beziehen auch die wegen des Listenlimits nicht einzeln angezeigten Wiederholungen ein. Deutsche Zahlenformatierung und volle Rechenpräzision bleiben erhalten.
+- Keine Änderung an Berechnung, Periodenerkennung, Gewichtung oder globaler Suche.
+
+- **Prüfung:** Drei passende Regressionen und sechs tatsächliche Browserprüfungen bestanden; Rechenkern und wissenschaftliche Auswertung unverändert.
 
 ## Ungewichteter Standard und Bedienung in 1.4.2
 

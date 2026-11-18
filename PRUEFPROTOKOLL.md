@@ -1,8 +1,21 @@
-# Prüfprotokoll – ElliFit 1.4.2
+# Prüfprotokoll – ElliFit 1.4.3
 
-Stand: 17. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand: 18. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.4.2
+## Aktuelle Prüfung von 1.4.3
+
+**Drei gezielte Regressionen und sechs tatsächliche Chromium-Prüfungen bestanden.** Die vorhandenen Prüfungen betreffen periodische Aliasbildung sowie versionierte und inhaltsabhängige Browserdateien. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Zwei unveränderte Bibliothekswarnungen. Rechenkern, Optimierung, Statistik, Materialien, Modelle und Starter sind bytegleich zu 1.4.2; dort ist die vollständige Suite mit 86 bestandenen Tests dokumentiert. Für diese reine Darstellungsänderung wurden die relevanten Prüfungen gezielt ausgeführt.
+
+1. Tatsächlicher Einwinkelfit mit synthetischen Daten: Formel mit Schichtnummer, Dezimalkomma, nm und ganzzahligem Zählerbereich schon im eingeklappten Familieneintrag sichtbar. Alle Aliase erfüllen die periodische Gleichung.
+2. Andere Wiederholung ausgewählt und wieder eingeklappt: Auswahl und Vergleich bleiben nutzbar; Formeln behalten dieselbe Basis.
+3. Verschobene untere Suchgrenze und mehr als 200 Wiederholungen: erste Dicke liegt im Suchbereich, Zähler nennt die vollständige analytische Anzahl und wird nicht durch das Listenlimit gekürzt.
+4. Tatsächlicher d/n-Fit: periodische Dicke und innerhalb der Familie konstanter Brechungsindex mit eindeutigen Schichtnummern sichtbar.
+5. Tatsächlicher Fit zweier Dicken: unabhängige Zähler m₁/m₂, alle Wertepaare und Familienanzahl gegen das periodische Produktgitter geprüft.
+6. Formelblöcke bis 390 px sichtbar und umbrechend, ohne horizontalen Seitenüberlauf oder JavaScript-Laufzeitfehler. Desktopdarstellung visuell geprüft.
+
+Nur synthetische Daten und getrennte Bibliotheksordner verwendet; keine privaten Daten, Browser-Skripte oder Screenshots im Paket. Die bestehenden Standardwerte und Bedienkorrekturen aus 1.4.2 bleiben erhalten.
+
+## Basisprüfung von 1.4.2
 
 **86 Tests bestanden, ein erwarteter privater Importtest übersprungen.** Zwei unveränderte Bibliothekswarnungen. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Prüfung unter Linux/Chromium; kein tatsächlicher Windows-Lauf.
 
