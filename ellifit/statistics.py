@@ -8,10 +8,9 @@ from __future__ import annotations
 import copy
 import math
 import numpy as np
-from scipy.linalg import block_diag
 from scipy.optimize import least_squares
 
-from .core import Observations, parameter_label, put, simulate, stokes, wrap
+from .core import Observations, get, mean_delta, parameter_label, periodic_axes, put, simulate, stokes, wrap
 
 
 class RepeatAnalysis:
@@ -29,7 +28,7 @@ class RepeatAnalysis:
             center = float(np.rad2deg(np.angle(z)) % 360)
             du = center + wrap(d - center)
             y = np.column_stack((du, p))
-            mean = y.mean(axis=0)
+            mean_d, _ = mean_delta(d)
             unique = len(np.unique(y, axis=0))
             covariance = np.cov(y, rowvar=False, ddof=1) if m >= 2 else None
             vec = stokes(d, p)
@@ -57,7 +56,7 @@ class RepeatAnalysis:
             std = np.sqrt(np.maximum(np.diag(covariance), 0)) if covariance is not None else None
             corr = float(covariance[0, 1] / np.prod(std)) if std is not None and np.prod(std) > 0 else None
             self.records.append(dict(angle=float(self.angles[j]), count=m, unique_count=unique,
-                mean_delta=float(mean[0] % 360), mean_psi=float(mean[1]),
+                mean_delta=mean_d, mean_psi=float(p.mean()), **self.raw.contexts[j],
                 std_delta=float(std[0]) if std is not None and std[0] > 0 else None,
                 std_psi=float(std[1]) if std is not None and std[1] > 0 else None,
                 uncertainty_mean_delta=float(std[0] / np.sqrt(m)) if valid else None,
@@ -67,6 +66,8 @@ class RepeatAnalysis:
             self.covariances.append(covariance if valid else None)
             self.stokes_covariances.append(scov if valid else None)
             self.precisions.append(np.linalg.inv(covariance) if valid else None)
+        if any(ctx['site'] or ctx['azimuth_deg'] is not None for ctx in self.raw.contexts):
+            self.warnings.append('Orte und Azimute werden getrennt gemittelt. Der gemeinsame Fit setzt dasselbe isotrope Schichtmodell voraus. Die Wiederholstreuung stammt nur aus Messungen derselben Gruppe.')
         self.complete = all(c is not None for c in self.covariances)
         self.active = bool(automatic and metric == 'angular' and self.complete)
         self.metric, self.policy = metric, policy
@@ -76,7 +77,7 @@ class RepeatAnalysis:
             self.warnings.append('Wenige Wiederholungen: geschätzte Kovarianzen und statistische Intervalle sind unsicher; χ²-Angaben sind Näherungen.')
 
     def public(self):
-        return dict(groups=self.records, complete=self.complete, weighted=self.active,
+        return dict(groups=self.records, angle_count=len(self.raw.geometry_angles), complete=self.complete, weighted=self.active,
             mode='repeat_covariance' if self.active else 'unweighted', warnings=list(dict.fromkeys(self.warnings)),
             assumptions='Unabhängige Wiederholungen derselben stabilen Probe. Systematische Fehler sind nicht aus der Streuung bestimmbar.')
 
@@ -126,7 +127,6 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     model = copy.deepcopy(obj.model)
     for path, v in zip(obj.paths, values):
         put(model, path, v)
-    y = _prediction_vector(model, obj.obs.angles, metric)
     scales = np.array([max(abs(v), 1) for v in values])
     columns = []
     for i, (path, value) in enumerate(zip(obj.paths, values)):
@@ -143,13 +143,15 @@ def parameter_uncertainty(obj, values, bootstrap=0):
             weights.append(count * analysis.precisions[j])
         else:
             weights.append(np.eye(width) * (count if obj.req.duplicate_policy != 'average' else 1))
-    W = block_diag(*weights)
-    information = J.T @ W @ J
+    blocks = J.reshape(len(weights), width, len(values))
+    weighted_blocks = np.asarray(weights) @ blocks
+    jtw = weighted_blocks.reshape(J.shape).T
+    information = jtw @ J
     singular = np.linalg.svd(information, compute_uv=False)
     weak = bool(singular[-1] <= max(1e-15, singular[0] * 1e-12))
     result = dict(available=False, method='Lokale Kovarianzfortpflanzung', statistical=None, calibration=None,
         combined=None, covariance_statistical=None, correlation=None, bootstrap95=None,
-        calibration_sources=[], weak=weak, note='Messstreuung wird durch den Fit fortgepflanzt; kein zusätzlicher pauschaler Fitfehler.')
+        calibration_sources=[], calibration_warnings=[], calibration_complete=True, weak=weak, note='Messstreuung wird durch den Fit fortgepflanzt; kein zusätzlicher pauschaler Fitfehler.')
     weighted_jac=np.vstack([np.linalg.cholesky(w).T@J[j*width:(j+1)*width] for j,w in enumerate(weights)])
     sj=np.linalg.svd(weighted_jac,compute_uv=False)
     rank=int(np.sum(sj>max(1e-13,sj[0]*1e-10)))
@@ -169,12 +171,21 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     if weak:
         result['note'] = 'Rangdefekt oder sehr starke Parameterkorrelation; keine verlässlichen lokalen Fehlerbalken.'
         return result
-    operator = np.diag(scales) @ np.linalg.solve(information, J.T @ W)
+    operator = np.diag(scales) @ np.linalg.solve(information, jtw)
     Cstat = None
     if analysis.complete:
         covs = analysis.stokes_covariances if metric == 'stokes' else analysis.covariances
-        Cy = block_diag(*[c / n for c, n in zip(covs, analysis.raw.counts)])
-        Cstat = operator @ Cy @ operator.T
+        if metric == 'stokes' and obj.req.duplicate_policy == 'average':
+            covs = []
+            for record, cov in zip(analysis.records, analysis.covariances):
+                delta, psi = np.deg2rad([record['mean_delta'], 2*record['mean_psi']])
+                jac = np.pi/180 * np.array([[0, -2*np.sin(psi)],
+                    [-np.sin(psi)*np.sin(delta), 2*np.cos(psi)*np.cos(delta)],
+                    [np.sin(psi)*np.cos(delta), 2*np.cos(psi)*np.sin(delta)]])
+                covs.append(jac @ cov @ jac.T)
+        op = operator.reshape(len(values), len(weights), width)
+        Cy = np.asarray(covs)/analysis.raw.counts[:,None,None]
+        Cstat = np.einsum('agi,gij,bgj->ab', op, Cy, op)
         result.update(available=True, statistical=np.sqrt(np.maximum(np.diag(Cstat), 0)).tolist(), covariance_statistical=Cstat.tolist())
         if len(values) == 2 and np.prod(result['statistical']) > 0:
             result['correlation'] = float(Cstat[0, 1] / np.prod(result['statistical']))
@@ -188,7 +199,7 @@ def parameter_uncertainty(obj, values, bootstrap=0):
     if cal.wavelength_nm is not None and cal.wavelength_nm > 0:
         sources.append(('Wellenlänge', 'wavelength_nm', cal.wavelength_nm))
     for location, medium in [('ambient', model['ambient']), ('substrate', model['substrate']), *[(f'layers.{i}', l) for i, l in enumerate(model['layers'])]]:
-        for field in ('n', 'k'):
+        for field in (('n', 'k', 'thickness_nm') if location.startswith('layers.') else ('n', 'k')):
             path = location + '.' + field
             uncertainty = medium.get('uncertainty_' + field)
             if path not in obj.paths and uncertainty is not None and uncertainty > 0:
@@ -197,22 +208,35 @@ def parameter_uncertainty(obj, values, bootstrap=0):
         ma, mb = copy.deepcopy(model), copy.deepcopy(model)
         aa, ab = obj.obs.angles.copy(), obj.obs.angles.copy()
         if path == 'angle':
-            lo, hi = -sigma, sigma
-            if aa.min()+lo <= 0 or ab.max()+hi >= 90:
-                continue
+            margin = min(float(aa.min()), float(90-ab.max()))
+            h = min(1e-4, margin/4)
+            lo, hi = -h, h
             aa += lo; ab += hi
-        elif path == 'wavelength_nm':
-            center = model[path]; lo, hi = max(center-sigma, center*.5), center+sigma
-            ma[path], mb[path] = lo, hi
+            if sigma >= margin:
+                result['calibration_warnings'].append(
+                    'u(φ) erreicht die Grenze des Einfallswinkelbereichs (0° bis 90°). '
+                    'Der Winkelbeitrag ist eine lokale Sensitivität. Für eine kombinierte Unsicherheit ist ein begrenztes Winkelmodell erforderlich.')
         else:
-            from .core import get
-            center = get(model, path); lo, hi = max(center-sigma, 1e-12 if path.endswith('.n') else 0), center+sigma
-            put(ma, path, lo); put(mb, path, hi)
+            wavelength = path == 'wavelength_nm'
+            center = model[path] if wavelength else get(model, path)
+            step = max(abs(center)*1e-5, 1e-5 if wavelength or path.endswith('thickness_nm') else 1e-7)
+            floor = 0. if not (wavelength or path.endswith('.n')) else center/2
+            lo, hi = max(center-step, floor), center+step
+            if wavelength:
+                ma[path], mb[path] = lo, hi
+            else:
+                put(ma, path, lo); put(mb, path, hi)
         derivative = _difference(_prediction_vector(mb, ab, metric), _prediction_vector(ma, aa, metric), metric) / (hi-lo)
-        response = operator @ derivative * sigma
+        response = -operator @ derivative * sigma
+        if not np.all(np.isfinite(response)):
+            result['calibration_warnings'].append(f'{name}: lokale Sensitivität nicht bestimmbar.')
+            result['calibration_sources'].append(dict(name=name, path=path, sigma=sigma, contribution=None))
+            continue
         Ccal += np.outer(response, response)
-        result['calibration_sources'].append(dict(name=name, contribution=np.abs(response).tolist()))
-    if result['calibration_sources']:
+        result['calibration_sources'].append(dict(name=name, path=path, sigma=sigma,
+            contribution=np.abs(response).tolist(), signed_shift=response.tolist()))
+    result['calibration_complete'] = not result['calibration_warnings']
+    if result['calibration_sources'] and result['calibration_complete']:
         result['calibration'] = np.sqrt(np.maximum(np.diag(Ccal), 0)).tolist()
         if Cstat is not None:
             result['combined'] = np.sqrt(np.maximum(np.diag(Cstat + Ccal), 0)).tolist()
@@ -226,7 +250,7 @@ def parameter_uncertainty(obj, values, bootstrap=0):
         lower, upper = np.maximum(0, center_z-.12), np.minimum(1, center_z+.12)
         # A thickness period must not be crossed by a bootstrap local fit.
         from .core import period
-        if len(obj.obs.angles) == 1:
+        if len(obj.obs.geometry_angles) == 1:
             for i, path in enumerate(obj.paths):
                 t = period(model, path, float(obj.obs.angles[0]))
                 if t:
@@ -242,11 +266,11 @@ def parameter_uncertainty(obj, values, bootstrap=0):
             means = []
             for d, p in zip(analysis.raw.ds, analysis.raw.ps):
                 idx = rng.integers(0, len(d), len(d))
-                if metric == 'stokes':
+                if metric == 'stokes' and obj.req.duplicate_policy != 'average':
                     means.append(_stokes(d[idx], p[idx]).mean(axis=0))
                 else:
-                    mid = np.rad2deg(np.angle(np.mean(np.exp(1j*np.deg2rad(d)))))
-                    means.append(np.array([np.mean(mid+wrap(d[idx]-mid)), np.mean(p[idx])]))
+                    pair = np.array([mean_delta(d[idx])[0], p[idx].mean()])
+                    means.append(_stokes(*pair) if metric == 'stokes' else pair)
             target = np.array(means)
             def residual(z):
                 fitted = obj.decode(z)
@@ -275,28 +299,25 @@ def parameter_uncertainty(obj, values, bootstrap=0):
 
 def group_periodic_candidates(obj, candidates, flat=False):
     """Only analytic lossless aliases become one family. Similar Q is insufficient."""
-    from .core import period
-    dcols = [i for i, p in enumerate(obj.paths) if p.endswith('thickness_nm')]
     groups = []
     for z, q in candidates:
         values = obj.decode(z)[0]
         model = copy.deepcopy(obj.model)
-        for path, v in zip(obj.paths, values): put(model, path, v)
-        periods = [period(model, obj.paths[i], float(obj.obs.angles[0])) for i in dcols] if len(obj.obs.angles)==1 and dcols and not flat else []
-        periods = periods if all(t is not None for t in periods) else []
+        for path, v in zip(obj.paths, values):
+            put(model, path, v)
+        axes = periodic_axes(model, obj.paths, obj.obs.geometry_angles[0]) if len(obj.obs.geometry_angles)==1 and not flat else {}
+        dcols, periods = list(axes), list(axes.values())
         key = values.copy()
-        if periods:
-            for i, t in zip(dcols, periods):
-                lower = obj.req.parameters[i].lower
-                key[i] = lower + ((values[i]-lower) % t)
-                if abs(key[i]-(lower+t)) < 1e-3: key[i] = lower
+        tolerance = np.maximum(1e-6, abs(values)*1e-5)
+        for i, t in axes.items():
+            lower = obj.req.parameters[i].lower
+            key[i] = lower + ((values[i]-lower) % t)
+            tolerance[i] = max(1e-3, t*1e-5)
+            if lower+t-key[i] < tolerance[i]:
+                key[i] = lower
         match = None
-        if periods:
-            for group in groups:
-                if not group['periods']: continue
-                tolerance = np.array([max(1e-3, abs(t)*1e-5) if i in dcols else max(1e-6,abs(values[i])*1e-5) for i,t in enumerate([periods[dcols.index(i)] if i in dcols else 1 for i in range(len(values))])])
-                if np.all(abs(group['key']-key) <= tolerance):
-                    match = group; break
+        if axes:
+            match = next((g for g in groups if g['dcols']==dcols and np.all(abs(g['key']-key)<=tolerance)), None)
         if match is None:
             match=dict(key=key, periods=periods, dcols=dcols, members=[])
             groups.append(match)

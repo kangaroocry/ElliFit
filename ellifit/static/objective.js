@@ -19,7 +19,7 @@ function renderObjectiveContext(){
  $('rmsLegend').setAttribute('aria-label','Punkt- und Listenfarben: ungewichteter Winkel-RMS');
  $('rmsLegend').dataset.caption=distinct?(fit?'Punkt-/Listenfarben: ungewichteter Winkel-RMS (°)':'Flächen-/Punkt-/Listenfarben: Winkel-RMS (°)'):'';
 }
-function metricMarkers(){return allMarkers().map(m=>({...m,q:state.result.solutions[m.family].aliases[m.alias].q}));}
+function metricMarkers(){return allMarkers();}
 function keepParameterView(layout,scene=false){
  const el=$('errorPlot');if(!el._elliViewKey?.startsWith(state.resultJob+'|')||!el._fullLayout)return;
  const source=el._elliPlotOptions?.scene?el._fullLayout.scene:el._fullLayout,target=scene?layout.scene:layout;
@@ -74,7 +74,7 @@ async function objectiveErrorPlot(ensureSelected=false){
   if(!surface)traces.push(...regionTraces(ax,ay,false));
  }
  traces.push(...metricTrialTrace(ax,two?ay:null,surface));keepParameterView(l,surface);
- const chosen=activeTrial()||r.solutions[state.active].aliases[state.activeAlias],value=fitValue(chosen.q),selected=ensureSelected===true?{xaxis:ax.map(chosen.values[0]),yaxis:two?ay.map(chosen.values[1]):state.view.logY?Math.max(value,1e-12):value,...(surface?{zaxis:Math.max(value,1e-12)}:{})}:{};
+ const chosen=activeTrial()||selectedMember(),value=fitValue(chosen.q),selected=ensureSelected===true?{xaxis:ax.map(chosen.values[0]),yaxis:two?ay.map(chosen.values[1]):state.view.logY?Math.max(value,1e-12):value,...(surface?{zaxis:Math.max(value,1e-12)}:{})}:{};
  const axes=surface?{xaxis:ax,yaxis:ay,zaxis:axisSpec([10**limits.lo,10**limits.hi],fitAxisLabel(),true)}:{xaxis:ax,yaxis:ay};
  const labels=surface?null:[...markers.map(m=>({x:ax.map(m.values[0]),y:two?ay.map(m.values[1]):display(m.q),label:String(m.rank),rank:m.rank,target:{family:m.family,alias:m.alias},active:!state.activeTrial&&m.family===state.active&&m.alias===state.activeAlias})),...state.trials.map(t=>({x:ax.map(t.values[0]),y:two?ay.map(t.values[1]):display(t.q),label:'T'+t.id,rank:10000+t.id,target:{trial:t.id},active:state.activeTrial===t.id}))];
  $('errorCaption').textContent=`Dargestellt und minimiert: ${fitMetric().label}, sqrt(Q / ${int(fitMetric().normalization)}), ${metricUnit()}. Kleinere Werte sind besser. ${two?'Neutrale Flächenfarben zeigen diese Fit-Abweichung; sie haben keine feste Winkel-RMS-Güteskala. ':''}Punkt- und Tabellenfarben zeigen weiterhin den ungewichteten Winkel-RMS. Keine Modellbestätigung allein durch einen kleinen Fehlerwert.${surface&&$('showRegions').checked?' Optionale Konfidenzgrenzen werden in dieser Ansicht nur in der 2D-Kontur dargestellt.':''}`;

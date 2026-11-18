@@ -1,8 +1,20 @@
-# Prüfprotokoll – ElliFit 1.4.3
+# Prüfprotokoll – ElliFit 1.5.0
 
 Stand: 18. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
 
-## Aktuelle Prüfung von 1.4.3
+## Prüfung von 1.5.0
+
+Die automatisierten Prüfungen decken Optik, Statistik, Suche, Import, Sitzungen, HTTP-Schnittstelle und Startlogik ab. Getestet wurde unter Linux mit Python 3.12 und lokalem Chromium. Die vorgesehenen Windows-Startdateien sind Teil der Auslieferung.
+
+- 160 deterministisch erzeugte, transparente und absorbierende Stapel mit bis zu vier Filmen wurden mit der unabhängigen Transfermatrix-Implementierung tmm verglichen. Die größte Winkelabweichung lag unter 10⁻¹² Grad. Bei einem unabhängigen Mehrwinkel-Datensatz ergab sich d = 118,75 nm und n = 1,654.
+- Bei exakt kritischem Strahlgang eines endlichen Films stimmten die ellipsometrischen Winkel mit dem analytischen Grenzwert bis auf weniger als 10⁻¹² Grad überein. Zusätzlich wurden die verschwindende Filmdicke, gemischte Strahlen in derselben Vektorrechnung und die Phasenwarnung am Brewsterwinkel geprüft.
+- Beim gemeinsamen Fit einer transparenten und einer absorbierenden Schicht ergaben 118,000, 401,158 und 684,316 nm genau eine Periodenfamilie. Der zweite Film hatte jeweils 60 nm. Für den Zusatzwinkel wurden die paarweisen Stokes-Abstände an den ausgegebenen Vorhersagen geprüft.
+- Der Test mit schwacher Absorption zwischen 20 und 40 000 nm ergab 282 innere Minima. Alle Familien waren in der Oberfläche zugänglich. In einer großen exakten Familie konnte die Wiederholung Nr. 235 direkt ausgewählt und gegen die Periodenformel geprüft werden.
+- Die Prüfung der Fehlerfortpflanzung umfasst Beiträge fester Filmdicken, die Behandlung freier Dicken und eine Winkelunsicherheit über der 90°-Grenze. Im letzten Fall bleiben die lokale Empfindlichkeit und die statistische Komponente einsehbar.
+- Die Winkelmittel in Fit, Vergleichsplot und Diagnose stimmen auch beim Übergang über 0° und bei größerer Streuung überein. CSV-Rundlauf, alte Messdaten, markierte Azimute, Wiederholungen am selben Ort sowie separate Einzelfits wurden geprüft.
+- Elf Browserprüfungen umfassten auch Schichtverschiebung und Löschung, Übernahme eines früheren Fits, Kriterium und Winkel-RMS in derselben Tabelle, physikalische k-Grenze und Layout bis 390 px Breite. Einzelheiten stehen in [Pruefdaten_Browser.json](Pruefdaten_Browser.json).
+
+## Prüfung von 1.4.3
 
 **Drei gezielte Regressionen und sechs tatsächliche Chromium-Prüfungen bestanden.** Die vorhandenen Prüfungen betreffen periodische Aliasbildung sowie versionierte und inhaltsabhängige Browserdateien. Alle fünf JavaScript-Dateien bestehen die Syntaxprüfung. Zwei unveränderte Bibliothekswarnungen. Rechenkern, Optimierung, Statistik, Materialien, Modelle und Starter sind bytegleich zu 1.4.2; dort ist die vollständige Suite mit 86 bestandenen Tests dokumentiert. Für diese reine Darstellungsänderung wurden die relevanten Prüfungen gezielt ausgeführt.
 

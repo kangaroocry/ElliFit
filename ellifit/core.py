@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import copy
 import csv
+import io
+from itertools import product
 import math
 import re
 import threading
@@ -32,6 +34,8 @@ class Medium(Validated):
 
 
 class Layer(Medium):
+    layer_id: str | None = Field(default=None, min_length=1, max_length=80)
+    uncertainty_thickness_nm: float | None = Field(default=None, ge=0, le=1e8)
     thickness_nm: float = Field(default=80, ge=0, le=1e8)
 
 
@@ -47,6 +51,9 @@ class Model(Validated):
 
     @model_validator(mode='after')
     def incident_medium(self):
+        ids = [layer.layer_id for layer in self.layers if layer.layer_id is not None]
+        if len(ids) != len(set(ids)):
+            raise ValueError('Die Schichtkennungen müssen innerhalb des Modells eindeutig sein.')
         if self.ambient.k != 0:
             raise ValueError('Das Einfallsmedium muss transparent sein (k = 0).')
         return self
@@ -60,6 +67,21 @@ class Row(Validated):
     source: str = Field(default='Manuell', max_length=500)
     line: int = 0
     comment: str = Field(default='', max_length=2000)
+
+    measurement_kind: Literal['repeat', 'location', 'azimuth'] = 'repeat'
+    site: str = Field(default='', max_length=120)
+    azimuth_deg: float | None = Field(default=None, ge=0, le=360)
+
+    @model_validator(mode='after')
+    def measurement_context(self):
+        self.site = self.site.strip()
+        if self.azimuth_deg == 360:
+            self.azimuth_deg = 0.
+        if self.measurement_kind == 'location' and not self.site:
+            raise ValueError('Für eine Ortsmessung einen Messort angeben.')
+        if self.measurement_kind == 'azimuth' and self.azimuth_deg is None:
+            raise ValueError('Für eine Azimutmessung den Probenazimut angeben.')
+        return self
 
 
 class Parameter(Validated):
@@ -106,6 +128,7 @@ class FitRequest(Validated):
     sigma_delta: float = Field(default=0.05, gt=0, le=180)
     sigma_psi: float = Field(default=0.05, gt=0, le=90)
     equivalence_deg: float = Field(default=0.01, ge=0, le=10)
+    refine_all: bool = False
     quality: Literal['quick', 'balanced', 'thorough'] = 'balanced'
     uncertainty_mode: Literal['auto', 'none'] = 'none'
     bootstrap_samples: Literal[0, 60, 120] = 60
@@ -173,6 +196,31 @@ def longitudinal(index, tangent):
     return np.where((q.imag < -1e-13) | ((abs(q.imag) < 1e-13) & (q.real < 0)), -q, q)
 
 
+def critical_reflection(q, indices, thickness, wavelength):
+    """Scaled characteristic matrix for rays crossing a critical film.
+
+    exp(iδ) cos(δ) and -i exp(iδ) sin(δ)/q have finite limits even
+    for q=0 and stay bounded in thick passive films.
+    """
+    result = []
+    for factor in (indices**2, np.ones_like(indices)):
+        electric = np.ones_like(q[-1])
+        magnetic = q[-1] / factor[-1]
+        for j in range(len(q)-2, 0, -1):
+            beta = 2 * np.pi * thickness[j-1] / wavelength
+            delta2 = np.expm1(2j * beta * q[j])
+            cosine = 1 + delta2 / 2
+            sine = np.divide(-delta2, 2*q[j], out=(-1j*beta).astype(complex), where=q[j]!=0)
+            electric, magnetic = (cosine*electric + sine*factor[j]*magnetic,
+                                  sine*q[j]**2/factor[j]*electric + cosine*magnetic)
+            norm = np.maximum(abs(electric), abs(magnetic))
+            electric /= norm
+            magnetic /= norm
+        incident = q[0]/factor[0] * electric
+        result.append((incident-magnetic)/(incident+magnetic))
+    return result
+
+
 def reflection(model, angles, values=None, paths=()):
     angles = np.atleast_1d(angles)
     values = np.empty((1, 0)) if values is None else np.atleast_2d(values)
@@ -191,7 +239,7 @@ def reflection(model, angles, values=None, paths=()):
             indices[j] = indices[j].real + 1j * values[:, col]
     tangent = indices[0, :, None] * np.sin(np.deg2rad(angles))[None, :]
     q = longitudinal(indices[:, :, None], tangent[None, :, :])
-    q = np.where(abs(q) < 1e-14, 1e-14 + 0j, q)
+    q[0] = indices[0, :, None] * np.cos(np.deg2rad(angles))
     eps = indices[:, :, None] ** 2
     with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
         ss = (q[:-1] - q[1:]) / (q[:-1] + q[1:])
@@ -201,6 +249,11 @@ def reflection(model, angles, values=None, paths=()):
             phase = np.exp(4j * np.pi * q[j + 1] * thickness[j, :, None] / model['wavelength_nm'])
             rs = (ss[j] + rs * phase) / (1 + ss[j] * rs * phase)
             rp = (pp[j] + rp * phase) / (1 + pp[j] * rp * phase)
+        critical = np.any(abs(q[1:-1]) <= 1e-5 * np.abs(indices[1:-1, :, None]), axis=0)
+        if np.any(critical):
+            batches, rays = np.nonzero(critical)
+            rp[critical], rs[critical] = critical_reflection(
+                q[:, batches, rays], indices[:, batches], thickness[:, batches], model['wavelength_nm'])
     return rp, rs
 
 
@@ -224,7 +277,22 @@ def parse_data(content: bytes, name: str):
     pattern = re.compile(rf'^\s*({number})[\s;]+({number})[\s;]+({number})(?:[\s;]+(.*))?\s*$')
     rows, skipped = [], []
     token = uuid.uuid4().hex[:10]
-    for line, s in enumerate(text.splitlines(), 1):
+    reader = csv.DictReader(io.StringIO(text), delimiter=';')
+    has_context = {'Winkel_Grad','Delta_Grad','Psi_Grad','Messart','Messort','Azimut_Grad'}.issubset(reader.fieldnames or ())
+    if has_context:
+        for record in reader:
+            line = reader.line_num
+            try:
+                a, d, p = (float(record[key].replace(',', '.')) for key in ('Winkel_Grad','Delta_Grad','Psi_Grad'))
+                azimuth = record['Azimut_Grad']
+                row = Row(id=f'{token}-{line}', angle=a, delta=d % 360, psi=p,
+                    source=record.get('Quelle') or name, line=int(record.get('Originalzeile') or line),
+                    comment=record.get('Kommentar') or '', measurement_kind=record['Messart'] or 'repeat',
+                    site=record['Messort'] or '', azimuth_deg=float(azimuth.replace(',', '.')) if azimuth else None)
+                rows.append(row.model_dump())
+            except (ValueError, TypeError, AttributeError):
+                skipped.append(line)
+    for line, s in enumerate(() if has_context else text.splitlines(), 1):
         match = pattern.match(s)
         parts = list(match.groups()) if match else None
         if parts is None:
@@ -255,30 +323,58 @@ def parse_data(content: bytes, name: str):
     return dict(rows=rows, count=len(rows), skipped=skipped, filename=name)
 
 
+def mean_delta(values):
+    """Least-squares mean on the local phase branch chosen by the circular center."""
+    center_vector = np.mean(np.exp(1j * np.deg2rad(values)))
+    center = np.rad2deg(np.angle(center_vector))
+    return float((center + np.mean(wrap(values-center))) % 360), abs(center_vector)
+
+
+def context_fields(row):
+    return dict(measurement_kind=row.get('measurement_kind', 'repeat'), site=row.get('site', ''),
+                azimuth_deg=row.get('azimuth_deg'))
+
+
 class Observations:
     """Exact circular SSE statistics; repeat weighting retains within-group spread."""
     def __init__(self, rows, policy='repeat', tolerance=0.001):
         self.rows, self.groups, self.warnings = rows, [], []
+        incidence = []
         for idx in np.argsort([r['angle'] for r in rows], kind='stable'):
             idx = int(idx)
-            if not self.groups or rows[idx]['angle'] - rows[self.groups[-1][0]]['angle'] > tolerance:
-                self.groups.append([idx])
-            else:
-                self.groups[-1].append(idx)
-        self.angles = np.array([np.mean([rows[i]['angle'] for i in g]) for g in self.groups])
-        self.duplicates = [dict(angle=float(a), count=len(g)) for a, g in zip(self.angles, self.groups) if len(g) > 1]
+            if not incidence or rows[idx]['angle'] - rows[incidence[-1][0]]['angle'] > tolerance:
+                incidence.append([])
+            incidence[-1].append(idx)
+        angles = []
+        self.geometry_angles = []
+        self.contexts = []
+        for indices in incidence:
+            angle = float(np.mean([rows[i]['angle'] for i in indices]))
+            self.geometry_angles.append(angle)
+            contexts = {}
+            for i in indices:
+                fields = context_fields(rows[i])
+                key = (fields['site'], fields['azimuth_deg'])
+                contexts.setdefault(key, []).append(i)
+            for members in contexts.values():
+                self.groups.append(members)
+                self.contexts.append(context_fields(rows[members[0]]))
+                angles.append(angle)
+        self.angles = np.array(angles)
+        self.duplicates = [dict(angle=a, count=len(g), **ctx) for a,g,ctx in
+                           zip(angles, self.groups, self.contexts) if len(g)>1]
         self.ds, self.ps = [], []
         self.centers, self.centered, self.deviations = [], [], []
         for a, group in zip(self.angles, self.groups):
             d = np.array([rows[i]['delta'] % 360 for i in group])
             p = np.array([rows[i]['psi'] for i in group])
             if policy == 'average' and len(group) > 1:
-                z = np.mean(np.exp(1j * np.deg2rad(d)))
-                if abs(z) < 1e-8:
+                mean, concentration = mean_delta(d)
+                if concentration < 1e-8:
                     raise ValueError(f'Kein eindeutiges Δ-Kreismittel bei {a:g}°. Auswahl eingrenzen.')
-                if abs(z) < 0.95 or np.ptp(p) > 1:
+                if concentration < 0.95 or np.ptp(p) > 1:
                     self.warnings.append(f'Große Streuung bei {a:g}°: nur dieselbe unveränderte Probe mitteln.')
-                d, p = np.array([np.rad2deg(np.angle(z)) % 360]), np.array([p.mean()])
+                d, p = np.array([mean]), np.array([p.mean()])
             self.ds.append(d)
             self.ps.append(p)
             center = float(np.rad2deg(np.angle(np.mean(np.exp(1j * np.deg2rad(d))))))
@@ -437,14 +533,21 @@ def safe_list(values):
     return out.tolist()
 
 
-def unique_candidates(candidates, limit=120):
-    kept = []
-    for z, q in sorted(candidates, key=lambda x: x[1]):
-        if q >= 1e90 or not np.isfinite(q) or any(np.max(abs(z - old[0])) < 2e-6 for old in kept):
+def unique_candidates(candidates):
+    # Adjacent bins preserve the former tolerance across bin edges without
+    # comparing each candidate to all previous minima.
+    tolerance = 2e-6
+    kept, bins = [], {}
+    for z, q in sorted(candidates, key=lambda item: item[1]):
+        if q >= 1e90 or not np.isfinite(q):
             continue
-        kept.append((np.asarray(z), float(q)))
-        if len(kept) == limit:
-            break
+        z = np.asarray(z)
+        key = np.floor(z/tolerance).astype(int)
+        nearby = product(*(range(int(i)-1, int(i)+2) for i in key))
+        if any(np.max(abs(z-old)) < tolerance for k in nearby for old in bins.get(k, ())):
+            continue
+        kept.append((z, q))
+        bins.setdefault(tuple(key), []).append(z)
     return kept
 
 
@@ -456,6 +559,15 @@ def period(model, path, angle):
         return None
     q = complex(longitudinal(l['n'] + 1j * l['k'], model['ambient']['n'] * math.sin(math.radians(angle))))
     return model['wavelength_nm'] / (2 * q.real) if abs(q.imag) < 1e-10 and q.real > 1e-10 else None
+
+
+def periodic_axes(model, paths, angle):
+    axes = {}
+    for col, path in enumerate(paths):
+        t = period(model, path, angle)
+        if t is not None:
+            axes[col] = t
+    return axes
 
 
 def fixed_value_minimum(obj, col, value, grids):
@@ -521,10 +633,7 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         idx = np.flatnonzero((scores <= np.r_[np.inf, scores[:-1]]) & (scores <= np.r_[scores[1:], np.inf]))
         if flat:
             idx = np.array([np.argmin(scores)])
-        maxlocal = [100, 240, 500][level]
-        if len(idx) > maxlocal:
-            warnings.append(f'Nur die besten {maxlocal} Rasterminima wurden lokal verfeinert.')
-            idx = idx[np.argsort(scores[idx])[:maxlocal]]
+        obj.search_counts = dict(grid_minima=len(idx), refined_grid_minima=len(idx))
         for k, j in enumerate(idx):
             lo, hi = grids[0][max(j - 1, 0)], grids[0][min(j + 1, len(scores) - 1)]
             opt = minimize_scalar(lambda z: obj.scalar([z]), bounds=(lo, hi), method='bounded', options={'xatol': 1e-13})
@@ -538,7 +647,8 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         ordered = members[np.lexsort((scores[members], ids[members]))]
         idx = ordered[np.r_[True, ids[ordered[1:]] != ids[ordered[:-1]]]]
         idx = idx[np.argsort(scores[idx])]
-        maxlocal = [40, 80, 160][level]
+        maxlocal = len(idx) if request.refine_all else [40, 80, 160][level]
+        obj.search_counts = dict(grid_minima=len(idx), refined_grid_minima=min(len(idx),maxlocal))
         if len(idx) > maxlocal:
             warnings.append(f'{len(idx)} Rasterminima; die besten {maxlocal} lokal verfeinert.')
         progress(49, 'Zusätzliche globale Suche: Differential Evolution')
@@ -576,22 +686,23 @@ def solve(request, progress=lambda p, m: None, cancel=None):
     candidates=[c for i,c in enumerate(candidates) if i==0 or not on_boundary(c[0])]
     dcols = [i for i, p in enumerate(obj.paths) if p.endswith('thickness_nm')]
     periodicity = dict(kind='none', message='Keine exakte gemeinsame Dickenperiode nachgewiesen.', periods=[])
-    if len(obj.obs.angles) == 1 and dcols and not flat:
+    if len(obj.obs.geometry_angles) == 1 and dcols and not flat:
         for z, q in candidates[:10]:
             vals = obj.decode(z)[0]
             m = copy.deepcopy(obj.model)
             for path, value in zip(obj.paths, vals):
                 put(m, path, value)
-            periods = [period(m, obj.paths[i], float(obj.obs.angles[0])) for i in dcols]
-            if not all(t is not None for t in periods):
+            cycles = periodic_axes(m, obj.paths, obj.obs.geometry_angles[0])
+            if not cycles:
                 continue
+            dcols, periods = list(cycles), list(cycles.values())
             axes = []
-            for i, t in zip(dcols, periods):
+            for i, t in cycles.items():
                 p = request.parameters[i]
                 a, b = math.ceil((p.lower - vals[i]) / t - 1e-10), math.floor((p.upper - vals[i]) / t + 1e-10)
                 axes.append(vals[i] + np.arange(a, min(b + 1, a + 200)) * t)
                 if b - a + 1 > 200:
-                    warnings.append('Periodenfamilie auf die ersten 200 Wiederholungen begrenzt.')
+                    warnings.append('Die ersten 200 Wiederholungen stehen direkt in der Familie. Weitere Nummern lassen sich gezielt auswählen.')
             combinations = np.column_stack([a.ravel() for a in np.meshgrid(*axes, indexing='ij')])[:800]
             values = np.tile(vals, (len(combinations), 1))
             values[:, dcols] = combinations
@@ -604,7 +715,7 @@ def solve(request, progress=lambda p, m: None, cancel=None):
         candidates = unique_candidates(candidates)
         if periodicity['periods']:
             periodicity['message'] = 'Dickenperiode(n): ' + ', '.join(f'{p["period_nm"]:.7g} nm' for p in periodicity['periods']) + ('. Bei festem zweiten Parameter; die Periode kann zwischen Wertepaaren variieren.' if periodicity['kind'] == 'conditional' else '. Analytische Wiederholungen wurden nachgerechnet.')
-    elif len(obj.obs.angles) > 1:
+    elif len(obj.obs.geometry_angles) > 1:
         periodicity['message'] = 'Mehrere Winkel haben im Allgemeinen unterschiedliche Dickenperioden. Ähnlich gute Minima allein beweisen keine Periodizität.'
     if ndim==2:
         # Also validate any period-shifted points; equality of function values
@@ -623,7 +734,7 @@ def comparison(request, values):
     from .statistics import RepeatAnalysis
     analysis = RepeatAnalysis(rows, request.duplicate_policy, request.angle_tolerance, request.metric, request.uncertainty_mode == 'auto')
     obs = analysis.display
-    multi = len(obs.angles) > 1
+    multi = len(obs.geometry_angles) > 1
     col = next((i for i, p in enumerate(request.parameters) if p.path.endswith('thickness_nm')), 0)
     if multi:
         x = np.unique(np.r_[np.linspace(obs.angles.min(), obs.angles.max(), 500), obs.angles])
@@ -633,7 +744,7 @@ def comparison(request, values):
         par = request.parameters[col]
         x = np.r_[0, np.geomspace(par.positive_min,par.upper,999)] if par.scale == 'log' and par.lower == 0 else np.geomspace(par.lower, par.upper, 1000) if par.scale == 'log' else np.linspace(par.lower, par.upper, 1000)
         x = np.unique(np.r_[x, values[col]])
-        d, p = simulate(m, obs.angles, x[:, None], [par.path])
+        d, p = simulate(m, obs.geometry_angles, x[:, None], [par.path])
         d, p = d.T, p.T
         xlabel, scale = parameter_label(m, par.path), par.scale
     fd, fp = simulate(m, obs.angles)
@@ -642,8 +753,10 @@ def comparison(request, values):
         for i in group:
             r = rows[i]
             residuals.append(r | dict(model_angle=float(obs.angles[j]), fit_delta=float(fd[0, j]), fit_psi=float(fp[0, j]), delta_residual=float(wrap(fd[0, j] - r['delta'])), psi_residual=float(fp[0, j] - r['psi'])))
-        display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=analysis.records[j]['mean_delta'], psi=analysis.records[j]['mean_psi'], source=f'Mittelwert aus {len(group)} Messungen')]
+        display = [rows[i] for i in group] if request.duplicate_policy != 'average' else [dict(delta=analysis.records[j]['mean_delta'], psi=analysis.records[j]['mean_psi'], source=f'Mittelwert aus {len(group)} Messungen', **obs.contexts[j])]
         for r in display:
-            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source'],comment=r.get('comment',''),line=r.get('line',0)))
+            points.append(dict(x=float(obs.angles[j]) if multi else float(values[col]), delta=r['delta'] % 360, psi=r['psi'], source=r['source'],comment=r.get('comment',''),line=r.get('line',0), **context_fields(r)))
+    phase_sensitive_angles = sorted({r['model_angle'] for r in residuals
+        if min(r['psi'], 90-r['psi'], r['fit_psi'], 90-r['fit_psi']) <= 1})
     fixed_label = parameter_label(m, request.parameters[1 - col].path) if not multi and len(request.parameters) == 2 else None
-    return dict(mode='angle' if multi else 'parameter', xlabel=xlabel, parameter_path=None if multi else request.parameters[col].path, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)
+    return dict(phase_warning_angles=phase_sensitive_angles, mode='angle' if multi else 'parameter', xlabel=xlabel, parameter_path=None if multi else request.parameters[col].path, scale=scale, x=x.tolist(), delta=safe_list(d[0]), psi=safe_list(p[0]), points=points, residuals=residuals, fitted_model=m, fixed_parameter_label=fixed_label, zero_floor=request.parameters[col].positive_min if not multi and request.parameters[col].path.endswith('.k') else None)

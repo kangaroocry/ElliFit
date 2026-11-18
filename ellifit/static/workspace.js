@@ -152,19 +152,19 @@ function renderResultContext(recheck=false){
  if(!r){box.dataset.state='empty';$('resultScopeTitle').textContent='Noch kein Fit berechnet';$('resultScopeDetail').textContent='Eingaben und Messdaten oben vorbereiten, dann die globale Suche starten.';$('resultScopeBadge').textContent='Bereit';return;}
  if(recheck)state.resultStale=pendingFitEdits()||state.fittedInputKey!==currentFitKey();
  const stamp=state.fitCompletedAt?new Date(state.fitCompletedAt).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'letzter Berechnung';
- const old=state.resultStale;box.dataset.state=old?'stale':state.busy?'running':'current';
+ const old=state.resultStale;$('openFittedModel').hidden=!old;box.dataset.state=old?'stale':state.busy?'running':'current';
  $('resultScopeTitle').textContent='Ergebnisse des Fits vom '+stamp;
- $('resultScopeDetail').textContent=`${r.model.name} · ${int(r.measurement_context.count)} Messungen · ${int(r.measurement_uncertainty.groups.length)} Winkel. Lösungsliste, Diagramme und Diagnosen gehören zu diesem Eingabestand.`;
+ $('resultScopeDetail').textContent=`${r.model.name} · ${int(r.measurement_context.count)} Messungen · ${int(r.counts.angles)} Winkel. Lösungsliste, Diagramme und Diagnosen gehören zu diesem Eingabestand.`;
  $('resultScopeBadge').textContent=old?'Früherer Eingabestand':state.busy?'Neue Berechnung läuft':'Eingaben stimmen überein';
  $('stale').hidden=!old;$('stale').textContent='Aktuelle Eingaben wurden geändert. Für diesen neuen Stand bitte erneut fitten; die bisherigen Ergebnisse bleiben zum Vergleich sichtbar.';
  $('noticesScope').textContent='Hinweise zu diesem '+(old?'früheren ':'')+'Fit vom '+stamp;
  $('analysisScope').textContent='Diagnosen zu diesem '+(old?'früheren ':'')+'Fit';
- const fitted=r.measurement_context.count,angles=r.measurement_uncertainty.groups.length;
+ const fitted=r.measurement_context.count,angles=r.counts.angles;
  $('statSelectedLabel').textContent='Messungen dieses Fits';$('statSelected').textContent=int(fitted);$('statAngles').textContent=`${int(angles)} Winkel · ${angles>1?'Mehrwinkel':'Einwinkel'}fit`;
 }
 function restoreTableView(){
  const value=Number(state.view.pageSize);state.pageSize=Number.isSafeInteger(value)&&value>0?value:100;state.view.pageSize=state.pageSize;
- state.view.groupBy=['none','auto','angle','source'].includes(state.view.groupBy)?state.view.groupBy:'none';state.view.reverse=state.view.reverse===true;
+ state.view.groupBy=['none','auto','angle','source','context'].includes(state.view.groupBy)?state.view.groupBy:'none';state.view.reverse=state.view.reverse===true;
  $('pageSize').value=int(state.pageSize);$('groupBy').value=state.view.groupBy;$('inputDetails').open=state.view.inputsOpen!==false;
  $('reverseRows').setAttribute('aria-pressed',String(state.view.reverse));$('reverseRows').textContent=state.view.reverse?'↓ Dateiende zuerst':'↑ Dateianfang zuerst';
  $('reverseRows').title='Nur die Anzeige umkehren; Originaldaten und Fit-Auswahl bleiben erhalten.';

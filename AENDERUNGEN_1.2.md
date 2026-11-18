@@ -1,6 +1,15 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 18. November 2026. Quellstand 1.4.3; ersetzt die Bedienoberfläche und erweitert die Auswertung von 1.1.1.
+Stand: 18. November 2026. Quellstand 1.5.0.
+
+## Änderungen in 1.5.0
+
+- Mittelwerte in Fit, Diagramm und Diagnose verwenden dieselbe Δ-Berechnung. Am Grenzwinkel einer endlichen Schicht wird der analytische Grenzwert verwendet. Schwach bestimmtes Δ nahe Ψ = 0° oder 90° erhält einen Hinweis auf das Stokes-Kriterium.
+- Bei einem Winkel werden die Dickenperioden transparenter Filme auch in Stapeln mit absorbierenden Fit-Schichten erkannt. Große Ergebnislisten sind vollständig durchblätterbar. Jede analytische Wiederholung ist über ihre Nummer anwählbar.
+- Die Messliste, CSV und Sitzung unterstützen Ort und Azimut. Wiederholungen werden innerhalb der jeweiligen Messbedingung ausgewertet. Residuen und optionale Einzelfits pro Messgruppe ergänzen den gemeinsamen Fit.
+- Feste Filmdicken können Standardunsicherheiten tragen. Beiträge zu den Fitparametern sind einzeln einsehbar. Eine über den physikalischen Winkelbereich reichende Unsicherheit wird ausgewiesen.
+- Zusätzliche Messwinkel mit modellierten Δ-/Ψ-Vorhersagen, separate Spalte für das Fitkriterium und Hinweise bei k = 0 oder fehlenden Freiheitsgraden unterstützen die Auswahl einer Lösung.
+- Fitparameter werden anhand der Schichtkennung gezielt ins aktuelle Modell übertragen. Ein früherer Modellstand lässt sich separat öffnen.
 
 ## Kompakte Periodengleichungen in 1.4.3
 

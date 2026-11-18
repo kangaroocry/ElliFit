@@ -67,3 +67,28 @@ body.fit-busy::after{content:"";position:fixed;inset:0;z-index:60;background:rgb
 .family-equation{white-space:normal;overflow-wrap:anywhere}
 .family-constant{font-size:12px;color:#527269}
 .family-indices{font:12px/1.5 "Segoe UI",sans-serif;color:#587969}
+
+.context-editor,.comparison-residuals,.angle-suggestion {margin:.65rem 0;padding:.55rem .75rem;border:1px solid #cddbd8;border-radius:6px}
+.context-editor summary,.comparison-residuals summary,.angle-suggestion summary {cursor:pointer;font-weight:600}
+.context-fields,.fixed-thickness-inputs {display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem;margin:.55rem 0}
+.context-fields label,.fixed-thickness-inputs label {display:grid;gap:.2rem;align-content:start}
+.row-context {display:block;width:fit-content;margin:.16rem 0 0;padding:.05rem .35rem;font-size:.79rem;color:#42636a;background:transparent;border:1px solid #c9d8d4}
+.result-paging {display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;font-size:.82rem}
+.result-paging[hidden],.result-paging button[hidden],.angle-suggestion[hidden],.comparison-residuals[hidden] {display:none}
+.comparison-residuals .scroll,.angle-suggestion .scroll {overflow:auto;max-width:100%;max-height:22rem}
+.comparison-residuals td small,#measurementUncertainty td small,.families-table th small {display:block}
+.comparison-residuals th {white-space:normal}
+.angle-suggestion,.fit-cautions[data-kind="info"] {background:#edf5fb;color:#194b67;border-color:#91b6cb}
+.angle-suggestion details {margin-top:.3rem}
+.family-equations {overflow-wrap:anywhere}
+.warning-inline {color:#713a0c;background:#fff0d6;padding:.55rem}
+#groupFitPanel {margin-top:.6rem;padding-top:.6rem;border-top:1px solid #cddbd8}
+#groupFitPanel[hidden] {display:none}
+#groupFitPanel .caption {display:block;margin-top:.25rem}
+.group-fit-value {display:block;margin:.2rem 0}
+
+#refineAllLabel[hidden],#openFittedModel[hidden],#cancelContext[hidden] {display:none}
+.alias-jump {display:flex;align-items:center;justify-content:center;gap:.4rem}
+.alias-jump input {max-width:7rem}
+
+#resultTable th,#resultTable th small,#resultTable th .quantity {white-space:normal;overflow-wrap:anywhere;hyphens:auto;line-height:1.25}

@@ -20,6 +20,7 @@ from typing import Literal
 from . import __version__
 from .core import Cancelled, FitRequest, Model, Observations, Row, comparison, parse_data, simulate, solve
 from .core import Medium, Objective, parameter_label, put
+from .measurement_plan import family_values
 from .statistics import RepeatAnalysis, parameter_uncertainty
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,7 +60,7 @@ async def bad_file(request, exc):
 @app.get('/')
 def home():
     html = (STATIC / 'index.html').read_text(encoding='utf-8')
-    assets = ('app.js', 'documents.js', 'workspace.js', 'interactions.js', 'objective.js', 'style.css')
+    assets = ('app.js', 'documents.js', 'workspace.js', 'interactions.js', 'objective.js', 'measurements.js', 'style.css')
     bundle = hashlib.sha256(b''.join((STATIC / name).read_bytes() for name in assets)).hexdigest()[:16]
     for asset in ('/static/' + name for name in assets):
         html = html.replace('"' + asset + '"', '"' + asset + '?v=' + __version__ + '&amp;build=' + bundle + '"')
@@ -311,16 +312,56 @@ def other_solution(key: str, index: int, alias: int | None = None):
         raise HTTPException(404, 'Lösung nicht vorhanden.')
     solution=job['result']['solutions'][index]
     if alias is None:alias=solution['representative_alias']
-    if not 0<=alias<len(solution['aliases']):raise HTTPException(404,'Periodische Wiederholung nicht vorhanden.')
-    values=solution['aliases'][alias]['values']
+    if not 0<=alias<solution['alias_count']:raise HTTPException(404,'Periodische Wiederholung nicht vorhanden.')
+    values=family_values(job['request'].parameters,solution,alias)
     result=comparison(job['request'],values)
     if alias==solution['representative_alias']:
         result['uncertainty']=solution['uncertainty']
     else:
         if 'objective' not in job:job['objective']=Objective(job['request'])
         result['uncertainty']=parameter_uncertainty(job['objective'],values)
+    if alias >= len(solution['aliases']):
+        obj = job['objective']
+        delta, psi = obj.prediction(obj.encode(values))
+        result['selected_member'] = dict(index=alias, values=values, q=float(obj.analysis.sse(delta,psi)[0]),
+                                         rmse_deg=float(obj.analysis.raw_rms(delta,psi)[0]))
     result['selected_alias']=alias
     return result
+
+
+class GroupFitInput(BaseModel):
+    row_id: str = Field(min_length=1, max_length=200)
+
+
+@app.post('/api/jobs/{key}/group-fit')
+def group_fit(key: str, body: GroupFitInput):
+    job = job_by_id(key)
+    if job['status'] != 'completed':
+        raise HTTPException(409, 'Zuerst eine globale Suche abschließen.')
+    request = job['request']
+    if len(request.parameters) != 1:
+        raise ValueError('Einzelfits je Messgruppe benötigen einen freien Parameter.')
+    member = next((r for r in request.measurements if r.id == body.row_id), None)
+    if member is None:
+        raise HTTPException(404, 'Diese Messung gehört nicht zum angezeigten Fit.')
+    def context(r):
+        return r.site, r.azimuth_deg
+    signature = context(member)
+    members = [r for r in request.measurements if context(r) == signature]
+    if len(members) == len(request.measurements):
+        raise ValueError('Für den Gruppenvergleich mindestens zwei Messgruppen kennzeichnen.')
+    subset = request.model_copy(update=dict(measurements=members, uncertainty_mode='none', metric='angular',
+        use_uncertainties=False, duplicate_policy='repeat', bootstrap_samples=0))
+    result = solve(subset)
+    best = result['solutions'][0]
+    cutoff = max(.1, best['rmse_deg'] + request.equivalence_deg)
+    good = [s for s in result['solutions'] if s['rmse_deg'] <= cutoff+1e-9]
+    return dict(measurement_kind=member.measurement_kind,site=member.site,azimuth_deg=member.azimuth_deg,
+        count=len(members), angle_count=result['counts']['angles'], best_rms=best['rmse_deg'],
+        good_families=len(good), good_values=sum(s['alias_count'] for s in good), cutoff=cutoff,
+        warnings=result['warnings'], families=[dict(rank=s['rank'], values=s['values'],
+            first_values=s['aliases'][0]['values'], periods=s['periods'], alias_count=s['alias_count'],
+            rmse_deg=s['rmse_deg'], at_boundary=s['at_boundary'], weak=s['uncertainty']['weak']) for s in good])
 
 
 class ViewInput(BaseModel):

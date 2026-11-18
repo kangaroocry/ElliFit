@@ -11,7 +11,7 @@ function documentFingerprint(value){
 }
 function inputDocument(input){
  if(!(input instanceof Element))return null;
- if(input.matches('#modelName,#modelNotes,#wavelength,#convention,#layerEditor input[data-path]'))return 'model';
+ if(input.matches('#modelName,#modelNotes,#wavelength,#convention,#layerEditor input[data-path],#fixedThicknessInputs input'))return 'model';
  if(input.matches('#materialName,#materialNotes,#materialN,#materialK,#materialWavelength,#materialUncertaintyN,#materialUncertaintyK'))return 'material';
  return null;
 }
@@ -37,7 +37,7 @@ function renderFileState(kind='model'){
  if(kind==='model')document.title=(edited?'● ':'')+'ElliFit '+UI_VERSION+(file?' · '+file:'');
 }
 function beginModelDocument(model,file=null,origin=''){
- state.model=clone(model);state.modelFile=file;state.modelOrigin=origin;state.modelBaseline=documentFingerprint(state.model);
+ state.modelDocument=(state.modelDocument||0)+1;state.model=clone(model);for(const layer of state.model.layers)layer.layer_id ||= newLayerId();state.modelFile=file;state.modelOrigin=origin;state.modelBaseline=documentFingerprint(state.model);
  documentInputs.model.clear();state.history=[];state.future=[];renderModel();stale();
 }
 function materialDocumentLoaded(){
@@ -147,8 +147,8 @@ function bindDocuments(){
  document.addEventListener('input',e=>{const kind=inputDocument(e.target);if(kind){documentInputs[kind].add(e.target);renderFileState(kind);}});
  document.addEventListener('change',e=>{
   const input=e.target,kind=inputDocument(input);if(!kind)return;
-  const optional=['materialWavelength','materialUncertaintyN','materialUncertaintyK'].includes(input.id);
-  if(!input.dataset.num||Number.isFinite(parseNumber(input.value,optional))||optional&&parseNumber(input.value,true)===null)documentInputs[kind].delete(input);
+  const optional=input.hasAttribute('data-u-thickness')||['materialWavelength','materialUncertaintyN','materialUncertaintyK'].includes(input.id);
+  if(input.validity.valid&&(!input.dataset.num||Number.isFinite(parseNumber(input.value,optional))||optional&&parseNumber(input.value,true)===null))documentInputs[kind].delete(input);
   renderFileState(kind);
  });
  $('saveModel').onclick=()=>saveDocument('model');$('saveModelAs').onclick=()=>saveDocument('model',true);

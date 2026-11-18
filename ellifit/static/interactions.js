@@ -17,7 +17,7 @@ function changeFitBound(t){
 function insertionGap(index){return `<div class="insert-gap"><button type="button" data-insert-layer="${index}" aria-label="Schicht an Grenzfläche ${index+1} einfügen" title="Neue Schicht genau hier einfügen">＋</button></div>`;}
 function insertLayerAt(index){
  if(state.model.layers.length>=40)return toast('Maximal 40 endliche Schichten.','warning');
- mutate(()=>{state.model.layers.splice(index,0,{name:'Film',n:1.5,k:0,thickness_nm:0,uncertainty_n:null,uncertainty_k:null});remapLayerParameters(i=>i>=index?i+1:i);});renderModel();
+ mutate(()=>{state.model.layers.splice(index,0,{layer_id:newLayerId(),name:'Film',n:1.5,k:0,thickness_nm:0,uncertainty_n:null,uncertainty_k:null});remapLayerParameters(i=>i>=index?i+1:i);});renderModel();
 }
 function quickMaterialOptions(path){return '<option value="">Material übernehmen …</option>'+state.materials.filter(m=>path!=='ambient'||m.k===0).map(m=>`<option value="${esc(m.file)}">${esc(m.name)}</option>`).join('');}
 function refreshQuickMaterialLists(){for(const select of $('layerEditor').querySelectorAll('[data-material-target]'))select.innerHTML=quickMaterialOptions(select.dataset.materialTarget);}
@@ -40,7 +40,7 @@ function profileScope(){
  const d=state.result?.identifiability,p=d?.profile,chosen=selectedProfileBranch();
  if(!p)return d?.profile_reason||'Kein Talprofil vorhanden.';
  if(!chosen&&p.branches)return 'Für diese Wiederholung wurde kein Talast berechnet. '+(p.omitted_branches?'Die Anzahl der fortgesetzten Äste ist begrenzt.':'');
- const s=state.result.solutions[state.active];return `Talast zu Familie ${s.rank}, Lösung ${state.activeAlias+1} · ${parameterHover(s.aliases[state.activeAlias].values).replace(/<[^>]*>/g,'')}. ${p.boundary_rule||''} Die Gleichungen darunter gelten lokal an dieser Lösung. Von verschiedenen Lösungen fortgesetzte Verläufe können sich überlagern.`;
+ const s=state.result.solutions[state.active];return `Talast zu Familie ${s.rank}, Lösung ${state.activeAlias+1} · ${parameterHover(selectedMember().values).replace(/<[^>]*>/g,'')}. ${p.boundary_rule||''} Die Gleichungen darunter gelten lokal an dieser Lösung. Von verschiedenen Lösungen fortgesetzte Verläufe können sich überlagern.`;
 }
 function renderBranchControl(){
  const p=state.result?.identifiability?.profile;
@@ -49,18 +49,30 @@ function renderBranchControl(){
 }
 function renderFitCautions(){
  const box=$('fitCautions'),r=state.result;if(!r){box.hidden=true;return;}
- const items=[],d=r.identifiability||{},periodic=r.solutions.filter(s=>s.periods?.length),good=r.solutions.filter(s=>s.rmse_deg<=.1),coupled=r.solutions.some(s=>s.uncertainty?.strongly_correlated||s.uncertainty?.weak);
- const flag=(title,text,critical=false)=>items.push({title,text,critical});
+ const items=[],d=r.identifiability||{},periodic=r.solutions.filter(s=>s.periodic),good=r.solutions.filter(s=>s.rmse_deg<=.1),relevant=[r.solutions[0],r.solutions[state.active],...good],coupled=relevant.some(s=>s.uncertainty?.strongly_correlated||s.uncertainty?.weak);
+ const flag=(title,text,critical=false,info=false)=>items.push({title,text,critical,info});
  if(periodic.length)flag('Periodische Mehrdeutigkeit',`${int(periodic.reduce((n,s)=>n+s.alias_count,0))} periodische Parameterkombinationen in ${int(periodic.length)} Familien. Innerhalb einer Familie gleichwertig: die erste Wiederholung ist nicht bevorzugt. Weitere periodische Lösungen können außerhalb des Suchbereichs liegen. Zusätzliche Winkel oder unabhängige Dickeninformation nötig.`);
  if(r.solutions[0].rmse_deg>1)flag('Fit relativ schlecht – Winkel-RMS über 1°',`Winkel-RMS des besten Fits: ${rmsText(r.solutions[0].rmse_deg)}°. Die Winkelabweichung überschreitet den Warnwert von 1°. Modell, Messauswahl und Suchgrenzen prüfen, bevor Parameter übernommen werden.`,r.solutions[0].rmse_deg>=10);
  if(good.length>1)flag('Mehrere sehr gute Fits',`${int(good.length)} verschiedene Familien haben Winkel-RMS ≤ 0,1°. Aus dem kleinsten angezeigten Wert folgt keine eindeutige physikalische Lösung.`);
- if(d.lack_of_fit_dof<=0&&r.parameters.length===2)flag('Keine unabhängige Modellprüfung',`${int(d.independent_mean_components)} unabhängige Winkelmittelwerte für ${int(d.free_parameters)} freie Parameter. Wiederholungen desselben Winkels ändern das nicht. Ein kleiner RMS bestätigt hier das Schichtmodell nicht.`,true);
- if(coupled)flag('Parameter stark gekoppelt','Viele Wertepaare können sehr ähnlich passen. Einzelne Dicken oder Indizes nicht isoliert abschreiben; gewählten Talast und zusätzliche Messwinkel prüfen.',r.solutions.some(s=>s.uncertainty?.weak));
- const branch=selectedProfileBranch(),points=(branch?.points||d.profile?.points||[]).filter(p=>p.rmse_deg<=.1);
+ if(d.lack_of_fit_dof<=0&&r.parameters.length===2)flag(
+  !activeTrial()&&r.solutions[state.active].mean_fit?.numerical_match?'Δ und Ψ getroffen · kein Freiheitsgrad zur Modellprüfung':'Kein verbleibender Freiheitsgrad zur Modellprüfung',
+  'Ein Einfallswinkel liefert höchstens zwei unabhängige Winkelgrößen für zwei freie Parameter. Für eine unabhängige Modellprüfung einen weiteren Einfallswinkel messen.',true);
+ if(coupled)flag('Parameter stark gekoppelt','Viele Wertepaare können sehr ähnlich passen. Einzelne Dicken oder Indizes nicht isoliert abschreiben; gewählten Talast und zusätzliche Messwinkel prüfen.',relevant.some(s=>s.uncertainty?.weak));
+ const branch=selectedProfileBranch(),points=(branch?.points||[]).filter(p=>p.rmse_deg<=.1);
  if(points.length>4&&r.parameters.length===2)flag('Tal mit vielen gut passenden Wertepaaren',r.parameters.map((p,i)=>`${parameterSymbol(p)}: ${quantityValue(Math.min(...points.map(q=>q.values[i])),p)} bis ${quantityValue(Math.max(...points.map(q=>q.values[i])),p)}${p.path.endsWith('thickness_nm')?' nm':''}`).join(' · ')+'. Spanne entlang des gewählten Talasts, keine Konfidenzgrenze.');
- if(r.solutions[0].at_boundary)flag('Bestes Minimum an der Suchgrenze','Suchbereich prüfen und erweitern. Die Begrenzung kann die scheinbar beste Lösung verursachen.',true);
- box.hidden=!items.length;if(!items.length)return;box.dataset.kind=items.some(x=>x.critical)?'critical':'warning';
- box.innerHTML=`<div class="caution-heading"><strong>Fitergebnis prüfen – keinen Einzelwert ungeprüft übernehmen</strong><span>${state.resultStale?'Zum früheren Fit':'Zum angezeigten Fit'}</span></div><div class="caution-grid">${items.map(x=>`<article data-kind="${x.critical?'critical':'warning'}"><b>${esc(x.title)}</b><p>${esc(x.text)}</p></article>`).join('')}</div><p class="caption">Winkel-RMS ≤ 0,1° kennzeichnet hier sehr kleine Winkelabweichungen; die Warnung „Fit relativ schlecht“ erscheint bei Winkel-RMS > 1°. Beide Werte sind Orientierungen, keine statistischen Nachweise. Die Hinweise gehören zum oben datierten Fit.</p>`;
+ for(const axis of r.solutions[0].boundary_axes||[]){
+  if(axis.physical_zero){
+   const zero=r.zero_tests?.find(t=>t.path===axis.path);
+   const value=axis.path.endsWith('.k')?'k = 0':'d = 0 nm';
+   flag('Die Messung ist mit '+value+' vereinbar', axis.label+'. '+(zero?.upper_limit!=null?'Näherungsweise einseitige 95-%-Obergrenze für k '+fmt(zero.upper_limit,4)+'.':'Der Fit erreicht die physikalische Nullgrenze.'),false,true);
+  }else flag('Bestes Minimum an einer Suchgrenze',axis.label+' erreicht die '+(axis.side==='lower'?'Untergrenze':'Obergrenze')+'. Diesen Suchbereich prüfen und gegebenenfalls erweitern.',true);
+ }
+ const unc=activeTrial()?null:state.comparison?.uncertainty||r.solutions[state.active].uncertainty;
+ for(const warning of unc?.calibration_warnings||[])flag('Kombinierte Unsicherheit offen',warning,true);
+ const phase=state.comparison?.phase_warning_angles||[];
+ if(phase.length)flag('Δ hier kaum bestimmbar','Bei '+phase.slice(0,5).map(a=>numericText(a,'angle')+'°').join(', ')+(phase.length>5?' und weiteren Winkeln':'')+' liegt das gemessene oder berechnete Ψ innerhalb von 1° bei 0° oder 90°. Kleine Polarisationsänderungen können große Δ-Sprünge ergeben. In den Suchoptionen steht die Stokes-Abweichung zum Vergleich bereit.');
+ box.hidden=!items.length;if(!items.length)return;const infoOnly=items.every(x=>x.info);box.dataset.kind=infoOnly?'info':items.some(x=>x.critical)?'critical':'warning';
+ box.innerHTML=`<div class="caution-heading"><strong>${infoOnly?'Physikalische Grenze':'Fitergebnis prüfen – keinen Einzelwert ungeprüft übernehmen'}</strong><span>${state.resultStale?'Zum früheren Fit':'Zum angezeigten Fit'}</span></div><div class="caution-grid">${items.map(x=>`<article data-kind="${x.info?'info':x.critical?'critical':'warning'}"><b>${esc(x.title)}</b><p>${esc(x.text)}</p></article>`).join('')}</div><p class="caption">Winkel-RMS ≤ 0,1° kennzeichnet hier sehr kleine Winkelabweichungen; die Warnung „Fit relativ schlecht“ erscheint bei Winkel-RMS > 1°. Beide Werte sind Orientierungen, keine statistischen Nachweise. Die Hinweise gehören zum oben datierten Fit.</p>`;
 }
 function periodicFamilyEquations(solution){
  const params=state.result.parameters,base=solution.aliases[0].values,variables=[],equations=[];
@@ -70,7 +82,7 @@ function periodicFamilyEquations(solution){
   if(period){
    const variable=solution.periods.length===1?'m':'m'+['₁','₂'][periodIndex];
    const last=Math.max(0,Math.floor((param.upper-base[column])/period.period_nm+1e-10));
-   equations.push(`<span class="family-equation" title="${esc(param.label)} · Gerundete Anzeige; Rechnung mit voller Präzision">${symbol} = (${quantityValue(base[column],param)} + ${variable} · ${numericText(period.period_nm,'d')}) nm</span>`);
+   equations.push(`<span class="family-equation" title="${esc(param.label)} · Gerundete Anzeige; Rechnung mit voller Präzision">${symbol} ≈ (${quantityValue(base[column],param)} + ${variable} · ${fmt(period.period_nm,Math.min(14,Math.max(6,Math.ceil(Math.log10(last+1))+5)))}) nm</span>`);
    variables.push(`${variable} = ${last===0?'0':last===1?'0, 1':'0, 1, …, '+int(last)}`);
   }else{
    equations.push(`<span class="family-equation family-constant" title="${esc(param.label)} · Innerhalb dieser Periodenfamilie gleich">${symbol} = ${quantityValue(base[column],param)}${param.path.endsWith('thickness_nm')?' nm':''}</span>`);
@@ -78,13 +90,26 @@ function periodicFamilyEquations(solution){
  }
  return `<span class="family-equations">${equations.join('')}<span class="family-indices">${variables.join(' · ')} (im Suchbereich)</span></span>`;
 }
+function selectedMember(){
+ return state.comparison?.selected_member||state.result.solutions[state.active].aliases[state.activeAlias];
+}
+function visibleFamilyMembers(s,index){
+ const extra=state.comparison?.selected_member;
+ return !activeTrial()&&state.active===index&&extra ? [...s.aliases,extra] : s.aliases;
+}
 function renderFamilies(){
- const r=state.result,params=r.parameters,heading=`<tr><th>#</th>${params.map(p=>`<th>${parameterHeading(p)}</th>`).join('')}<th>RMS (°)${fitMetric().differs_from_angular_rms?'':' ↓'}</th></tr>`;
- $('resultTable').innerHTML=`<table class="families-table"><thead>${heading}</thead><tbody>${r.solutions.map((s,i)=>{
+ const r=state.result,params=r.parameters,m=fitMetric(),extra=m.differs_from_angular_rms;
+ const metricHead=extra?`<th>${esc(m.label)} ↓<small>${metricUnit()}</small></th>`:'';
+ const metricCells=(q,rms)=>(extra?`<td>${fmt(fitValue(q),5)}</td>`:'')+`<td>${rmsText(rms)}</td>`;
+ const heading=`<tr><th>#</th>${params.map(p=>`<th>${parameterHeading(p)}</th>`).join('')}${metricHead}<th>Winkel-RMS (°)${extra?'':' ↓'}</th></tr>`;
+ const shown=Math.min(r.solutions.length,Math.max(state.shownFamilies||120,state.active+1));
+ $('familyPaging').hidden=false;$('moreFamilies').hidden=shown===r.solutions.length;
+ $('familyCounter').textContent=`${int(r.counts.grid_minima)} ${r.counts.grid_minima===1?'Rasterminimum':'Rasterminima'} erkannt · ${int(r.counts.refined_grid_minima)} lokal verfeinert · ${int(shown)} von ${int(r.solutions.length)} ${r.solutions.length===1?'Familie':'Familien'} angezeigt`;
+ $('resultTable').innerHTML=`<table class="families-table"><thead>${heading}</thead><tbody>${r.solutions.slice(0,shown).map((s,i)=>{
   const active=!state.activeTrial&&state.active===i,color=rmsColor(s.rmse_deg,.17);
-  if(!s.periodic)return `<tr class="family-row ${active?'active':''}" data-family="${i}" title="${esc(fitMetric().label)}: ${fmt(fitValue(s.q),5)} (${metricUnit()})" style="background:${color}"><td>${s.rank}</td>${s.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}<td>${rmsText(s.rmse_deg)}</td></tr>`;
-  const rows=s.aliases.map((a,j)=>`<tr data-family="${i}" data-alias="${j}" class="alias-row ${active&&state.activeAlias===j?'active':''}" tabindex="0" role="button" title="${esc(fitMetric().label)}: ${fmt(fitValue(a.q),5)} (${metricUnit()})" aria-label="Familie ${s.rank}, Lösung ${j+1} auswählen"><td>${j+1}</td>${a.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}<td>${rmsText(a.rmse_deg)}</td></tr>`).join('');
-  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b><span>RMS ${rmsText(s.rmse_deg)}°</span>${periodicFamilyEquations(s)}</summary><p class="family-period">${s.periods.map(p=>`${esc(p.label)}: T = ${numericText(p.period_nm,'d')} nm`).join(' · ')}. Aufsteigende Werte, keine Bevorzugung der ersten Lösung.</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} berechneten Wiederholungen.</p>`:''}</details></td></tr>`;
+  if(!s.periodic)return `<tr class="family-row ${active?'active':''}" data-family="${i}" title="${esc(m.label)}: ${fmt(fitValue(s.q),5)} (${metricUnit()})" style="background:${color}"><td>${s.rank}</td>${s.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}${metricCells(s.q,s.rmse_deg)}</tr>${s.periods.length?`<tr><td colspan="${params.length+2+Number(extra)}"><small>Eine Wiederholung im Suchbereich · ${s.periods.map(p=>'T = '+fmt(p.period_nm,6)+' nm').join(' · ')}</small></td></tr>`:''}`;
+  const rows=visibleFamilyMembers(s,i).map(a=>`<tr data-family="${i}" data-alias="${a.index}" class="alias-row ${active&&state.activeAlias===a.index?'active':''}" tabindex="0" role="button" aria-label="Familie ${s.rank}, Lösung ${a.index+1} auswählen"><td>${int(a.index+1)}</td>${a.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}${metricCells(a.q,a.rmse_deg)}</tr>`).join('');
+  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2+Number(extra)}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b>${extra?`<span>${esc(m.label)} ${fmt(fitValue(s.q),5)}</span>`:''}<span>Winkel-RMS ${rmsText(s.rmse_deg)}°</span>${periodicFamilyEquations(s)}</summary><p class="family-period">${s.periods.map(p=>esc(p.label)+': T = '+fmt(p.period_nm,8)+' nm').join(' · ')}</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} Wiederholungen. Weitere Nummer direkt auswählen.</p><label class="alias-jump">Lösung Nr. <input data-alias-number="${i}" inputmode="numeric" aria-label="Nummer innerhalb der Familie ${s.rank}"><button data-jump-family="${i}">Anzeigen</button></label>`:''}</details></td></tr>`;
  }).join('')}</tbody></table>`;
  for(const el of $('resultTable').querySelectorAll('details[data-family-open]'))el.addEventListener('toggle',()=>el.open?expandedFamilies.add(Number(el.dataset.familyOpen)):expandedFamilies.delete(Number(el.dataset.familyOpen)));
  const s=r.solutions[state.active];$('activeLabel').textContent=activeTrial()?`Probelösung T${state.activeTrial} · nicht optimiert`:`Dargestellt: Familie ${s.rank}${s.periodic?' · Lösung '+(state.activeAlias+1)+' (gleichwertige Wiederholung)':''}`;

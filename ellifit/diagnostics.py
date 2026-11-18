@@ -120,7 +120,7 @@ def _profile_minimum(obj, fixed_col, fixed, grids):
 
 
 def fit_diagnostics(obj, solutions, grids, progress=None):
-    angles=len(obj.obs.angles);parameters=len(obj.paths)
+    angles=len(obj.obs.geometry_angles);parameters=len(obj.paths)
     floor=float(np.sqrt(sum(np.sum(wrap(d-r['mean_delta'])**2)+np.sum((p-r['mean_psi'])**2)
         for d,p,r in zip(obj.analysis.raw.ds,obj.analysis.raw.ps,obj.analysis.records))/(2*obj.analysis.raw.count)))
     out=dict(unique_angles=angles, independent_mean_components=2*angles, free_parameters=parameters,
@@ -150,7 +150,7 @@ def fit_diagnostics(obj, solutions, grids, progress=None):
         near.extend(center+np.r_[0.,np.geomspace(1e-7*span,.02*span,21),-np.geomspace(1e-7*span,.02*span,21)])
     axis=np.unique(np.clip(np.r_[base,near],par.lower,par.upper))
     threshold=None
-    m=int(obj.analysis.raw.counts[0])
+    m=int(obj.analysis.raw.counts[0]) if len(obj.obs.groups)==1 else 0
     if obj.analysis.active and m>2:
         threshold=float(2*(m-1)/(m-2)*f_distribution.ppf(.95,2,m-2))
     from .profiles import build_profiles

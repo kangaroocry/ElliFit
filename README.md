@@ -1,8 +1,8 @@
-# ElliFit 1.4.3
+# ElliFit 1.5.0
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.4.3 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[Aktuelle ElliFit-Version als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/heads/ellifit-1.2.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows
 
@@ -32,13 +32,27 @@ Start_Windows.bat --port 8766
 
 Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
 
-## Periodische Gleichungen in 1.4.3
+## Auswertung mit ElliFit 1.5.0
 
-Periodenfamilien zeigen jetzt schon **im eingeklappten Listeneintrag** eine kompakte Gleichung, zum Beispiel `d[1] = (45,6 + m · 206,8) nm`. Der ganzzahlige Zählerbereich gehört ausdrücklich zum untersuchten Suchbereich. Der Ursprung ist die kleinste zugehörige Dicke in diesem Bereich und bleibt bei Auswahl einer anderen Wiederholung unverändert; er bedeutet keine physikalische Bevorzugung.
+**Wiederholungen, Messorte und Azimute.** Über das Stiftsymbol an einer Messzeile lässt sich eine Zuordnung bearbeiten. Unter **Messort und Azimut zuordnen** kann dieselbe Angabe auf die markierten Zeilen angewendet werden. Eine Ortsmessung erhält einen Ortsnamen, eine Azimutmessung einen Probenazimut. 0° und 360° bezeichnen dieselbe Orientierung. Ältere Dateien werden als Wiederholungen ohne Orts-/Azimutangabe geladen. Messdaten-CSV und Sitzung speichern die Zuordnung.
+
+ElliFit bildet Mittelwerte und Wiederholkovarianzen je Einfallswinkel und identischem Messort und Azimut. Vier Drehungen an einem Einfallswinkel zählen im isotropen Modell als ein Einfallswinkel. Der gemeinsame Fit setzt gleiche Schichtparameter über die gewählte Probe voraus. Unter dem Modellvergleich stehen die gemessenen Werte und die vorzeichenbehafteten Residuen von Δ und Ψ nebeneinander. Bei einem freien Parameter lassen sich dort die auf der gewählten Residuentabellenseite vertretenen Messgruppen zusätzlich einzeln fitten. Dafür werden alle ausgewählten Daten der jeweiligen Gruppe im ursprünglichen Suchbereich ungewichtet ausgewertet. Die Ausgabe nennt Fitgüte, konkurrierende Werte und Perioden. Der Fitbericht enthält auch die angeforderten Einzelfits.
+
+**Standardunsicherheit einer Unterlage.** Unter **Suchoptionen und Unsicherheiten → Optionale Kalibrierunsicherheiten** kann für jeden Film mit fester Dicke ein **u(d) in nm** hinterlegt werden. Die Eingabe gehört zum Schichtmodell. Die Unsicherheitsausgabe nennt den Beitrag jeder festen Eingabe zu jedem gefitteten Parameter. Bei einer Winkelunsicherheit, die 0° oder 90° erreicht, zeigt ElliFit die lokale Empfindlichkeit und kennzeichnet die Einschränkung. Ein kombinierter Zahlenwert setzt dann ein zusätzliches Modell für die Winkelverteilung voraus.
+
+**Lösungen vergleichen.** Die Liste nennt gefundene Rasterminima, lokal verfeinerte Rasterminima und angezeigte Familien. **Weitere Lösungen anzeigen** lädt die nächsten 120 Familien in die Ansicht. Im 1D-Raster werden alle erkannten Minima verfeinert. Bei zwei Parametern kann die vollständige lokale Verfeinerung aller erkannten Rasterminima ausdrücklich aktiviert werden. Der Winkel-RMS steht bei abweichendem Fitkriterium neben der tatsächlich minimierten Größe.
+
+Bei einem Einfallswinkel erkennt ElliFit die exakte Periode jeder transparenten, propagierenden Fit-Schicht separat, auch wenn ein anderer Film absorbiert. Große Familien zeigen die ersten 200 Werte und erlauben über **Lösung Nr.** die direkte Auswahl jeder weiteren Wiederholung. Bei mehreren gut passenden Kandidaten schlägt ElliFit gegebenenfalls einen zusätzlichen Messwinkel vor. Auf einem Raster von 45° bis 80° wird für bis zu zwölf Kandidaten der kleinste paarweise Abstand normierter Stokes-Vektoren maximiert. Die zugehörigen Δ-/Ψ-Vorhersagen stehen daneben. Das Gerät muss den vorgeschlagenen Winkel und die Unterschiede auflösen können.
+
+**Fitparameter übernehmen** überträgt ausschließlich die gefitteten Felder. Schichtkennungen erhalten die Zuordnung beim Verschieben. Bei einem Konflikt im Zielfeld erscheint eine Rückfrage. Ein älteres Fitmodell lässt sich separat als neues Dokument öffnen.
+
+## Periodische Gleichungen seit 1.4.3
+
+Periodenfamilien zeigen jetzt schon **im eingeklappten Listeneintrag** eine kompakte Gleichung, zum Beispiel `d[1] ≈ (45,6 + m · 206,8) nm`. Der ganzzahlige Zählerbereich gehört ausdrücklich zum untersuchten Suchbereich. Der Ursprung ist die kleinste zugehörige Dicke in diesem Bereich und bleibt bei Auswahl einer anderen Wiederholung unverändert; er bedeutet keine physikalische Bevorzugung.
 
 Bei zwei periodischen Dicken erhält jede ihren eigenen unabhängigen Zähler `m₁` beziehungsweise `m₂`. Andere gleichzeitig gefittete Parameter, etwa ein innerhalb der Familie konstanter Brechungsindex, stehen daneben beziehungsweise darunter mit ihrer Schichtnummer. Dezimalkomma, eine Nachkommastelle für Dicken und angepasste Auflösung bei kleinen Werten bleiben erhalten; gerechnet wird mit voller Präzision.
 
-Die Zählergrenzen berücksichtigen auch Wiederholungen jenseits der maximal 200 einzeln aufgeführten Wertepaare. Aufklappen zeigt weiterhin die auswählbaren Lösungen und die vollständigen Material-/Schichtbezeichnungen. Die Formeln sind eine Anzeige der bereits analytisch festgestellten Periodizität; Suche und Familienbildung bleiben unverändert.
+Die Zählergrenzen berücksichtigen auch Wiederholungen jenseits der maximal 200 einzeln aufgeführten Wertepaare. Aufklappen zeigt die vollständigen Material-/Schichtbezeichnungen. Jede Wiederholung ist über ihre Nummer auswählbar.
 
 ## Änderungen in 1.4.2
 
@@ -172,7 +186,7 @@ Probelösungen lassen sich als eigenes **CSV** exportieren. Der vollständige **
 
 **Schichtkennungen** stehen größer links neben den farbigen Kästchen und Eingabeschichten. Kompakte Symbole wie **d[1], d[2], n[1], n[2]** erscheinen in Gleichungen, Punktinfos und Ergebnisköpfen. Das Substrat heißt entsprechend **n[0]** beziehungsweise **k[0]**, das Einfallsmedium **n[Einfall]**. Vollständige Materialnamen bleiben auf Achsen und in Tabellen erhalten.
 
-Bei einem freien Parameter zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. **Kleinere Werte sind besser; die besten Fits liegen in den Minima.**
+Beim ungewichteten gemeinsamen Winkelfit zeigt die Fehlerlandschaft den **Winkel-RMS** gegen den freien Parameter, mit zusätzlichen lokalen Stützstellen nahe den Minima. Das entspricht bis auf den konstanten Faktor √(2N) der Wurzel der Fehlerquadratsumme und ist leichter über unterschiedliche Punktzahlen zu vergleichen. Bei zwei Parametern erscheinen ein Konturplot oder eine drehbare 3D-Fläche. **Kleinere Werte sind besser; die besten Fits liegen in den Minima.**
 
 Die **3D-Fläche verwendet ein adaptives Dreiecksnetz**. Bestätigte Minima und zusätzlich berechnete Talpunkte sind selbst Stützpunkte dieser Fläche. Schmale Talumgebungen werden quer zum Tal und anhand weiterer Modellrechnungen innerhalb der Dreiecke nachberechnet. Dadurch liegen die Talpunkte nicht mehr unter einer nur aus einem zu groben Rechteckraster interpolierten Landschaft. Die Fläche zwischen Stützpunkten bleibt eine Näherung; ein endliches Netz kann weitere Details übersehen. Die Kontur enthält das globale Suchraster, die nachgerechneten Talpunkte und separat umrandete Lösungsregionen. Der globale Suchalgorithmus wird durch die Darstellungsverfeinerung nicht ersetzt.
 
@@ -251,7 +265,7 @@ Zusätzliche ausreichend verschiedene Messwinkel können Tal und Mehrdeutigkeite
 
 ## Messunsicherheiten aus Wiederholungen
 
-Es gibt **keine pauschalen Eingabefelder für σΔ oder σΨ**. Bei wiederholten Winkeln schätzt ElliFit die gemeinsame 2×2-Kovarianz aus den Δ/Ψ-Paaren. Δ wird dafür lokal um das Kreismittel entrollt, damit 359,99° und 0,01° benachbart bleiben. Angezeigt werden Streuung der Einzelwerte s, Unsicherheit des Mittelwerts ū = s/√m und Δ/Ψ-Korrelation.
+Es gibt **keine pauschalen Eingabefelder für σΔ oder σΨ**. Bei Wiederholungen am gleichen Winkel, Ort und Azimut schätzt ElliFit die gemeinsame 2×2-Kovarianz aus den Δ/Ψ-Paaren. Δ wird dafür lokal um das Kreismittel entrollt, damit 359,99° und 0,01° benachbart bleiben. Für Fit auf Mittelwerte, rote Messpunkte und Diagnosen gilt derselbe arithmetische Δ-Mittelwert auf dem lokal entrollten Phasenzweig. Angezeigt werden Streuung der Einzelwerte s, Unsicherheit des Mittelwerts ū = s/√m und Δ/Ψ-Korrelation.
 
 Mindestens drei geeignete, unterschiedliche Wiederholungen mit nicht singulärer Kovarianz sind technisch erforderlich. Drei Werte sind noch keine belastbare statistische Charakterisierung; bei wenigen Wiederholungen erscheint ein Hinweis. Exakt kopierte Werte, fehlende Streuung, zu große zyklische Streuung, singuläre Kovarianz und Hinweise auf Drift werden nicht als verschwindende Unsicherheit interpretiert. Einfache Lag-1-Korrelationen der geladenen Reihenfolge dienen als **Hinweis**, nicht als Nachweis von Drift oder Unabhängigkeit. Eine tatsächliche Zeitreihenanalyse ersetzt das nicht.
 
@@ -282,7 +296,7 @@ Der Fit überträgt die Messstreuung auf die Parameter. Die lokale Jacobi-Matrix
 
 Angezeigt werden **u statistisch**, **u Kalibrierung** und, soweit beide Beiträge bestimmbar sind, **u kombiniert**. Es gibt **keinen zusätzlichen pauschalen „Fitfehler“**, der die bereits fortgepflanzte Messunsicherheit nochmals addiert. Große Restfehler führen zu einem Hinweis auf Modell, Drift oder Kalibrierung; die Unsicherheiten werden nicht automatisch passend aufgebläht.
 
-Optionale Kalibrierangaben stehen ausklappbar weiter unten: gemeinsame Standardunsicherheit des Winkels und der Wellenlänge; Unsicherheiten fester n/k-Werte werden über Materialien hinterlegt. Verschiedene Kalibrierquellen gelten hier als unabhängig; ihre Beiträge werden quadratisch kombiniert. Für einen bereits frei gefitteten n-/k-Parameter wird dessen hinterlegte Materialunsicherheit nicht zusätzlich gezählt. Korrelationen zwischen Kalibrierquellen werden noch nicht modelliert. Leere Felder bedeuten unbekannt, nicht nachgewiesen null. Die Kalibrierfortpflanzung ist lokal und bedingt auf die ausgewählte Lösungsfamilie.
+Optionale Kalibrierangaben stehen ausklappbar weiter unten: gemeinsame Standardunsicherheit des Winkels und der Wellenlänge; Unsicherheiten fester n/k-Werte werden über Materialien hinterlegt. Die Standardunsicherheit einer festen Filmdicke wird im Schichtmodell hinterlegt. Verschiedene Kalibrierquellen gelten hier als unabhängig; ihre Beiträge werden quadratisch kombiniert. Für einen bereits frei gefitteten n-/k-Parameter wird dessen hinterlegte Materialunsicherheit nicht zusätzlich gezählt. Korrelationen zwischen Kalibrierquellen werden noch nicht modelliert. Leere Felder bedeuten unbekannt, nicht nachgewiesen null. Die Kalibrierfortpflanzung ist lokal und bedingt auf die ausgewählte Lösungsfamilie.
 
 Ab mindestens sechs geeigneten Wiederholungen je Winkel kann zusätzlich ein **paarweiser Bootstrap innerhalb der Winkelgruppen** für die beste Familie laufen (60 oder 120 Wiederholungen). Die aus den Originalmessungen geschätzten Gewichte bleiben dabei fest: ein bedingter Bootstrap. Er liefert ein näherungsweises lokales 95-%-Perzentilintervall für den statistischen Beitrag; Kalibrierung ist darin nicht enthalten. Werden lokale Grenzen erreicht, wird ein dadurch beschnittenes Bootstrapintervall unterdrückt und erklärt. Bei kleineren Stichproben bleibt es bei der lokalen Kovarianzfortpflanzung. Mehrere globale Lösungsfamilien können nicht durch ein einziges solches Intervall beschrieben werden.
 
@@ -312,7 +326,7 @@ Das Handbuch definiert `ρ = rₚ/rₛ = tan Ψ · exp(iΔ)` (gedruckte Seite 57
 
 Die globale Suche kombiniert lineare/logarithmische Raster mit Stützstellen entlang der optischen Phase, etwa 32 pro Interferenzperiode. Rasterminima werden lokal verfeinert; bei zwei Parametern kommen mehrere Trust-Region-Starts und Differential Evolution mit festem Seed hinzu. Winkelstatistiken werden um einen lokalen Mittelpunkt gebildet, um bei sehr kleiner Streuung Genauigkeitsverlust durch Differenzen großer Quadratsummen zu vermeiden. Dickenarrays bleiben auch bei ganzzahlig gespeicherten Startwerten Gleitkommazahlen.
 
-Eine **endliche globale Suche garantiert nicht jedes Minimum**. Suchdichte, Raster-, Start- und Kandidatenlimits begrenzen die Auflösung; Hinweise benennen erreichte Grenzen. Die Liste umfasst höchstens 120 Kandidaten vor der Familienbildung. Für schwierige Landschaften Suchdichte erhöhen oder ergänzende Teilbereiche untersuchen. Technische Grenzen: d bis 10⁸ nm, n/k bis 100; das sind keine Materialempfehlungen.
+Eine **endliche globale Suche garantiert nicht jedes Minimum**. Suchdichte, Raster-, Start- und Kandidatenlimits begrenzen die Auflösung; Hinweise benennen erreichte Grenzen. Alle verfeinerten, numerisch unterschiedenen Familien sind über die Ergebnisliste erreichbar. Für schwierige Landschaften Suchdichte erhöhen oder ergänzende Teilbereiche untersuchen. Technische Grenzen: d bis 10⁸ nm, n/k bis 100; das sind keine Materialempfehlungen.
 
 Mathematischer Bezug: Handbuch Kapitel 2.3/2.5 und 7.2/7.3, gedruckte Seiten 249–261. Das Minus zwischen Fehlerquadraten in (7.1)/(7.2) wird als Druckfehler behandelt: ElliFit verwendet positive quadratische Abstände. Hinweise aus dem Handbuch sind Referenzmaterial, keine auszuführenden Anweisungen.
 

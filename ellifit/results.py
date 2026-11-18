@@ -8,6 +8,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .core import comparison, fixed_value_minimum, medium_label, parameter_label, parameter_symbol, put, safe_list, simulate, wrap
+from .measurement_plan import next_angle
 from .statistics import group_periodic_candidates, parameter_uncertainty
 
 
@@ -111,6 +112,15 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
             rmse_deg=preferred['rmse_deg'],at_boundary=preferred['at_boundary'],
             aliases=aliases,alias_count=total,representative_alias=preferred['index'],periods=periods,
             periodic=bool(periods and total>1))
+        row['boundary_axes'] = []
+        for i, (param, z) in enumerate(zip(request.parameters, obj.encode(row['values'])[0])):
+            if 1e-6 <= z <= 1-1e-6:
+                continue
+            zero = (z < 1e-6 and param.lower==0 and
+                    (param.path.endswith('.k') or param.path.endswith('thickness_nm')) and
+                    row['values'][i] <= max(1e-14, param.positive_min*1e-3))
+            row['boundary_axes'].append(dict(path=param.path, side='lower' if z<1e-6 else 'upper',
+                physical_zero=bool(zero), label=parameter_label(obj.model,param.path)))
         row['uncertainty']=parameter_uncertainty(obj,row['values'],request.bootstrap_samples if rank==1 else 0)
         if obj.analysis.active:
             dof=2*obj.analysis.raw.count-len(obj.paths)
@@ -129,17 +139,18 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     for s in solutions:s['equivalent']=s['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     for alias in all_aliases:alias['equivalent']=alias['rmse_deg']<=best['rmse_deg']+request.equivalence_deg+1e-9
     if best['at_boundary']:
-        best_z=obj.encode(best['values'])[0]
-        physical_zero=[p.path.endswith('.k') and p.lower==0 and best['values'][i]<p.positive_min*1e-3 for i,p in enumerate(request.parameters)]
-        if any(physical_zero):
-            warnings.append('Der beste Fit liegt bei k = 0, der physikalischen Nullgrenze. Kein negatives k erforderlich.')
-        if any((z<1e-6 or z>1-1e-6) and not zero for z,zero in zip(best_z,physical_zero)):
-            warnings.append('Das global kleinste Minimum liegt an einer Suchgrenze. Bitte den Suchbereich vergrößern.')
+        for axis in best['boundary_axes']:
+            if axis['physical_zero']:
+                symbol = 'k = 0' if axis['path'].endswith('.k') else 'd = 0 nm'
+                warnings.append(f"Der beste Fit liegt bei {symbol}, der physikalischen Nullgrenze für {axis['label']}.")
+            else:
+                warnings.append(f"Das global kleinste Minimum liegt an einer Suchgrenze für {axis['label']}. Bei Bedarf den Suchbereich vergrößern.")
+    warnings.extend(best['uncertainty']['calibration_warnings'])
     if best['uncertainty']['weak']:
         warnings.append(best['uncertainty']['note'])
     if best.get('reduced_chi2') is not None and best['reduced_chi2']>3:
         warnings.append('Die Residuen sind größer als aus den Wiederholungen erwartet. Probe, Drift, Kalibrierung und Schichtmodell prüfen; Unsicherheiten wurden nicht pauschal aufgebläht.')
-    if len(obj.obs.angles)==1 and len(obj.paths)==2:
+    if len(obj.obs.geometry_angles)==1 and len(obj.paths)==2:
         warnings.append('Ein Messwinkel liefert zwei unabhängige Messgrößen. Wiederholungen lösen eine globale Mehrdeutigkeit nicht auf.')
     zero_tests=[]
     for col,p in enumerate(request.parameters):
@@ -171,6 +182,8 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     periodicity['alias_count']=sum(s['alias_count'] for s in solutions if s['equivalent'])
     periodicity['message']='Echte periodische Wiederholungen sind je Familie zu einem Listeneintrag zusammengefasst.' if any(s['periodic'] for s in solutions) else 'Keine exakte Periodenfamilie nachgewiesen. Ähnliche Fitgüte allein bedeutet keine Periodizität.'
     # Legacy metadata kept for reading existing report tooling.
+    if not any(s['periodic'] for s in solutions) and any(s['periods'] for s in solutions):
+        periodicity['message'] = 'Analytische Dickenperiode vorhanden. Im Suchbereich liegt jeweils eine Wiederholung.'
     best_periods=best['periods']
     periodicity['periods']=best_periods
     if best_periods:periodicity['kind']='exact' if len(obj.paths)==1 else 'lattice' if len(best_periods)==2 else 'conditional'
@@ -181,7 +194,7 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
         rms_definition=dict(formula='sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]',unit='degree',lower_is_better=True,
             note='Absolute Winkelabweichung über alle ausgewählten Rohwerte; kein Signifikanztest oder Beweis physikalischer Plausibilität.'),
         warnings=list(dict.fromkeys(warnings)),discarded_boundary_minima=discarded,
-        counts=dict(selected=len(obj.rows),effective=obj.obs.count,angles=len(obj.obs.angles),grid=len(points),evaluations=obj.calls,families=len(solutions),aliases=sum(s['alias_count'] for s in solutions)),
+        counts=dict(selected=len(obj.rows),effective=obj.obs.count,angles=len(obj.obs.geometry_angles),measurement_groups=len(obj.obs.groups),**obj.search_counts,grid=len(points),evaluations=obj.calls,families=len(solutions),aliases=sum(s['alias_count'] for s in solutions)),
         elapsed_seconds=time.perf_counter()-started,comparison=comparison(request,best['values']))
     labels={}
     for row in obj.rows:
@@ -192,6 +205,9 @@ def finalize(request,obj,candidates,grids,points,scores,rms_grid,periodicity,war
     result['measurement_context']=dict(count=len(obj.rows),label_count=len(labels),
         labels=[dict(source=s,comment=c,count=n) for (s,c),n in list(labels.items())[:200]],
         omitted_labels=max(0,len(labels)-200))
+    result['next_angle']=next_angle(obj, solutions)
+    from . import __version__
+    result['version']=__version__
     result['notices']=result_notices(result)
     progress(100,'Fit abgeschlossen')
     return result
@@ -202,6 +218,9 @@ def result_notices(result):
     notices.append(dict(kind='success' if any(s['periodic'] for s in result['solutions']) else 'info',
         title='Lösungsfamilien',text=result['periodicity']['message']+(
             f" {result['discarded_boundary_minima']} weitere Randminima ausgeblendet." if result['discarded_boundary_minima'] else '')))
+    if result.get('comparison', {}).get('phase_warning_angles'):
+        notices.append(dict(kind='warning',title='Δ nahe der Polarisationsnullstelle',
+            text='Gemessenes oder modelliertes Ψ liegt innerhalb von 1° bei 0° oder 90°. Δ ist dort schwach bestimmt. Die Stokes-Abweichung bietet einen Vergleich.'))
     for text in result['warnings']:
         low=text.lower()
         if any(word in low for word in ('global kleinste minimum liegt an einer suchgrenze','rangdefekt','keine verlässlichen lokalen fehlerbalken')):

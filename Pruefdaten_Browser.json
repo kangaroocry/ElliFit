@@ -728,5 +728,60 @@
     "version": "1.4.3",
     "check": "Gleichungen und Zähler bis 390 px sichtbar und umbrechend, kein horizontaler Seitenüberlauf und keine JavaScript-Laufzeitfehler",
     "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Früherer Fit übernimmt nur den Fitparameter und bewahrt spätere Änderungen am Substrat.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Eine eingefügte Schicht verschiebt das Ziel korrekt. Eine gelöschte Zielschicht löst einen Hinweis aus.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Früheres Fitmodell lässt sich als eigenes Dokument öffnen.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Eine gemischte Periodenfamilie mit Gleichung, drei Vorhersagen beim Zusatzwinkel und Bezug zu den Freiheitsgraden.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Gewichtete Fitgröße und Winkel-RMS nebeneinander, feste Dicke editierbar und Grenzwinkelunsicherheit sichtbar.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Ungewichtete Einzelanpassungen für die vier Azimute neben dem gemeinsamen Fit.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Vier Azimute einzeln zuordnen, gruppieren, fitten, Residuen ablesen und CSV mit Ort/Azimut wieder einlesen.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Alle 282 Familien erreichbar und auswählbar, Raster- und Verfeinerungszähler sichtbar.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Wiederholung 235 einer großen Familie direkt ausgewählt, mit voller Präzision berechnet und in der Liste markiert.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Nullgrenze k=0 zeigt eine physikalische Information ohne Aufforderung zum Erweitern.",
+    "passed": true
+  },
+  {
+    "version": "1.5.0",
+    "check": "Desktop- und schmale Ansichten ohne horizontalen Seitenüberlauf oder JavaScript-Laufzeitfehler.",
+    "passed": true
   }
 ]
