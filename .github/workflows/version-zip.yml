@@ -30,4 +30,11 @@ jobs:
           package="ElliFit_${TAG#v}"
           git -C source archive --format=zip --prefix="$package/" --output="$PWD/$package.zip" HEAD
           unzip -tq "$package.zip"
-          gh release upload "$TAG" "$package.zip"
+          existing=$(gh release view "$TAG" --json assets --jq '.assets[].name')
+          if grep -Fxq "$package.zip" <<< "$existing"; then
+            mkdir existing
+            gh release download "$TAG" --pattern "$package.zip" --dir existing
+            cmp "$package.zip" "existing/$package.zip"
+          else
+            gh release upload "$TAG" "$package.zip"
+          fi

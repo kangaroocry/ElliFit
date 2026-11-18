@@ -2,7 +2,7 @@
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.6.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/archive/refs/tags/v1.6.0.zip)** · [Versionsseite](https://github.com/kangaroocry/ElliFit/releases/tag/v1.6.0)
+**[ElliFit 1.6.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/releases/download/v1.6.0/ElliFit_1.6.0.zip)** · [Versionsseite](https://github.com/kangaroocry/ElliFit/releases/tag/v1.6.0)
 
 Unter Windows das ZIP vollständig entpacken und **`Start_Windows.bat`** doppelklicken. Der Starter verwendet auch WinPython aus dem Benutzer-PATH.
 
