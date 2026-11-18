@@ -1,0 +1,33 @@
+name: ElliFit-Versionspaket
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Vorhandener veröffentlichter Versionstag (z. B. v1.6.0)
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: ZIP aus dem veröffentlichten Quellstand bauen und anhängen
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh release view "$TAG" --json tagName --jq .tagName
+          gh repo clone "$GH_REPO" source -- --quiet --single-branch --branch "$TAG" --depth 1
+          package="ElliFit_${TAG#v}"
+          git -C source archive --format=zip --prefix="$package/" --output="$PWD/$package.zip" HEAD
+          unzip -tq "$package.zip"
+          gh release upload "$TAG" "$package.zip"
