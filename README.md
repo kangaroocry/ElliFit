@@ -1,10 +1,18 @@
-# ElliFit 1.6.0
+# ElliFit 1.6.1
 
 Lokale Auswertung monochromatischer Ellipsometrie mit globaler Suche nach Schichtdicke, Brechungsindex oder Extinktionskoeffizient. Ein oder zwei Parameter können gleichzeitig frei sein.
 
-**[ElliFit 1.6.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/releases/download/v1.6.0/ElliFit_1.6.0.zip)** · [Versionsseite](https://github.com/kangaroocry/ElliFit/releases/tag/v1.6.0)
+**[ElliFit 1.6.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/releases/download/v1.6.1/ElliFit_1.6.1.zip)** · [Versionsseite](https://github.com/kangaroocry/ElliFit/releases/tag/v1.6.1)
 
 Unter Windows das ZIP vollständig entpacken und **`Start_Windows.bat`** doppelklicken. Der Starter verwendet auch WinPython aus dem Benutzer-PATH.
+
+## Neu in 1.6.1
+
+Neue Messdateien lassen sich direkt im Tab **Modellfit und Lösungen** öffnen oder ablegen. Nach dem Import wechselt ElliFit zu **Messdaten und Schichtmodell**. Periodische Wiederholungen heißen in der aufgeklappten Liste zum Beispiel **2.1** und **2.2**.
+
+Die RMS-Skala zeigt Gelb bei 1°, Orange bei 10°, Rot bei 100° und Pink beim Maximum. Ein Winkel-RMS über 1° bis einschließlich 10° heißt **Fit relativ schlecht**. Über 10° lautet der Befund **Fit sehr schlecht**.
+
+Die Diagrammoptionen verbinden **Plot-Ausschnitt neu berechnen** mit **Automatisch**. **Im Plot-Ausschnitt neu fitten** wird bei einem neu gewählten Parameterbereich freigegeben.
 
 ## Neu in 1.6.0
 
@@ -14,10 +22,10 @@ Die eindimensionale Suche prüft Kandidaten beidseitig. Beim reproduzierten Flan
 
 107 automatisierte Tests bestanden. Im Chromium-Browser wurden unter anderem der Originalimport mit 16 434 Messungen, periodische und Mehrwinkelfits, die Serienauswertung, der Laborbericht und die schmale Ansicht geprüft. Getestete Plattform war Linux mit Python 3.12.
 
-- [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/v1.6.0)
-- [Materialwerte und Schichtvorlagen](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/MATERIALIEN.md)
-- [Änderungsübersicht](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/AENDERUNGEN_1.2.md)
-- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/v1.6.0/PRUEFPROTOKOLL.md)
+- [Quellcode und ausführliche Anleitung](https://github.com/kangaroocry/ElliFit/tree/v1.6.1)
+- [Materialwerte und Schichtvorlagen](https://github.com/kangaroocry/ElliFit/blob/v1.6.1/MATERIALIEN.md)
+- [Änderungsübersicht](https://github.com/kangaroocry/ElliFit/blob/v1.6.1/AENDERUNGEN_1.2.md)
+- [Prüfprotokoll](https://github.com/kangaroocry/ElliFit/blob/v1.6.1/PRUEFPROTOKOLL.md)
 
 ## Periodische Gleichungen in 1.4.3
 
