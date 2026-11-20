@@ -37,7 +37,7 @@ function refreshPreparation(selected, angleCount) {
         selected ? int(angleCount) + ' Einfallswinkel' : '',
         free.length ? free.join(' und ') + ' frei' : 'Kein freier Parameter',
     ].filter(Boolean).join(' · ');
-    $('runFit').disabled = state.busy || !selected || !free.length;
+    updateFitButton();
     $('dataFields').classList.toggle('empty-data', !state.rows.length);
     $('kineticNote').hidden = !state.rows.some(r => r.time_s != null);
     $('evaluateTab').disabled = !state.result;
@@ -194,7 +194,9 @@ function currentFinding() {
     const good=r.solutions.filter(s=>s.rmse_deg!=null && s.rmse_deg<=.1);
     const values=best.values.map((v,i)=>quantityValue(v,r.parameters[i])+(r.parameters[i].path.endsWith('thickness_nm')?' nm':''));
     if(best.rmse_deg==null) return {title:'Δ unbestimmt · Winkel-RMS nicht auswertbar',tone:'warn',detail:'An einer Polarisationsnullstelle ist nur der Polarisationszustand auswertbar. Der Fit verwendet die '+r.fit_objective.label+'.'};
-    if(best.rmse_deg!=null && best.rmse_deg>1) return {title:'Fit relativ schlecht · Winkel-RMS '+rmsText(best.rmse_deg)+'°',tone:'critical',detail:'Der beste Fit überschreitet 1°. Messauswahl, Modell und Suchbereich prüfen.'};
+    const assessment=assessFitRms(best.rmse_deg);
+    if(assessment) return {title:assessment.label+' · '+rmsText(best.rmse_deg)+'° Winkel-RMS',
+        tone:assessment.critical?'critical':'warn',detail:'Der beste Fit überschreitet '+assessment.threshold+'°. Messauswahl, Modell und Suchbereich prüfen.'};
     if(best.uncertainty?.weak) return {title:r.parameters.length===2?'Mindestens ein Fitparameter ist schwach bestimmbar':'Der Fitparameter ist schwach bestimmbar',tone:'warn',detail:r.parameters.map(p=>p.label).join(' und ')+' · Empfindlichkeit und Suchbereich prüfen.'};
     if(r.parameters.length===2 && best.uncertainty?.strongly_correlated) return {title:'Die beiden Fitparameter sind stark gekoppelt',tone:'warn',detail:r.parameters.map(p=>p.label).join(' und ')+' · '+(r.identifiability.profile?'Talverlauf in der Fehlerlandschaft prüfen.':'Parameterprofil unter Diagnosen prüfen.')};
     if(good.length>1) return {title:int(good.length)+' Lösungsfamilien mit Winkel-RMS bis 0,1°',tone:'warn',detail:'Die Messung lässt mehrere Parameterkombinationen zu.'};

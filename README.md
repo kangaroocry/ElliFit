@@ -1,8 +1,8 @@
-# ElliFit 1.6.0
+# ElliFit 1.6.1
 
 Lokales Programm zur monochromatischen Ellipsometrie: Schichtmodelle und Materialien speichern, Messungen auswählen und Schichtdicke, Brechungsindex oder Extinktionskoeffizient global fitten. Ein oder zwei Parameter können gleichzeitig frei sein. Die Browseroberfläche und der Python-Rechenkern laufen auf demselben Rechner.
 
-**[ElliFit 1.6.0 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/releases/download/v1.6.0/ElliFit_1.6.0.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
+**[ElliFit 1.6.1 als ZIP herunterladen](https://github.com/kangaroocry/ElliFit/releases/download/v1.6.1/ElliFit_1.6.1.zip)** · [Materialwerte und Schichtvorlagen](MATERIALIEN.md) · [Änderungen gegenüber 1.1](AENDERUNGEN_1.2.md) · [Prüfprotokoll](PRUEFPROTOKOLL.md)
 
 ## Start unter Windows
 
@@ -32,11 +32,11 @@ Start_Windows.bat --port 8766
 
 Unter Linux/macOS `sh start.sh`; alternativ eine virtuelle Umgebung anlegen, `pip install -r requirements.txt` und `python launch.py` ausführen. `--no-browser` unterdrückt das automatische Öffnen des Browsers. `--models "C:\Pfad\Modelle"` und `--materials "C:\Pfad\Materialien"` ändern die Bibliotheksordner; diese lassen sich auch in der Oberfläche wechseln.
 
-## Arbeitsablauf in 1.6.0
+## Arbeitsablauf
 
-1. Unter **Vorbereitung** die Messdatei öffnen und Messungen auswählen. Die leere Startsitzung lässt sich über **Referenz laden** mit einer synthetischen Probe ausprobieren. Neben der Messliste zeigt jede Schicht ihre Werte und die freien Parameter. Eine Schicht aufklappen, um X, Y, Suchgrenzen, Raster oder Material zu ändern.
+1. Unter **Messdaten und Schichtmodell** die Messdatei öffnen und Messungen auswählen. Die leere Startsitzung lässt sich über **Referenz laden** mit einer synthetischen Probe ausprobieren. Neben der Messliste zeigt jede Schicht ihre Werte und die freien Parameter. Eine Schicht aufklappen, um X, Y, Suchgrenzen, Raster oder Material zu ändern.
 2. Für wiederkehrende Messungen eine **Auswertevorlage** speichern oder wählen. Sie enthält Schichtmodell, freie Parameter, Suchgrenzen, Fitkriterium und Unsicherheitseinstellungen. Die Messauswahl bleibt beim Laden erhalten. Eigene Vorlagen liegen im Ordner `recipes` oder im über `ELLIFIT_RECIPES` gesetzten Verzeichnis. Eine Sitzung speichert zusätzlich die Messungen und ihre Auswahl.
-3. **Fit starten** wechselt nach der Berechnung zur **Auswertung**. Oben steht der Befund der globalen Suche mit Datensatz und Fitstatus. Bei einer periodischen Familie stehen Anzahl und Gleichung im Vordergrund. Nach geänderten Eingaben ist der frühere Fit entsprechend gekennzeichnet. Ein Klick auf eine Familie, eine Wiederholung oder eine Probelösung aktualisiert die Diagramme.
+3. **Fit starten** wechselt nach der Berechnung zu **Modellfit und Lösungen**. Oben steht der Befund der globalen Suche mit Datensatz und Fitstatus. Bei einer periodischen Familie stehen Anzahl und Gleichung im Vordergrund. Die aufgeklappten Wiederholungen heißen zum Beispiel 2.1 und 2.2. Nach geänderten Eingaben ist der frühere Fit entsprechend gekennzeichnet. Ein Klick auf eine Familie, eine Wiederholung oder eine Probelösung aktualisiert die Diagramme. Im gleichen Tab lässt sich unter dem Befund eine neue Messdatei öffnen oder ablegen. Nach erfolgreichem Import wechselt ElliFit zu **Messdaten und Schichtmodell**.
 4. Mit **Fit zum Vergleich merken** die aktuell dargestellte Auswahl für einen zweiten Fit festhalten. Die Vergleichstabelle nennt Datensatz, Modell, freie Parameter, Kriterium und Periodenfamilie. Der Vergleich bleibt bis zum Schließen der Seite oder bis zum Ersetzen des gemerkten Fits erhalten. **Laborbericht drucken** gibt den dargestellten Stand einschließlich Messwinkeln, ausgewählter Lösung, Fitgüte und Warnungen aus. Im Druckdialog lässt er sich als PDF speichern.
 
 **Zeitreihen und Serien.** Bei einer unklaren ersten Messspalte zeigt ElliFit die ersten Datenzeilen zur Zuordnung. Zeitwerte benötigen eine Zeiteinheit und den festen Einfallswinkel. Verschiedene Zeitpunkte bilden getrennte Messkontexte. Ein gemeinsamer Fit setzt über die gewählte Serie konstante Schichtparameter voraus. Im ausklappbaren Bereich für Messwerte und Residuen lassen sich unabhängige Fits je Zeitpunkt, Messort/Azimut oder Quelldatei starten und als CSV exportieren. Eine Datei-Auswertung übernimmt das Fitkriterium und die Behandlung der Wiederholungen vom angezeigten Fit. Einzelne Messkontexte verwenden ungewichtete Einzelmessungen. Jede ausgegebene Familie nennt ihre Werte und gegebenenfalls ihre Periode. Fehlgeschlagene Gruppen sind einzeln sichtbar und können erneut berechnet werden.
@@ -99,7 +99,7 @@ N bezeichnet die Anzahl ausgewählter Rohwertpaare, M die Anzahl tatsächlich ve
 
 **Farben und Rangfolge klar unterscheiden:** Punkt- und Tabellenfarben beziehen sich weiterhin auf den ungewichteten Winkel-RMS mit der festen Farbskala. Die gewichtete/Stokes-/Mittelwert-Landschaft erhält eine eigene neutrale relative Farbskala für die tatsächliche Fitgröße. Der Winkel-RMS bleibt als zusätzliche absolute Winkelabweichung in der Liste und im Hover verfügbar. Die Kennzahlenleiste nennt jetzt den „Winkel-RMS des besten Fits“ und bei abweichender Zielfunktion zusätzlich dessen Fit-Abweichung. Die Liste ist nach der Fit-Zielfunktion geordnet; der RMS-Spaltenkopf behauptet dabei keine RMS-Sortierung mehr.
 
-**Wenn ausdrücklich der Winkel-RMS minimiert werden soll:** Im Schichtmodell „Suchoptionen und Unsicherheiten“ → „Fitverfahren und Unsicherheiten“ öffnen, Zielfunktion Δ/Ψ, gleiche Winkel als gemeinsamer Fit aller Einzelwerte und Messunsicherheiten **„Ungewichtet fitten“** wählen. Anschließend neu fitten. „Im Ausschnitt neu suchen“ berücksichtigt die aktuellen Fit-Einstellungen; ein Umschalten der Plotansicht allein ändert diese Einstellungen nicht.
+**Wenn ausdrücklich der Winkel-RMS minimiert werden soll:** Im Schichtmodell „Suchoptionen und Unsicherheiten“ → „Fitverfahren und Unsicherheiten“ öffnen, Zielfunktion Δ/Ψ, gleiche Winkel als gemeinsamer Fit aller Einzelwerte und Messunsicherheiten **„Ungewichtet fitten“** wählen. Anschließend neu fitten. „Im Plot-Ausschnitt neu fitten“ berücksichtigt die aktuellen Fit-Einstellungen; ein Umschalten der Plotansicht allein ändert diese Einstellungen nicht.
 
 Die Zoom-Nachberechnung behält bestätigte eindimensionale Minimum-Anker zusätzlich zum regulären Raster exakt bei. Zweidimensionale Netze enthalten neben Winkel-RMS nun auch die tatsächlich berechnete Zielfunktion für jeden Stützpunkt. CSV-Ausgaben führen Fit-Abweichung, Einheit und Winkel-RMS getrennt; JSON speichert zusätzlich die gewählte Fehleransicht. Optionale Konfidenzgrenzen bleiben standardmäßig aus; in einer 3D-Fitgrößenansicht werden keine Linien mit fremden RMS-Höhen eingeblendet, die 2D-Parametergrenzen bleiben optional verfügbar.
 
@@ -121,9 +121,9 @@ Die Zoom-Nachberechnung behält bestätigte eindimensionale Minimum-Anker zusät
 
 Die Astwahl nennt **Familie und Wiederholung**. Gleichungen gelten lokal an dieser Lösung; von verschiedenen Lösungen aus fortgesetzte Pfade können sich überlagern. Andere bestätigte Wurzeln auf demselben Pfad werden exakt aufgenommen und im Profil nummeriert. Talpunkte sind direkt nachgerechnete Modellwerte, keine zusätzlichen lokalen Minima. Bei anderen Datenlagen erklärt die Diagnose, weshalb kein Profil berechnet wird. Der Export nennt Ast, Familie und Wiederholung. **95-/99-%-Darstellung ist standardmäßig ausgeschaltet** und befindet sich bei den optionalen Diagnosen; RMS-Farben und Talspannen sind keine Konfidenzgrenzen.
 
-**Im Zoom weiterarbeiten.** Nach einer kurzen Zoompause wird der sichtbare Ausschnitt standardmäßig dichter mit dem Modell des angezeigten Fits nachgerechnet: 241 reguläre Stützstellen plus exakte Minimum-Anker im Einparameterfall beziehungsweise 161 × 161 beim Konturplot. Dies optimiert keine Lösungen und verändert die Liste nicht. Die Nachrechnung überlappt den ursprünglichen Suchbereich; außerhalb davon wird nicht extrapoliert. Veraltete Antworten nach weiterem Zoom werden verworfen. Automatik abschaltbar, „Ansicht nachrechnen“ bleibt verfügbar. In 3D bezieht sich die manuelle Nachrechnung auf die Parameterachsenbereiche, nicht auf die Kameraperspektive.
+**Plot-Ausschnitt neu berechnen.** In den Diagrammoptionen der Fehlerlandschaft lässt sich ein gezoomter Parameterbereich mit dem angezeigten Fitmodell dichter abtasten. Für einen Parameter verwendet ElliFit 241 reguläre Stützstellen plus exakte Minimum-Anker. Im Konturplot sind es 161 × 161 Stützstellen. **Automatisch** startet die Neuberechnung nach einer kurzen Zoompause. Während der Berechnung und für einen bereits berechneten Ausschnitt ist der Button ausgegraut. Die Darstellung nutzt den Überlapp mit dem bisherigen Suchbereich.
 
-**„Im Ausschnitt neu suchen“** setzt die Suchgrenzen auf die sichtbaren physikalischen Parametergrenzen und startet ausdrücklich eine neue globale und lokale Suche. Das kann auch einen zuvor nicht untersuchten Bereich einschließen. Voraussetzung ist ein Fit zu den aktuellen Eingaben; bei verändertem Modell oder anderer Messauswahl zuerst neu fitten. Die Änderung der Suchgrenzen ist rückgängig machbar. Zoom/Ansichtsnachrechnung selbst ändern weder Eingaben noch Speicherstatus. Tick-/Beschriftungsupdates und Nachrechnung behalten die gewählten Achsenbereiche; explizite Auswahl einer außerhalb liegenden Lösung darf weiterhin dorthin verschieben.
+**Im Plot-Ausschnitt neu fitten.** Sobald sich der sichtbare Parameterbereich tatsächlich ändert, kann ElliFit mit diesen Grenzen neu suchen. Das kann einen zuvor noch nicht untersuchten Bereich einschließen. Unberührte Parameterachsen behalten ihre Suchgrenzen. Der Fit muss zu den aktuellen Daten und zum aktuellen Modell gehören. Durch Zurücksetzen des Zooms kehrt die Ansicht zu den ursprünglichen Suchgrenzen zurück.
 
 ## Korrektur nach DAT-Import in 1.3.2
 
@@ -215,7 +215,8 @@ RMS = sqrt[Σ(wrap(Δtheo − Δexp)² + (Ψtheo − Ψexp)²) / (2N)]
 | 0,01° | mittlere Grünabstufung |
 | 0,1° | klares Grün für einen sehr guten Fit |
 | 1° | Gelb |
-| 10° | Rot |
+| 10° | Orange |
+| 100° | Rot |
 | 142,3° (theoretisches Maximum) | Pink |
 
 Zwischen 0,001° und dem theoretischen Höchstwert von √[(180² + 90²)/2] ≈ 142,3° wird die Farbe über die Dekaden interpoliert. Von 0,1° bis 0,001° geht das Grün kontinuierlich in ein kräftigeres, satteres Grün über. Pink wird erst am Höchstwert erreicht; es gibt keinen violetten Abschnitt und kein gleichfarbiges Plateau ab 100°. Die Farbskala ist bei jedem Datensatz gleich und gilt für Tabelle, Kontur, 3D und nummerierte Minimum-Punkte. Die Tabelle ist dezent hinterlegt; Punkte sind kräftiger mit heller Umrandung. Im **1D-Plot wird auch der Hintergrund nach dem jeweiligen y-Wert eingefärbt**, mit geringerer Deckkraft und einer dunklen Kurve. Das gilt sowohl für die logarithmische als auch für die lineare y-Achse. Der Hintergrund wird nur im sichtbaren Diagrammbereich gezeichnet und folgt Zoom, Verschieben und Autoscale; seine Ausdehnung zählt nicht zu den Daten. **Autoscale richtet sich ausschließlich nach Kurve und Minimum-Punkten.**
@@ -223,6 +224,8 @@ Zwischen 0,001° und dem theoretischen Höchstwert von √[(180² + 90²)/2] ≈
 Die Farblegende und die automatische 1D-Achsenskalierung reichen nach oben höchstens bis zum theoretischen RMS-Maximum. Legende, Hintergrund und Marker verwenden dieselbe Farbdefinition. Die Konturfarbe wird logarithmisch abgestuft, ihre Legende und die Hoverangaben zeigen den **RMS in Grad**. In 3D ist die Höhe der RMS auf einer logarithmischen z-Achse: kleine Werte ergeben Täler. Numerische Nullwerte werden in logarithmischen Höhen nur zur Darstellung bei 10⁻⁹° begrenzt; tatsächliche RMS-Werte bleiben im Bericht und in Exporten erhalten. Es gibt keine zusätzliche transformierte Fitgüte-Kennzahl und keine entsprechende CSV- oder JSON-Spalte.
 
 **Der Winkel-RMS beschreibt die absolute Übereinstimmung in Winkeln, keine statistische Signifikanz und keine physikalische Plausibilität.** Er bleibt beim bloßen Vervielfachen derselben Messwerte gleich. Seine Bewertung hängt weiterhin von Probe, Messgeometrie und Gerätestreuung ab. Ein kleiner RMS bestätigt weder Eindeutigkeit noch das Schichtmodell. Ein R² ist wegen zyklischem Δ und möglicher Mehrdeutigkeit kein sinnvoller Standard.
+
+Ein Winkel-RMS über 1° bis einschließlich 10° wird als **„Fit relativ schlecht“** gekennzeichnet. Über 10° lautet der Befund **„Fit sehr schlecht“**.
 
 Die Ergebnisliste wird nach der **gewählten Zielfunktion** sortiert. Bei Kovarianzgewichtung oder Stokes-Abstand muss diese Reihenfolge nicht der Reihenfolge des ungewichteten Winkel-RMS und damit der Farbe entsprechen. Die absolute Fehlerquadratsumme Q bleibt aus der Ergebnisliste entfernt; im vollständigen JSON-Bericht ist sie für Diagnosezwecke enthalten.
 

@@ -833,5 +833,35 @@
     "version": "1.6.0",
     "check": "Echter Stokes-Fit am analytischen Brewsterwinkel im schmalen Browserfenster. n = 1,5 und Winkel-RMS unbestimmt.",
     "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Umbenannte Tabs und gleiche Höhe von Sitzung, Hilfe und Fitstart, Layout bis 320 px.",
+    "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Datei-Dialog und Drag-and-Drop aus dem Ergebnis-Tab. Tab-Wechsel bei Erfolg sowie Anhängen, Abbruch, Zeitspaltenzuordnung und Fehler geprüft.",
+    "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Periodische Wiederholungen 1.1, 1.2, 2.1 und Direktwahl von 1.235 geprüft.",
+    "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Tatsächliche Fits bei Winkel-RMS 1,727° und 42,716° mit den jeweiligen Gütestufen. Farbskala und Legende bei 1°, 10°, 100° und beim Maximum geprüft.",
+    "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Mauszoom, RMS-Achse, zweite Parameterachse in der Kontur und 3D-Kamerabewegung. Manuelle und automatische Neuberechnung, Fehlerbehandlung, verspätete Antwort und Autoscale geprüft.",
+    "passed": true
+  },
+  {
+    "version": "1.6.1",
+    "check": "Direkter Fit im neuen Plot-Ausschnitt einschließlich eines zuvor unberechneten Teilbereichs. Originalimporte und Hauptabläufe aus 1.6.0 erneut geprüft. Keine JavaScript-Laufzeitfehler.",
+    "passed": true
   }
 ]

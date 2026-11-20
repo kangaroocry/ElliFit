@@ -14,8 +14,9 @@ header .work-tabs button {border:0;border-radius:4px 4px 0 0;border-bottom:3px s
 header .work-tabs button[aria-current="page"] {color:var(--action);border-bottom-color:var(--action);background:#edf5f4}
 header button:disabled {opacity:.47}
 #runFit,#importData {background:var(--action);color:white}
-.session-menu {position:relative}
-.session-menu summary {border-radius:5px;padding:7px 11px;cursor:pointer}
+.session-menu {position:relative;margin:0}
+.session-menu summary {border-radius:5px;padding:7px 11px;line-height:26px;cursor:pointer}
+header .head-actions > button,header .session-menu > summary {height:42px}
 .session-menu[open] > button {position:absolute;right:0;z-index:12;width:155px;box-shadow:0 2px 5px #213c3920}
 .session-menu[open] > #openSession {top:100%}.session-menu[open] > #saveSession {top:calc(100% + 36px)}
 body .workspace {display:block;max-width:1920px;margin:auto;padding:0 clamp(12px,2.6vw,42px) 26px}
@@ -63,6 +64,9 @@ body #inputDetails .setup-inputs > .data-panel, body #inputDetails .setup-inputs
 .finding {background:white;border-left:5px solid var(--action);border-radius:4px;padding:14px 17px}
 .finding[data-tone="warn"] {border-left-color:#aa6200}.finding[data-tone="critical"] {border-left-color:#ba3b33}
 .finding h1 {margin:4px 0}
+#evaluation .quick-import {width:fit-content;max-width:100%;padding:5px 9px;flex-wrap:wrap;justify-content:flex-start;gap:7px 10px;margin:0 0 12px;color:var(--ink-muted)}
+#evaluation .quick-import[aria-busy="true"] {cursor:progress}
+.quick-import .check {margin-left:4px}
 body .workspace #evaluation .stats {display:flex;align-items:start;gap:14px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--rule);box-shadow:none}
 body #evaluation .stats>div {flex:1 1 140px;border:0;padding:0}.stats .stat-dataset {flex:2 1 230px!important}
 body #evaluation .stats>div>strong {font-size:17px}body #evaluation .stats>div>span {font-size:13px}
@@ -73,6 +77,13 @@ body #evaluation .stats>div>strong {font-size:17px}body #evaluation .stats>div>s
 .result-workbench[data-expanded="error"] #comparisonCard,.result-workbench[data-expanded="comparison"] #errorCard {display:none}
 #evaluation .expand-plot {font-size:13px}
 #evaluation .plot-settings .viewport-controls {margin-top:6px}
+.viewport-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:6px}
+.viewport-actions button {padding:7px 8px;font-size:13px}
+.refine-action {display:flex;flex-direction:column;min-width:0}
+.refine-action #refineView {border-radius:6px 6px 0 0}
+#viewportControls .refine-action .check {justify-content:center;margin:0;padding:4px 6px;border:1px solid var(--rule);border-top:0;border-radius:0 0 6px 6px;background:white}
+#evaluation .alias-table th:first-child {width:min(22%,70px)}
+#evaluation .alias-table .alias-number {overflow-wrap:anywhere}
 #evaluation .fit-cautions {padding:8px 12px;margin:8px 0}
 #analysisDetails .analysis-body {min-width:0}
 #opticsContent, #fitComparison {overflow-x:auto}
@@ -93,7 +104,8 @@ body #evaluation .stats>div>strong {font-size:17px}body #evaluation .stats>div>s
 @media(max-width:700px){
  body>header {gap:5px 10px;padding:7px 10px}
  header .head-actions {margin-left:auto}
- header .work-tabs {order:2;flex-basis:100%}
+ header .work-tabs {order:2;flex:1 0 100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ header .work-tabs button {line-height:1.25;min-height:42px;padding-inline:6px;white-space:normal}
  .recipe-tools {width:100%}
  .recipe-tools>div {flex-wrap:nowrap}.recipe-tools select {min-width:0;width:100%}
  #evaluation .result-workbench,#evaluation .result-workbench[data-expanded] {display:flex;flex-direction:column}

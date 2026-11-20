@@ -1,6 +1,15 @@
-# Prüfprotokoll – ElliFit 1.6.0
+# Prüfprotokoll – ElliFit 1.6.1
 
-Stand: 18. November 2026. Numerik/API und lokale Browseroberfläche unter Linux geprüft. Keine Durchführung auf einem echten Windows-System.
+Stand 20. November 2026. Numerik, API und Browseroberfläche wurden unter Linux geprüft. Die Windows-Ausführung steht aus.
+
+## Prüfung von 1.6.1
+
+**107 automatisierte Tests bestanden** mit Python 3.12 und den bereitgestellten Importdateien. Sieben JavaScript-Dateien bestanden die Syntaxprüfung. Die Testumgebung meldete zwei Veraltungshinweise von Testbibliotheken.
+
+- Im Chromium-Browser wurden der Datei-Dialog, Drag-and-Drop, Anhängen, Zeitspaltenzuordnung, Abbruch und ein ungültiger Dateiimport direkt in „Modellfit und Lösungen“ geprüft. Ein erfolgreicher Import wechselt zur Messauswahl. Der ursprüngliche Fit erscheint beim Zurückwechseln als früherer Eingabestand.
+- In der Hauptnavigation liegen Sitzung, Hilfe und Fitstart auf gleicher Höhe. Die Tab-Namen und der Konturplot wurden bis zu 320 px Breite geprüft. Die Periodenliste zeigt 1.1, 1.2 und 2.1. Der Direktsprung zu Lösung 1.235 funktioniert.
+- Zwei tatsächliche Fits ergaben 1,727° und 42,716° Winkel-RMS. Befund und Hinweise zeigten die jeweils passende Gütestufe. Die Farbwerte und Legende wurden bei 1°, 10°, 100° und dem RMS-Maximum geprüft.
+- Der Ausschnitt wurde per Maus und über die Achsen geprüft. In 1D zählt die Parameterachse, im Konturplot zählen beide Parameterachsen. Eine Änderung der 3D-Kamera wählt keinen neuen Parameterbereich. Neuberechnung, Status, Wiederholversuch, verspätete Antwort, Autoscale und erneuter Fit mit sichtbaren Grenzen wurden geprüft. Ein Refittest erweiterte eine alte Suchgrenze von 0,1 auf 0,05 nm. [Einzelne Browserprüfungen](Pruefdaten_Browser.json)
 
 ## Prüfung von 1.6.0
 

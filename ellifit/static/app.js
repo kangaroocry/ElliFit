@@ -1,5 +1,5 @@
 'use strict';
-const UI_VERSION='1.6.0';
+const UI_VERSION='1.6.1';
 const $=id=>document.getElementById(id);
 const clone=x=>JSON.parse(JSON.stringify(x));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -10,7 +10,7 @@ const rmsText=x=>x!=null&&x<1e-6?'< 0,000001':numericText(x,'angle');
 function numericInput(id,value){const el=$(id);el.value=value==null?'':numericText(value,el.dataset.num||'n');el.title=value==null?'Keine Angabe':el.value;}
 function prettyMessage(text){return String(text).replace(/(?<![\w.])[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?(?![\w.])/gi,s=>fmt(Number(s),6));}
 const DEFAULT_SETTINGS={duplicate_policy:'repeat',angle_tolerance:.001,metric:'angular',uncertainty_mode:'none',bootstrap_samples:60,refine_all:false,quality:'balanced',equivalence_deg:.01,calibration:{angle_deg:null,wavelength_nm:null}};
-const state={model:null,modelFile:null,modelBaseline:null,modelOrigin:'',parameters:[{path:'layers.0.thickness_nm',lower:.1,upper:1000,scale:'log',positive_min:1e-8},{path:'',lower:1,upper:4,scale:'linear',positive_min:1e-8}],settings:clone(DEFAULT_SETTINGS),rows:[],selected:new Set(),page:0,pageSize:100,table:{entries:[],indices:[],pages:1},jumpRow:null,collapsed:new Set(),groups:[],measurementStats:null,view:{logX:true,logY:true,comparisonLog:null,groupBy:'none',pageSize:100,reverse:false},history:[],future:[],trials:[],activeTrial:null,trialSequence:0,trialDraft:[],noticeJob:null,result:null,fittedInputKey:null,fittedSettings:null,fitCompletedAt:null,resultStale:false,comparison:null,active:0,activeAlias:0,job:null,resultJob:null,busy:false,material:null,materialFile:null,materialBaseline:null,materialOrigin:'',materials:[],provenance:''};
+const state={model:null,modelFile:null,modelBaseline:null,modelOrigin:'',parameters:[{path:'layers.0.thickness_nm',lower:.1,upper:1000,scale:'log',positive_min:1e-8},{path:'',lower:1,upper:4,scale:'linear',positive_min:1e-8}],settings:clone(DEFAULT_SETTINGS),rows:[],selected:new Set(),page:0,pageSize:100,table:{entries:[],indices:[],pages:1},jumpRow:null,collapsed:new Set(),groups:[],measurementStats:null,view:{logX:true,logY:true,comparisonLog:null,groupBy:'none',pageSize:100,reverse:false},history:[],future:[],trials:[],activeTrial:null,trialSequence:0,trialDraft:[],noticeJob:null,result:null,fittedInputKey:null,fittedSettings:null,fitCompletedAt:null,resultStale:false,comparison:null,active:0,activeAlias:0,job:null,resultJob:null,busy:false,importingMeasurements:false,material:null,materialFile:null,materialBaseline:null,materialOrigin:'',materials:[],provenance:''};
 let toastTimer,statisticsTimer,statisticsTicket=0,comparisonTicket=0,lastRow=null,fitFocus=null;
 async function api(url,options={}){const request={...options};if(request.body&&!(request.body instanceof FormData)){request.headers={'Content-Type':'application/json'};request.body=JSON.stringify(request.body);}const response=await fetch(url,request),data=await response.json();if(!response.ok){const d=data.detail??data,e=new Error(typeof d==='string'?d:Array.isArray(d)?d.map(x=>x.loc?.slice(1).join('.')+': '+x.msg).join('\n'):d.message||'Anfrage fehlgeschlagen.');e.status=response.status;e.detail=d;throw e;}return data;}
 function toast(message,kind=notificationKind(message)){$('toast').textContent=prettyMessage(message);$('toast').dataset.kind=kind;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,6500);}
@@ -32,7 +32,7 @@ function busy(value){
  for(const el of [document.querySelector('header'),document.querySelector('.workspace')]){el.inert=value;el.setAttribute('aria-busy',String(value));}
  $('fitBusyPanel').hidden=!value;
  if(changed&&value)$('fitBusyPanel').focus({preventScroll:true});
- if(changed&&!value){state.fitPhase=null;$('runFit').disabled=!state.selected.size||!state.parameters.some(p=>p.path);if(fitFocus?.isConnected&&!fitFocus.disabled)fitFocus.focus({preventScroll:true});fitFocus=null;}
+ if(changed&&!value){state.fitPhase=null;updateFitButton();if(fitFocus?.isConnected&&!fitFocus.disabled)fitFocus.focus({preventScroll:true});fitFocus=null;}
  renderFileState('model');renderFileState('material');renderResultContext();updateViewportControls();
 }
 function snapshot(){return clone({model:state.model,parameters:state.parameters,settings:state.settings,axes:{logX:state.view.logX,logY:state.view.logY,comparisonLog:state.view.comparisonLog}});}
@@ -172,13 +172,75 @@ function jumpToMeasurement(value=parseNumber($('rowJump').value)){
 }
 function setRows(rows,label,append=false){state.editContextId=null;state.rows=append?[...state.rows,...rows]:rows;state.selected=append?new Set([...state.selected,...rows.map(r=>r.id)]):new Set(rows.map(r=>r.id));state.provenance=label;state.page=0;state.jumpRow=null;$('rowJump').value='';lastRow=null;state.collapsed.clear();$('filter').value='';$('angleFilter').value='';$('onlySelected').checked=false;$('provenance').textContent=label;angleOptions();dataTable();scheduleStatistics();stale();}
 function scheduleStatistics(){clearTimeout(statisticsTimer);const ticket=++statisticsTicket;statisticsTimer=setTimeout(async()=>{const measurements=selectedRows().map(({id,angle,delta,psi,measurement_kind,site,azimuth_deg,time_s,source})=>({id,angle,delta,psi,measurement_kind,site,azimuth_deg,time_s,source}));if(!measurements.length){state.measurementStats=null;measurementUncertainty();return;}try{const stats=await api('/api/observations',{method:'POST',body:{measurements,angle_tolerance:state.settings.angle_tolerance,duplicate_policy:state.settings.duplicate_policy}});if(ticket!==statisticsTicket)return;state.measurementStats=stats;measurementUncertainty();dataTable();}catch(e){toast(e.message,'critical');}},180);}
-async function importFiles(files){if(state.busy)return;try{let rows=[],names=[],skipped=0;for(const file of files){const d=await importMeasurementFile(file);if(!d)return;for(const row of d.rows)rows.push(row);names.push(`${d.filename} · ${int(d.count)} Messungen`);skipped+=d.skipped.length;}if(rows.length)setRows(rows,names.join(' | '),$('appendImport').checked);toast(`${int(rows.length)} Messungen geladen.${skipped?` ${int(skipped)} ungültige Zeilen übersprungen.`:''} Messort und Azimut lassen sich in der Liste zuordnen.`);}catch(e){toast(e.message,'critical');}}
+function updateFitButton(){
+ $('runFit').disabled=state.busy||state.importingMeasurements||!state.selected.size||!state.parameters.some(p=>p.path);
+}
+function setMeasurementImportPending(pending){
+ state.importingMeasurements=pending;
+ for(const id of ['importData','importNextData','appendImport','appendNextImport','exampleReference','openSession'])$(id).disabled=pending;
+ for(const id of ['dropZone','resultDropZone'])$(id).setAttribute('aria-busy',String(pending));
+ updateFitButton();
+ updateViewportControls();
+}
+async function importFiles(files){
+ if(state.busy||state.importingMeasurements||!files.length)return;
+ const append=$('appendImport').checked;
+ setMeasurementImportPending(true);
+ try{
+  const rows=[],names=[];
+  let skipped=0;
+  for(const file of files){
+   const data=await importMeasurementFile(file);
+   if(!data)return;
+   for(const row of data.rows)rows.push(row);
+   names.push(data.filename+' · '+int(data.count)+' Messungen');
+   skipped+=data.skipped.length;
+  }
+  if(!rows.length)return;
+  setRows(rows,names.join(' | '),append);
+  if(workArea!=='prepare'){
+   changeArea('prepare');
+   $('prepareTab').focus({preventScroll:true});
+  }
+  toast(int(rows.length)+' Messungen geladen.'+(skipped?' '+int(skipped)+' ungültige Zeilen übersprungen.' :''));
+ }catch(e){toast(e.message,'critical');}
+ finally{setMeasurementImportPending(false);}
+}
+function bindMeasurementImport(){
+ const picker=$('dataInput');
+ picker.onchange=()=>{
+  const files=Array.from(picker.files);
+  picker.value='';
+  importFiles(files);
+ };
+ const append=$('appendImport'),appendNext=$('appendNextImport');
+ append.onchange=()=>{appendNext.checked=append.checked;};
+ appendNext.onchange=()=>{append.checked=appendNext.checked;};
+ for(const [buttonId,zoneId] of [['importData','dropZone'],['importNextData','resultDropZone']]){
+  $(buttonId).onclick=()=>picker.click();
+  const zone=$(zoneId);
+  zone.onclick=e=>{if(!state.importingMeasurements&&!e.target.closest('button,label,input'))picker.click();};
+  zone.ondragenter=zone.ondragover=e=>{
+   e.preventDefault();
+   if(!state.busy&&!state.importingMeasurements&&e.dataTransfer.types.includes('Files')){
+    e.dataTransfer.dropEffect='copy';
+    zone.classList.add('drag');
+   }
+  };
+  zone.ondragleave=e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove('drag');};
+  zone.ondrop=e=>{
+   e.preventDefault();
+   zone.classList.remove('drag');
+   importFiles(Array.from(e.dataTransfer.files));
+  };
+ }
+}
 async function reference(initial=false){const r=await api('/api/reference');if(!initial&&!await confirmDocumentChange('model','die Referenz geladen wird'))return;beginModelDocument(r.model);setRows(r.rows,'Synthetische Referenz: d = 118 nm, n = 1,46 · Keine Originalmessungen');}
 function settings(){return clone(state.settings);}
 function migratedSettings(s={}){const v=clone(DEFAULT_SETTINGS);for(const key of Object.keys(v))if(s[key]!=null)v[key]=clone(s[key]);v.calibration={...DEFAULT_SETTINGS.calibration,...s.calibration};return v;}
 function duplicateQuestion(groups){$('duplicateGroups').innerHTML=groups.map(g=>`${numericText(g.angle,'angle')}° · ${esc(contextLabel(g.context||{}))} · ${int(g.indices.length)} Messungen`).join('<br>');return new Promise(resolve=>{const dialog=$('duplicateDialog');dialog.returnValue='cancel';dialog.addEventListener('close',()=>resolve(dialog.returnValue),{once:true});dialog.showModal();});}
 async function run(){
- if(state.busy||!flushFitInputs())return;
+ if(state.busy||state.importingMeasurements||!flushFitInputs())return;
  let completed=false;
  try{
   const rows=selectedRows();if(!rows.length)throw new Error('Bitte mindestens eine Messung auswählen.');
@@ -210,8 +272,14 @@ async function run(){
 async function selectSolution(index,alias=null){if(!state.result)return;alias??=state.result.solutions[index].representative_alias;if(!state.activeTrial&&index===state.active&&alias===state.activeAlias)return;const ticket=++comparisonTicket;try{const c=index===0&&alias===state.result.solutions[0].representative_alias?state.result.comparison:await api(`/api/jobs/${state.resultJob}/comparison/${index}?alias=${alias}`);if(ticket!==comparisonTicket)return;state.activeTrial=null;state.active=index;state.activeAlias=alias;state.comparison=c;expandedFamilies.add(index);solutionTable();renderTrialTable();errorPlot(true);comparisonPlot();parameterUncertainty();identifiability();solutionRegions();renderNotices();datasetContext();}catch(e){toast(e.message,'critical');}}
 // Colors describe physical angular RMS in degrees. Interpolate within decades.
 const RMS_MAX=Math.sqrt((180**2+90**2)/2);
-const RMS_ANCHORS=[[.001,'#159d4b'],[.1,'#70c66f'],[1,'#f1cf57'],[10,'#e65b52'],[RMS_MAX,'#e96aab']];
-const RMS_LOG_MIN=-3,RMS_LOG_MAX=Math.log10(RMS_MAX);
+const RMS_ANCHORS=[[.001,'#159d4b'],[.1,'#70c66f'],[1,'#f1cf57'],[10,'#ed8b3d'],[100,'#de4148'],[RMS_MAX,'#e96aab']];
+const RMS_LOG_MIN=Math.log10(RMS_ANCHORS[0][0]),RMS_LOG_MAX=Math.log10(RMS_MAX);
+const RMS_LEGEND_LEVELS=[RMS_ANCHORS[0][0],.01,...RMS_ANCHORS.slice(1).map(([rms])=>rms)];
+function assessFitRms(rms){
+ if(!Number.isFinite(rms)||rms<=1)return null;
+ const critical=rms>10;
+ return {label:critical?'Fit sehr schlecht':'Fit relativ schlecht',threshold:critical?10:1,critical};
+}
 const logHeight=rms=>rms==null?null:Math.max(rms,1e-9);
 const rmsLog=rms=>rms==null||!Number.isFinite(rms)?null:Math.log10(Math.max(rms,1e-12));
 const rgbFromHex=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -232,10 +300,15 @@ function rmsPlotColors(){
  const u=rms=>(Math.log10(rms)-RMS_LOG_MIN)/(RMS_LOG_MAX-RMS_LOG_MIN);
  return RMS_ANCHORS.map(([r,c])=>[u(r),c]);
 }
-function rmsColorbar(){return {title:{text:'RMS (°)'},thickness:12,len:.86,tickvals:[-3,-2,-1,0,1,RMS_LOG_MAX],ticktext:['≤ 0,001','0,01','0,1','1','10',fmt(RMS_MAX)]};}
+function rmsScaleLabel(rms){
+ return (rms===RMS_LEGEND_LEVELS[0]?'≤ ':'')+fmt(rms,rms===RMS_MAX?4:3);
+}
+function rmsColorbar(){
+ return {title:{text:'RMS (°)'},thickness:12,len:.86,tickvals:RMS_LEGEND_LEVELS.slice(0,-1).map(Math.log10),
+  ticktext:RMS_LEGEND_LEVELS.slice(0,-1).map(rmsScaleLabel)};
+}
 function renderRmsLegend(){
- const entries=[[.001,'≤ 0,001°'],[.01,'0,01°'],[.1,'0,1°'],[1,'1°'],[10,'10°'],[RMS_MAX,fmt(RMS_MAX)+'°']];
- $('rmsLegend').innerHTML=entries.map(([r,label])=>`<span><i style="background:${rmsColor(r)}"></i>${esc(label)}</span>`).join('');
+ $('rmsLegend').innerHTML=RMS_LEGEND_LEVELS.map(rms=>`<span><i style="background:${rmsColor(rms)}"></i>${rmsScaleLabel(rms)}°</span>`).join('');
 }
 function rmsBackground(axis){
  const [a,b]=axis.range,logarithmic=axis.type==='log',shapes=[];
@@ -534,8 +607,15 @@ function bind(){
  for(const [id,key]of [['sigmaAngle','angle_deg'],['sigmaLambda','wavelength_nm']])$(id).onchange=()=>{const value=parseNumber($(id).value,true);if(value!==null&&(!Number.isFinite(value)||value<0))return toast('Kalibrierunsicherheit muss leer oder nicht negativ sein.');mutate(()=>state.settings.calibration[key]=value);numericInput(id,value);};
  $('runFit').onclick=run;$('cancelFit').onclick=async()=>{if(!state.busy||!state.job||state.fitPhase!=='search')return;$('cancelFit').disabled=true;try{await api(`/api/jobs/${state.job}/cancel`,{method:'POST'});status('Abbruch angefordert …');}catch(e){if(state.busy&&state.fitPhase==='search')$('cancelFit').disabled=false;toast(e.message,'critical');}};
  for(const [id,key]of [['plotLogX','logX'],['plotLogY','logY']])$(id).onchange=()=>{state.view[key]=$(id).checked;errorPlot();if(state.result?.identifiability?.profile)profilePlot();};$('comparisonLogX').onchange=()=>{state.view.comparisonLog=$('comparisonLogX').checked;comparisonPlot();};$('surfaceView').onchange=()=>{refreshLines();errorPlot();};
- $('resultTable').onclick=e=>{if(e.target.closest('summary'))return;const jump=e.target.closest('[data-jump-family]');if(jump){const i=Number(jump.dataset.jumpFamily),n=parseNumber($('resultTable').querySelector('[data-alias-number="'+i+'"]').value);if(!Number.isSafeInteger(n)||n<1||n>state.result.solutions[i].alias_count)return toast('Bitte eine gültige Lösungsnummer in dieser Familie eingeben.','warning');selectSolution(i,n-1);return;}const t=e.target.closest('[data-family]');if(t)selectSolution(Number(t.dataset.family),t.dataset.alias==null?null:Number(t.dataset.alias));};$('applySolution').onclick=applyFittedParameters;
- $('importData').onclick=()=>$('dataInput').click();$('dataInput').onchange=async e=>{await importFiles(e.target.files);e.target.value='';};$('dropZone').onclick=e=>{if(!e.target.closest('label'))$('dataInput').click();};for(const type of ['dragenter','dragover'])$('dropZone').addEventListener(type,e=>{e.preventDefault();$('dropZone').classList.add('drag');});$('dropZone').ondragleave=()=>$('dropZone').classList.remove('drag');$('dropZone').ondrop=e=>{e.preventDefault();$('dropZone').classList.remove('drag');importFiles(e.dataTransfer.files);};$('exampleReference').onclick=()=>reference().catch(e=>toast(e.message,'critical'));
+ $('resultTable').onclick=e=>{
+  if(e.target.closest('summary'))return;
+  const jump=e.target.closest('[data-jump-family]');
+  if(jump){jumpToFamilyMember(Number(jump.dataset.jumpFamily));return;}
+  const row=e.target.closest('[data-family]');
+  if(row)selectSolution(Number(row.dataset.family),row.dataset.alias==null?null:Number(row.dataset.alias));
+ };
+ $('applySolution').onclick=applyFittedParameters;
+ bindMeasurementImport();$('exampleReference').onclick=()=>reference().catch(e=>toast(e.message,'critical'));
  $('addMeasurement').onclick=()=>{const angle=parseNumber($('manualAngle').value),delta=parseNumber($('manualDelta').value),psi=parseNumber($('manualPsi').value);if(!Number.isFinite(angle+delta+psi)||angle<=0||angle>=90||psi<0||psi>90)return toast('Erforderlich: 0 < φ < 90°, 0 ≤ Ψ ≤ 90°, Δ endlich.');setRows([{id:crypto.randomUUID(),angle,delta:(delta%360+360)%360,psi,source:'Manuell',line:0,comment:''}],'Manuell hinzugefügt',true);};
  for(const id of ['filter','angleFilter','onlySelected'])$(id).addEventListener(id==='filter'?'input':'change',()=>{state.page=0;lastRow=null;dataTable();});$('groupBy').onchange=()=>{state.view.groupBy=$('groupBy').value;state.page=0;dataTable();};
  $('selectAll').onchange=()=>{state.selected=$('selectAll').checked?new Set(state.rows.map(r=>r.id)):new Set();dataTable();scheduleStatistics();stale();};$('selectNone').onclick=()=>{state.selected.clear();dataTable();scheduleStatistics();stale();};$('selectFiltered').onclick=()=>{for(const i of filtered())state.selected.add(state.rows[i].id);dataTable();scheduleStatistics();stale();};

@@ -1,6 +1,6 @@
 'use strict';
 const expandedFamilies=new Set();
-let viewportTimer,viewportController,viewportTicket=0;
+let viewportTimer,viewportBaseline=null,viewportRequest=null,viewportError=null;
 function renderLocalBounds(){
  for(const box of $('layerEditor').querySelectorAll('[data-local-bounds]')){
   const i=state.parameters.findIndex(p=>p.path===box.dataset.localBounds),p=state.parameters[i];
@@ -52,7 +52,10 @@ function renderFitCautions(){
  const items=[],d=r.identifiability||{},periodic=r.solutions.filter(s=>s.periodic),good=r.solutions.filter(s=>s.rmse_deg!=null&&s.rmse_deg<=.1),relevant=[r.solutions[0],r.solutions[state.active],...good],coupled=relevant.some(s=>s.uncertainty?.strongly_correlated||s.uncertainty?.weak);
  const flag=(title,text,critical=false,info=false)=>items.push({title,text,critical,info});
  if(periodic.length)flag('Periodische Mehrdeutigkeit',`${int(periodic.reduce((n,s)=>n+s.alias_count,0))} periodische Parameterkombinationen in ${int(periodic.length)} Familien. Innerhalb einer Familie gleichwertig: die erste Wiederholung ist nicht bevorzugt. Weitere periodische Lösungen können außerhalb des Suchbereichs liegen. Zusätzliche Winkel oder unabhängige Dickeninformation nötig.`);
- if(r.solutions[0].rmse_deg>1)flag('Fit relativ schlecht – Winkel-RMS über 1°',`Winkel-RMS des besten Fits: ${rmsText(r.solutions[0].rmse_deg)}°. Die Winkelabweichung überschreitet den Warnwert von 1°. Modell, Messauswahl und Suchgrenzen prüfen, bevor Parameter übernommen werden.`,r.solutions[0].rmse_deg>=10);
+ const rms=r.solutions[0].rmse_deg,assessment=assessFitRms(rms);
+ if(assessment)flag(assessment.label,
+  `Der Winkel-RMS des besten Fits beträgt ${rmsText(rms)}°. Er überschreitet ${assessment.threshold}°. Modell, Messauswahl und Suchgrenzen prüfen.`,
+  assessment.critical);
  if(good.length>1)flag('Mehrere sehr gute Fits',`${int(good.length)} verschiedene Familien haben Winkel-RMS ≤ 0,1°. Aus dem kleinsten angezeigten Wert folgt keine eindeutige physikalische Lösung.`);
  if(d.lack_of_fit_dof<=0&&r.parameters.length===2)flag(
   !activeTrial()&&r.solutions[state.active].mean_fit?.numerical_match?'Δ und Ψ getroffen · kein Freiheitsgrad zur Modellprüfung':'Kein verbleibender Freiheitsgrad zur Modellprüfung',
@@ -106,6 +109,17 @@ function visibleFamilyMembers(s,index){
  const extra=state.comparison?.selected_member;
  return !activeTrial()&&state.active===index&&extra ? [...s.aliases,extra] : s.aliases;
 }
+function familyMemberNumber(rank,index){
+ return rank+'.'+(index+1);
+}
+function jumpToFamilyMember(index){
+ const family=state.result.solutions[index];
+ const value=$('resultTable').querySelector('[data-alias-number="'+index+'"]').value.trim();
+ const qualified=/^(\d+)[.,](\d+)$/.exec(value);
+ const number=qualified?(Number(qualified[1])===family.rank?Number(qualified[2]):NaN):parseNumber(value);
+ if(!Number.isSafeInteger(number)||number<1||number>family.alias_count)return toast('Bitte eine gültige Lösungsnummer in dieser Familie eingeben.','warning');
+ selectSolution(index,number-1);
+}
 function renderFamilies(){
  const r=state.result,params=r.parameters,m=fitMetric(),extra=m.differs_from_angular_rms;
  const metricHead=extra?`<th>${esc(m.label)} ↓<small>${metricUnit()}</small></th>`:'';
@@ -117,45 +131,151 @@ function renderFamilies(){
  $('resultTable').innerHTML=`<table class="families-table"><thead>${heading}</thead><tbody>${r.solutions.slice(0,shown).map((s,i)=>{
   const active=!state.activeTrial&&state.active===i,color=rmsColor(s.rmse_deg,.17);
   if(!s.periodic)return `<tr class="family-row ${active?'active':''}" data-family="${i}" title="${esc(m.label)}: ${fmt(fitValue(s.q),5)} (${metricUnit()})" style="background:${color}"><td>${s.rank}</td>${s.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}${metricCells(s.q,s.rmse_deg)}</tr>${s.periods.length?`<tr><td colspan="${params.length+2+Number(extra)}"><small>Eine Wiederholung im Suchbereich · ${s.periods.map(p=>'T = '+fmt(p.period_nm,6)+' nm').join(' · ')}</small></td></tr>`:''}`;
-  const rows=visibleFamilyMembers(s,i).map(a=>`<tr data-family="${i}" data-alias="${a.index}" class="alias-row ${active&&state.activeAlias===a.index?'active':''}" tabindex="0" role="button" aria-label="Familie ${s.rank}, Lösung ${a.index+1} auswählen"><td>${int(a.index+1)}</td>${a.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}${metricCells(a.q,a.rmse_deg)}</tr>`).join('');
-  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2+Number(extra)}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b>${extra?`<span>${esc(m.label)} ${fmt(fitValue(s.q),5)}</span>`:''}<span>Winkel-RMS ${rmsText(s.rmse_deg)}°</span>${periodicFamilyEquations(s)}</summary><p class="family-period">${s.periods.map(p=>esc(p.label)+': T = '+fmt(p.period_nm,8)+' nm').join(' · ')}</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} Wiederholungen. Weitere Nummer direkt auswählen.</p><label class="alias-jump">Lösung Nr. <input data-alias-number="${i}" inputmode="numeric" aria-label="Nummer innerhalb der Familie ${s.rank}"><button data-jump-family="${i}">Anzeigen</button></label>`:''}</details></td></tr>`;
+  const rows=visibleFamilyMembers(s,i).map(a=>{
+   const number=familyMemberNumber(s.rank,a.index);
+   return `<tr data-family="${i}" data-alias="${a.index}" class="alias-row ${active&&state.activeAlias===a.index?'active':''}" tabindex="0" role="button" aria-label="Lösung ${number} auswählen"><td class="alias-number">${number}</td>${a.values.map((v,k)=>`<td>${quantityValue(v,params[k])}</td>`).join('')}${metricCells(a.q,a.rmse_deg)}</tr>`;
+  }).join('');
+  return `<tr class="family-group ${active?'active':''}" style="background:${color}"><td colspan="${params.length+2+Number(extra)}"><details class="periodic-family" data-family-open="${i}" ${expandedFamilies.has(i)?'open':''}><summary><span class="family-rank">${s.rank}</span><b>↻ ${int(s.alias_count)} gleichwertige Lösungen</b>${extra?`<span>${esc(m.label)} ${fmt(fitValue(s.q),5)}</span>`:''}<span>Winkel-RMS ${rmsText(s.rmse_deg)}°</span>${periodicFamilyEquations(s)}</summary><p class="family-period">${s.periods.map(p=>esc(p.label)+': T = '+fmt(p.period_nm,8)+' nm').join(' · ')}</p><table class="alias-table"><thead>${heading}</thead><tbody>${rows}</tbody></table>${s.alias_count>s.aliases.length?`<p>Erste ${int(s.aliases.length)} von ${int(s.alias_count)} Wiederholungen. Weitere Nummer direkt auswählen.</p><label class="alias-jump">Lösung Nr. <input data-alias-number="${i}" inputmode="decimal" placeholder="${s.rank}.1" aria-label="Lösungsnummer in Familie ${s.rank}"><button data-jump-family="${i}">Anzeigen</button></label>`:''}</details></td></tr>`;
  }).join('')}</tbody></table>`;
  for(const el of $('resultTable').querySelectorAll('details[data-family-open]'))el.addEventListener('toggle',()=>el.open?expandedFamilies.add(Number(el.dataset.familyOpen)):expandedFamilies.delete(Number(el.dataset.familyOpen)));
- const s=r.solutions[state.active];$('activeLabel').textContent=activeTrial()?`Probelösung T${state.activeTrial} · nicht optimiert`:`Dargestellt: Familie ${s.rank}${s.periodic?' · Lösung '+(state.activeAlias+1)+' (gleichwertige Wiederholung)':''}`;
+ const active=r.solutions[state.active];
+ $('activeLabel').textContent=activeTrial()?`Probelösung T${state.activeTrial} · nicht optimiert`:
+  active.periodic?`Lösung ${familyMemberNumber(active.rank,state.activeAlias)} · gleichwertige Wiederholung`:`Familie ${active.rank}`;
 }
-function visibleParameterBounds(){
- const el=$('errorPlot'),options=el._elliPlotOptions;if(!state.result||!el._fullLayout||!options)return null;
- const layout=options.scene?el._fullLayout.scene:el._fullLayout;
- return state.result.parameters.map((p,i)=>{const spec=options.axes[i?'yaxis':'xaxis'],axis=layout[i?'yaxis':'xaxis'];return axis.range.map(v=>spec.unmap(axis.type==='log'?10**v:v)).sort((a,b)=>a-b);});
+function sameParameterRange([lo,hi],[otherLo,otherHi]){
+ const magnitude=Math.max(Math.abs(lo),Math.abs(hi),Math.abs(otherLo),Math.abs(otherHi));
+ const tolerance=Math.max(64*Number.EPSILON*magnitude,1e-9*Math.max(hi-lo,otherHi-otherLo));
+ return Math.abs(lo-otherLo)<=tolerance&&Math.abs(hi-otherHi)<=tolerance;
 }
-function viewSignature(){return JSON.stringify([state.resultJob,visibleParameterBounds(),state.view.logX,state.view.logY,$('surfaceView').value,$('errorQuantity').value]);}
-function cancelViewport(){clearTimeout(viewportTimer);viewportController?.abort();viewportTicket++;state.refinedSurface=null;$('viewportStatus').textContent='Zoom verfeinert die Darstellung des gezeigten Fits; eine neue Suche erfolgt per Knopfdruck.';}
-function updateViewportControls(){
- const ready=!!state.result&&!state.busy;$('refineView').disabled=!ready;$('searchView').disabled=!ready||state.resultStale;
- $('searchView').title=state.resultStale?'Zuerst einen Fit zu den aktuellen Eingaben berechnen.':'Suchgrenzen auf den sichtbaren Parameterbereich setzen und neu fitten.';
+function readParameterViewport(){
+ const el=$('errorPlot'),options=el._elliPlotOptions,layout=el._fullLayout,job=state.resultJob;
+ if(!state.result||!layout||!options||options.scene||!el._elliViewKey?.startsWith(job+'|'))return null;
+ const bounds=[],scales=[];
+ for(const i of state.result.parameters.keys()){
+  const key=i?'yaxis':'xaxis',axis=layout[key],spec=options.axes[key];
+  if(!axis?.range||!spec)return null;
+  const range=axis.range.map(v=>spec.unmap(axis.type==='log'?10**v:v)).sort((a,b)=>a-b);
+  if(!range.every(Number.isFinite)||range[0]>=range[1])return null;
+  bounds.push(range);
+  scales.push(spec.logarithmic?'log':'linear');
+ }
+ return {job,bounds,scales};
 }
-function scheduleViewport(){
- clearTimeout(viewportTimer);viewportController?.abort();viewportTicket++;
- if($('autoRefine').checked&&!state.busy&&state.result&&!$('errorPlot')._elliPlotOptions?.scene)viewportTimer=setTimeout(()=>refineViewport(false),500);
+function rememberViewportBaseline(view,change){
+ if(!view)return;
+ if(viewportBaseline?.job!==view.job){
+  viewportBaseline=view;
+  return;
+ }
+ for(const [i,scale] of view.scales.entries()){
+  const axis=i?'yaxis':'xaxis';
+  if(viewportBaseline.scales[i]!==scale||change[axis+'.autorange']===true){
+   viewportBaseline.bounds[i]=view.bounds[i];
+   viewportBaseline.scales[i]=scale;
+  }
+ }
+}
+function viewportSelections(visible=readParameterViewport()){
+ if(!visible||viewportBaseline?.job!==visible.job)return {redraw:null,refit:null};
+ const params=state.result.parameters,full=params.map(p=>[p.lower,p.upper]);
+ // Use fitted limits on untouched axes so Plotly's margins never become search limits.
+ const selected=visible.bounds.map((range,i)=>sameParameterRange(range,viewportBaseline.bounds[i])?full[i]:range);
+ const redraw=selected.map(([lo,hi],i)=>[Math.max(lo,full[i][0]),Math.min(hi,full[i][1])]);
+ const refit=selected.map(([lo,hi],i)=>{
+  const p=params[i];
+  return [Math.max(lo,p.path.endsWith('.n')?Math.min(p.lower,1e-8):0),
+   Math.min(hi,p.path.endsWith('thickness_nm')?1e8:100)];
+ });
+ const changed=bounds=>bounds.every(([lo,hi])=>lo<hi)&&bounds.some((range,i)=>!sameParameterRange(range,full[i]));
+ return {
+  redraw:changed(redraw)?{...visible,bounds:redraw}:null,
+  refit:changed(refit)?{...visible,bounds:refit}:null,
+ };
+}
+function matchesViewport(view,selection){
+ return !!view&&!!selection&&view.job===selection.job&&view.bounds.length===selection.bounds.length&&
+  view.scales.every((scale,i)=>scale===selection.scales[i]&&sameParameterRange(view.bounds[i],selection.bounds[i]));
+}
+function cancelViewport(){
+ clearTimeout(viewportTimer);
+ viewportRequest?.controller.abort();
+ viewportRequest=null;
+ viewportError=null;
+ state.refinedSurface=null;
+}
+function updateViewportControls({redraw,refit}=viewportSelections()){
+ const ready=!!redraw&&!state.busy,working=ready&&matchesViewport(viewportRequest,redraw);
+ const calculated=ready&&matchesViewport(state.refinedSurface,redraw);
+ $('refineView').disabled=!ready||working||calculated;
+ $('searchView').disabled=!refit||state.busy||state.resultStale||state.importingMeasurements;
+ $('searchView').title=state.resultStale?'Zuerst einen Fit zu den aktuellen Eingaben berechnen.':'Sichtbaren Parameterbereich als Suchgrenzen verwenden.';
+ let message=$('errorPlot')._elliPlotOptions?.scene?'Einen Parameter-Ausschnitt in der Konturansicht wählen.':
+  'Für einen neuen Plot-Ausschnitt im Diagramm zoomen.';
+ if(working)message='Plot-Ausschnitt wird neu berechnet …';
+ else if(calculated)message=int(state.refinedSurface.evaluations)+' Modellpunkte im Ausschnitt neu berechnet.';
+ else if(ready&&matchesViewport(viewportError,redraw))message=viewportError.message;
+ else if(ready)message='Ausschnitt gewählt.';
+ else if(refit&&!state.busy)message='Suchbereich für einen neuen Fit gewählt.';
+ if($('viewportStatus').textContent!==message)$('viewportStatus').textContent=message;
+}
+function scheduleViewport(change={}){
+ clearTimeout(viewportTimer);
+ const visible=readParameterViewport();
+ rememberViewportBaseline(visible,change);
+ const selections=viewportSelections(visible),{redraw}=selections;
+ if(viewportRequest&&!matchesViewport(viewportRequest,redraw)){
+  viewportRequest.controller.abort();
+  viewportRequest=null;
+ }
+ if(viewportError&&!matchesViewport(viewportError,redraw))viewportError=null;
+ updateViewportControls(selections);
+ if($('autoRefine').checked&&!$('refineView').disabled&&!viewportError){
+  viewportTimer=setTimeout(()=>refineViewport(false),500);
+ }
 }
 async function refineViewport(manual=true){
- if(!state.result||state.busy)return;
- const bounds=visibleParameterBounds();if(!bounds)return;
- const ticket=++viewportTicket,signature=viewSignature(),job=state.resultJob;viewportController?.abort();viewportController=new AbortController();
- $('viewportStatus').textContent='Sichtbaren Ausschnitt nachrechnen …';
+ const {redraw:selection}=viewportSelections();
+ if(state.busy||!selection||matchesViewport(viewportRequest,selection)||matchesViewport(state.refinedSurface,selection))return;
+ clearTimeout(viewportTimer);
+ viewportRequest?.controller.abort();
+ viewportError=null;
+ const request={...selection,controller:new AbortController()};
+ viewportRequest=request;
+ updateViewportControls();
+ let detail;
  try{
-  const scales=bounds.map((_,i)=>(i?state.view.logY:state.view.logX)?'log':'linear');
-  const data=await api(`/api/jobs/${job}/view`,{method:'POST',body:{bounds,scales,size:state.result.parameters.length===1?241:161},signal:viewportController.signal});
-  if(ticket!==viewportTicket||signature!==viewSignature()||job!==state.resultJob)return;
-  state.refinedSurface={...data,job};refreshLines();await errorPlot();$('viewportStatus').textContent=`${int(data.evaluations)} Modellpunkte im Ausschnitt nachgerechnet. Lösungsliste unverändert; für neue Minima „Im Ausschnitt neu suchen“.`;
- }catch(e){if(e.name==='AbortError')return;$('viewportStatus').textContent=e.message;if(manual)toast(e.message,'warning');}
+  const {job,bounds,scales}=selection;
+  const data=await api(`/api/jobs/${job}/view`,{method:'POST',body:{bounds,scales,size:bounds.length===1?241:161},signal:request.controller.signal});
+  if(viewportRequest!==request||!matchesViewport(request,viewportSelections().redraw))return;
+  detail={...data,job};
+  state.refinedSurface=detail;
+  await errorPlot();
+  if(viewportRequest===request)refreshLines();
+ }catch(e){
+  if(viewportRequest!==request||e.name==='AbortError')return;
+  if(detail&&state.refinedSurface===detail)state.refinedSurface=null;
+  viewportError={...selection,message:e.message};
+  if(manual)toast(e.message,'warning');
+ }finally{
+  if(viewportRequest===request){
+   viewportRequest=null;
+   updateViewportControls();
+  }
+ }
 }
 async function searchViewport(){
- if(state.busy||!state.result||state.resultStale)return;
- const bounds=visibleParameterBounds();if(!bounds||!flushFitInputs())return;
- const clipped=bounds.map((b,i)=>{const p=state.parameters[i],floor=p.path.endsWith('.n')||!p.path.endsWith('.k')&&(i?state.view.logY:state.view.logX)?1e-8:0,ceiling=p.path.endsWith('thickness_nm')?1e8:100;return [Math.max(floor,b[0]),Math.min(ceiling,b[1])];});
- if(clipped.some(([lo,hi])=>!(lo<hi)))return toast('Kein gültiger Parameterbereich sichtbar.','warning');
- mutate(()=>clipped.forEach(([lo,hi],i)=>{state.parameters[i].lower=lo;state.parameters[i].upper=hi;state.parameters[i].scale=(i?state.view.logY:state.view.logX)?'log':'linear';}));renderParameters();cancelViewport();await run();
+ if(state.busy||state.resultStale||state.importingMeasurements||!flushFitInputs())return;
+ const {refit:selection}=viewportSelections();
+ if(!selection||state.resultStale)return;
+ const active=state.parameters.filter(p=>p.path);
+ mutate(()=>selection.bounds.forEach(([lo,hi],i)=>{
+  const p=active[i],canUseLog=lo>0||(p.path.endsWith('.k')&&p.positive_min<hi);
+  p.lower=lo;
+  p.upper=hi;
+  p.scale=canUseLog?selection.scales[i]:'linear';
+ }));
+ renderParameters();
+ await run();
 }
 function displaySurface(){
  const base=state.result.surface,detail=state.refinedSurface;if(!detail||detail.job!==state.resultJob)return base;
@@ -170,6 +290,10 @@ function refinedContour(ax,ay){
 function bindInteractions(){
  $('layerEditor').addEventListener('change',e=>{if(e.target.matches('[data-material-target]'))quickMaterial(e.target);});
  $('profileBranch').onchange=()=>{const b=state.result.identifiability.profile.branches.find(b=>b.id===$('profileBranch').value);if(b)selectSolution(b.family-1,b.alias);};
- $('refineView').onclick=()=>refineViewport(true);$('searchView').onclick=searchViewport;$('autoRefine').onchange=()=>{$('autoRefine').checked?scheduleViewport():clearTimeout(viewportTimer);};
+ $('refineView').onclick=()=>refineViewport(true);$('searchView').onclick=searchViewport;
+ $('autoRefine').onchange=()=>{
+  if($('autoRefine').checked)viewportError=null;
+  scheduleViewport();
+ };
  $('resultTable').addEventListener('keydown',e=>{const row=e.target.closest('[data-alias]');if(row&&['Enter',' '].includes(e.key)){e.preventDefault();selectSolution(Number(row.dataset.family),Number(row.dataset.alias));}});
 }

@@ -1,6 +1,13 @@
 # ElliFit – umgesetzte Änderungen
 
-Stand: 18. November 2026. Quellstand 1.6.0.
+Stand 20. November 2026 · Quellstand 1.6.1.
+
+## Änderungen in 1.6.1
+
+- Die Tabs heißen **Messdaten und Schichtmodell** und **Modellfit und Lösungen**. Eine neue Messdatei lässt sich direkt bei den Ergebnissen öffnen oder ablegen. Nach erfolgreichem Import erscheint die Messauswahl.
+- Periodische Wiederholungen tragen die Familiennummer, beispielsweise **2.1** und **2.2**.
+- Der Bereich über 1° bis 10° heißt **Fit relativ schlecht**. Höhere Werte heißen **Fit sehr schlecht**. Die RMS-Skala zeigt Gelb bei 1°, Orange bei 10°, Rot bei 100° und Pink beim Maximum.
+- Der Sitzungsbutton steht auf Höhe der übrigen Kopfaktionen. **Automatisch** ist mit **Plot-Ausschnitt neu berechnen** verbunden. Der aktuelle Ausschnitt wird einmal dichter gezeichnet. **Im Plot-Ausschnitt neu fitten** wird bei einem neuen Parameterbereich freigegeben.
 
 ## Änderungen in 1.6.0
 

@@ -100,5 +100,5 @@ function objectiveProfilePlot(){
  return renderWorkspacePlot('profilePlot',traces,l,{mode:'fit-profile',axes:{xaxis:ax,yaxis:axisSpec([1e-12,100],fitAxisLabel(),true)},labels:minima.map(p=>({x:ax.map(p.values[col]),y:numerical(p.q),label:String(p.minimum_family),rank:p.minimum_family,target:{family:p.minimum_family-1,alias:p.minimum_alias},active:!state.activeTrial&&p.minimum_family-1===state.active&&p.minimum_alias===state.activeAlias}))}).then(()=>{const el=$('profilePlot');if(!el._elliProfileClick){el.on('plotly_click',e=>{if(selectNearbyMinimum(el,e))return;const p=e.points[0];if(p.data?.meta?.kind==='trial')selectTrial(p.customdata[0]);else if(p.curveNumber===1)selectSolution(p.customdata[0],p.customdata[1]);});el._elliProfileClick=true;}});
 }
 function bindObjective(){
- $('errorQuantity').onchange=()=>{clearTimeout(viewportTimer);viewportController?.abort();viewportTicket++;state.view.errorQuantity=$('errorQuantity').value;renderObjectiveContext();errorPlot();if(state.result?.identifiability?.profile)profilePlot();};
+ $('errorQuantity').onchange=()=>{state.view.errorQuantity=$('errorQuantity').value;renderObjectiveContext();errorPlot();if(state.result?.identifiability?.profile)profilePlot();};
 }

@@ -138,11 +138,15 @@ function renderWorkspacePlot(id,traces,layout,options){
   if(el._elliSerial!==serial)return;
   if(!el._elliViewEvents){el.on('plotly_clickannotation',event=>selectPlotTarget(el._elliLabelTargets?.[event.index]));el.on('plotly_relayout',change=>{
    if(el._elliDecorating||Object.keys(change).every(k=>/^(annotations|shapes)|tick(mode|vals|text)$/.test(k)))return;
-   if(id==='errorPlot'&&Object.keys(change).some(k=>/range|autorange/.test(k)))scheduleViewport();
+   if(id==='errorPlot'&&Object.keys(change).some(k=>/range|autorange/.test(k)))scheduleViewport(change);
    queuePlotDecoration(el);if(id==='errorPlot'&&!el._elliPlotOptions?.scene)syncRmsBackground(el);
   });el._elliViewEvents=true;}
   await nextPaint();
-  if(el._elliSerial===serial){cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=null;await decorateWorkspacePlot(el);}
+  if(el._elliSerial===serial){
+   cancelAnimationFrame(el._elliDecorationFrame);el._elliDecorationFrame=null;
+   await decorateWorkspacePlot(el);
+   if(id==='errorPlot'&&el._elliSerial===serial)scheduleViewport();
+  }
  });
 }
 function currentFitRequest(){return {model:clone(state.model),measurements:clone(selectedRows()),parameters:state.parameters.filter(p=>p.path).map(clone),...settings()};}
